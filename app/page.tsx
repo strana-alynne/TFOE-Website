@@ -1,9 +1,9 @@
-"use client";
 import Card_Component from "@/components/card-component";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ReusableCarousel from "@/components/ReusableCarousel";
 import { Button } from "@/components/ui/button";
+import { sanityFetch } from "@/sanity/lib/live";
 import {
   ArrowBack,
   ArrowForward,
@@ -12,31 +12,31 @@ import {
   Gite,
 } from "@mui/icons-material";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { link } from "fs";
-import { useRouter } from "next/navigation";
+import { defineQuery, PortableText } from "next-sanity";
+import { Key } from "react";
 
-export default function Home() {
-  const router = useRouter();
-  const activities = [
-    {
-      category: "Activities",
-      title: "Service Through Strong Brotherhood",
-      description:
-        "Gintong Butil Ng Nueva Ecija Eagles Club Rise Of The New Aspirant.",
-      image: "/image-2.png",
+const EVENTS_QUERY = defineQuery(`*[_type == "blog"]{
+  Title, Category, Image, Link, Details, Date
+}`);
+export default async function Home() {
+  const { data: blog } = await sanityFetch({ query: EVENTS_QUERY });
+
+  const activities = blog.map(
+    (item: {
+      Category: any;
+      Title: any;
+      Details: any;
+      Image: any;
+      Link: any;
+    }) => ({
+      category: item.Category,
+      title: item.Title,
+      description: item.Details,
+      image: item.Image, // Ensure this is a valid image URL
       buttonText: "View More",
-      link: "/blog/1",
-    },
-    {
-      category: "Activities",
-      title: "Service Through Strong Brotherhood",
-      description:
-        "Gintong Butil Ng Nueva Ecija Eagles Club Rise Of The New Aspirant.",
-      image: "/image-3.png",
-      buttonText: "View More",
-      link: "/blog/2",
-    },
-  ];
+      link: item.Link, // Ensure this is a valid link
+    })
+  );
 
   return (
     <main className="max-w-full overflow-x-hidden">
@@ -223,23 +223,26 @@ export default function Home() {
 
           {/* Right Side - Scrollable Cards */}
           <div className="flex overflow-x-auto space-x-4 pb-4 no-scrollbar w-full">
-            {[
-              "/image-4.png",
-              "/image-5.png",
-              "/image-6.png",
-              "/image-6.png",
-              "/image-6.png",
-              "/image-6.png",
-              "/image-6.png",
-            ].map((imageSrc, index) => (
-              <Card_Component
-                key={index}
-                imageSrc={imageSrc}
-                title={"Activities"}
-                description={"Kadaugan sa Mactan Eagles Club"}
-                date={"21 November 2024"}
-              />
-            ))}
+            {blog.map(
+              (
+                event: {
+                  Image: string;
+                  Category: string;
+                  Details: any;
+                  Date: string;
+                  Title: string;
+                },
+                index: Key | null | undefined
+              ) => (
+                <Card_Component
+                  key={index}
+                  imageSrc={event.Image}
+                  title={event.Category}
+                  description={event.Title}
+                  date={event.Date}
+                />
+              )
+            )}
           </div>
         </div>
       </section>

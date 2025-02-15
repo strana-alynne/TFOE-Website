@@ -1,13 +1,12 @@
 import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { ArrowBack, ChevronLeft, ChevronRight } from "@mui/icons-material";
+import NavbarBlog from "@/components/NavbarBlog";
+import { ChevronLeft } from "@mui/icons-material";
 import Link from "next/link";
 
 const BlogPost = () => {
   return (
     <main className="max-w-full overflow-x-hidden">
-      <Navbar />
+      <NavbarBlog />
       <section className="max-w-3xl mx-auto px-4 py-8 mt-[20vh]">
         <div className="pb-8">
           <Link

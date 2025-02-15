@@ -1,0 +1,87 @@
+import * as React from "react";
+import { VersionSwitcherMember } from "./version-switcher-member";
+import { VersionSwitcher } from "@/components/version-switcher";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+
+// This is sample data.
+const data = {
+  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
+  navMain: [
+    {
+      title: "Profile",
+      url: "/portal-member/profile",
+    },
+    {
+      title: "Annpuncements",
+      url: "#",
+    },
+    {
+      title: "Email Announcents",
+      url: "#",
+    },
+  ],
+};
+
+export function AppSidebarMember({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <Sidebar {...props}>
+      <SidebarHeader>
+        <VersionSwitcherMember
+          versions={data.versions}
+          defaultVersion={data.versions[0]}
+        />
+      </SidebarHeader>
+      <SidebarContent>
+        {/* We create a SidebarGroup for each parent. */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive>
+                  <a href="/portal">Dashboard</a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        {data.navMain.map((item) => (
+          <SidebarGroup key={item.title}>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href={item.url}>{item.title}</a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive>
+              <a href="#">Logout</a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}

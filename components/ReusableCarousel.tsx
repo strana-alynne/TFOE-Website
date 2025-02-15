@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "./ui/button";
 import { ArrowForward, ChevronLeft, ChevronRight } from "@mui/icons-material";
 import Link from "next/link";
+import { urlFor } from "@/sanity/lib/image";
+import { PortableText } from "next-sanity";
 
 interface CarouselSlide {
   category: string;
   title: string;
-  description: string;
-  image: string;
+  description: any;
+  image: any;
   link: string;
 }
 
@@ -49,9 +51,9 @@ export default function ReusableTextCarousel({
             <h2 className="text-white uppercase text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold">
               {slides[currentSlide].title}
             </h2>
-            <p className="text-white text-sm sm:text-base md:text-lg max-w-2xl">
-              {slides[currentSlide].description}
-            </p>
+            <div className="text-white text-sm sm:text-base md:text-lg max-w-2xl">
+              <PortableText value={slides[currentSlide].description} />
+            </div>
 
             <Button
               asChild
@@ -83,7 +85,9 @@ export default function ReusableTextCarousel({
           >
             <div
               className="w-full h-full bg-cover bg-center filter brightness-50"
-              style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
+              style={{
+                backgroundImage: `url(${urlFor(slides[currentSlide].image).url()})`,
+              }}
             />
           </motion.div>
         </AnimatePresence>

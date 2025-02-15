@@ -48,7 +48,7 @@ export const blogType = defineType({
     }),
     defineField({
       name: 'Link',
-      type: 'url',
+      type: 'string',
       validation: (rule) => rule.required().error('Link is required'),
 
     }),

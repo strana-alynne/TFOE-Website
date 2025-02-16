@@ -64,7 +64,7 @@ export function DataTable<TData, TValue>({
       // Assuming your data has an _id field
       const id = (row as any)._id;
       if (id) {
-        router.push(`/portal/members/${id}`);
+        router.push(`/portal/membersProfile`);
       }
     }
   };

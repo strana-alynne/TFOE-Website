@@ -3,6 +3,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ReusableCarousel from "@/components/ReusableCarousel";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { sanityFetch } from "@/sanity/lib/live";
 import {
   ArrowBack,
@@ -119,6 +120,32 @@ export default async function Home() {
             among its members as keystone to humanitarian service
           </p>
         </div>
+      </section>
+      {/* About Certs */}
+      <section
+        id="Certs"
+        className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
+      >
+        <div className="text-center md:text-left px-4 md:px-0">
+          <div className="flex flex-col text-center md:text-left">
+            <p className="text-yellow-500 text-sm sm:text-base md:text-lg font-bold">
+              Certificate
+            </p>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
+              NPC Certification and Seal
+            </h2>
+          </div>
+          <p className="max-w-2xl my-4 sm:my-6 md:my-8 text-sm sm:text-base md:text-lg text-center md:text-left">
+            The Fraternal Order of Eagles (Philippine Eagles) was formally
+            recognized as compliant with National Privacy Commission (NPC)
+            standards earning the NPC Certification and Seal
+          </p>
+        </div>
+        <img
+          src="/image.png"
+          alt="Eagle Members"
+          className="w-full md:w-1/2 max-w-md"
+        />
       </section>
 
       {/* Club Membership Section */}

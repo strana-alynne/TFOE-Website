@@ -42,7 +42,7 @@ export default function Page() {
               <Group />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$45,231.89</div>
+              <div className="text-2xl font-bold">45,231.89</div>
               <p className="text-xs text-muted-foreground">
                 +20.1% from last month
               </p>
@@ -56,7 +56,7 @@ export default function Page() {
               <AssignmentInd />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+2350</div>
+              <div className="text-2xl font-bold">2350</div>
               <p className="text-xs text-muted-foreground">
                 +180.1% from last month
               </p>
@@ -68,7 +68,7 @@ export default function Page() {
               <Group />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$12,000</div>
+              <div className="text-2xl font-bold">12,000</div>
               <p className="text-xs text-muted-foreground">
                 +15.5% from last month
               </p>
@@ -82,7 +82,7 @@ export default function Page() {
               <AssignmentInd />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">+540</div>
+              <div className="text-2xl font-bold">540</div>
               <p className="text-xs text-muted-foreground">
                 +50.3% from last month
               </p>

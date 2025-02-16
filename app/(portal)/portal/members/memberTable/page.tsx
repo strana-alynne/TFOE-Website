@@ -1,29 +1,31 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Member, columns } from "./columns";
 import { DataTable } from "./data-table";
 
-async function getData(): Promise<Member[]> {
-  try {
-    const response = await fetch("http://localhost:3000/api/members", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+export default function MembersTable() {
+  const [data, setData] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch members");
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/members");
+        if (!response.ok) throw new Error("Failed to fetch members");
+
+        const data = await response.json();
+        setData(data.members);
+      } catch (err) {
+        setError("Error fetching members");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
-
-    const data = await response.json();
-    return data.members;
-  } catch (error) {
-    console.error("Error fetching members:", error);
-    throw error;
-  }
-}
-
-export default async function MembersTable() {
-  const data = await getData();
+    fetchData();
+  }, []);
 
   return (
     <div className="container mx-auto py-10">

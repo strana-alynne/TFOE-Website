@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -13,28 +16,88 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Download } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 
-export default async function Profile() {
-  const id = "67b0877a16c61ff9590d17d7"; // ✅ Now, this is immediately available
+// Define the Member type
+interface Member {
+  _id: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  name_extension?: string;
+  status: string;
+  age: number;
+  profession: string;
+  email: string;
+  contact: string;
+  address: string;
+  datejoined: string;
+  position: string;
+  contribution: string;
+  absences: number;
+  feedback: string;
+}
 
-  // Fetch member data on the server
-  async function getMemberById(id: string) {
-    try {
-      const response = await fetch(`http://localhost:3000/api/members/${id}`, {
-        cache: "no-store", // Ensures fresh data on every request
-      });
-      if (!response.ok) throw new Error("Failed to fetch member data");
-      const data = await response.json();
-      return data.member;
-    } catch (error) {
-      console.error("Error fetching member:", error);
-      return null;
+export default function Profile() {
+  const id = "67b0877a16c61ff9590d17d7";
+  const [member, setMember] = useState<Member | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchMember() {
+      try {
+        const response = await fetch(`/api/members/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch member data");
+
+        const data = await response.json();
+        setMember(data.member);
+      } catch (err) {
+        setError("Error loading member profile");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+
+    fetchMember();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <SidebarInset className="w-full">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <p>Loading profile...</p>
+        </header>
+      </SidebarInset>
+    );
   }
 
-  const member = await getMemberById(id);
+  if (error || !member) {
+    return (
+      <SidebarInset className="w-full">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbPage>Error</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <Card className="m-4 p-4">
+          <h2 className="text-lg font-semibold">Error Loading Profile</h2>
+          <p className="text-muted-foreground">{error || "Member not found"}</p>
+        </Card>
+      </SidebarInset>
+    );
+  }
+
   const fullName =
-    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.name_extension || ""}`.trim(); // ✅ This will no longer be a pending Promise
-  console.log(fullName);
+    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.name_extension || ""}`.trim();
+
   return (
     <SidebarInset className="w-full">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">

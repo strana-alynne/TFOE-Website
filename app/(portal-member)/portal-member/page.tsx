@@ -29,66 +29,7 @@ export default function Page() {
       </header>
       <div className="p-4 w-full text-2xl font-bold">
         {" "}
-        <h2>Welcome to the Dashboard </h2>
-      </div>
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 p-4 w-full">
-        <DashboardPieChart />
-        <div className="grid gap-4 grid-cols-2 col-span-2 w-full">
-          <Card className="w-full flex-grow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Overall Members
-              </CardTitle>
-              <Group />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$45,231.89</div>
-              <p className="text-xs text-muted-foreground">
-                +20.1% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="w-full flex-grow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Active Members
-              </CardTitle>
-              <AssignmentInd />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+2350</div>
-              <p className="text-xs text-muted-foreground">
-                +180.1% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="w-full flex-grow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">New Members</CardTitle>
-              <Group />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">$12,000</div>
-              <p className="text-xs text-muted-foreground">
-                +15.5% from last month
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="w-full flex-grow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Requests
-              </CardTitle>
-              <AssignmentInd />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">+540</div>
-              <p className="text-xs text-muted-foreground">
-                +50.3% from last month
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <h2>Welcome, John! </h2>
       </div>
       <div className="p-4 w-full grid grid-cols-3 md:grid-col-1 gap-4 justify-evenly h-full">
         <div className="h-full flex">

@@ -16,7 +16,7 @@ import { IdCard } from "lucide-react";
 export default async function MembersProfile({
   params,
 }: {
-  params: { id: string }; // ✅ `params` should not be a Promise
+  params: Promise<{ id: string }>; // ✅ `params` should not be a Promise
 }) {
   const id = (await params).id; // ✅ Now, this is immediately available
 

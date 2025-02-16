@@ -77,7 +77,7 @@ export default function Page() {
         </Card>
       </div>
 
-      <div className="p-4 w-full">
+      <div className="px-4 w-full">
         <MembersTable />
       </div>
     </SidebarInset>

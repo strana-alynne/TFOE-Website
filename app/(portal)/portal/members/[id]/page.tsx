@@ -13,8 +13,8 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Download } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 
-export default async function MembersProfile({ params }: { params: any }) {
-  const id = params; // No need to await
+export default async function MembersProfile() {
+  const id = "67b0877a16c61ff9590d17d7"; // No need to await
 
   // Fetch member data on the server
   async function getMemberById(id: string) {

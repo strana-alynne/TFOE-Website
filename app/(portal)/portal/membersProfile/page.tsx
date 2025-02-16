@@ -128,60 +128,51 @@ export default function Profile() {
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">Member Information</h2>
 
-        <div className="flex items-center gap-4">
-          <img
-            src="/prof-pic.jpg"
-            alt="prof pic"
-            className="rounded-full h-40 w-40 object-cover object-top"
-          />
+        {member ? (
+          <div className="mb-4">
+            <h2 className="text-xl font-bold">{fullName}</h2>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <span>
+                <IdCard />
+              </span>
+              {member._id}
+            </p>
+          </div>
+        ) : (
+          <p className="text-red-500">Member not found</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-muted-foreground">AGE</p>
+            <h2 className="text-md font-bold">{member.age}</h2>
+          </div>
 
           <div>
-            <div className="flex items-center gap-4">
-              <div className="mb-4">
-                <h2 className="text-xl font-bold">{fullName}</h2>
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <span>
-                    <IdCard />
-                  </span>
-                  {member._id}
-                </p>
-              </div>
-              <div>
-                <div>
-                  <p className="text-muted-foreground">STATUS</p>
-                  <Badge
-                    className={
-                      member.status === "Active" ? "bg-green-500" : "bg-red-500"
-                    }
-                  >
-                    {member.status}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            {/* Other Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div>
-                <p className="text-muted-foreground">AGE</p>
-                <h2 className="text-md font-bold">{member.age}</h2>
-              </div>
-              <div>
-                <p className="text-muted-foreground">PROFESSION</p>
-                <h2 className="text-md font-bold">{member.profession}</h2>
-              </div>
-              <div>
-                <p className="text-muted-foreground">EMAIL</p>
-                <h2 className="text-md font-bold">{member.email}</h2>
-              </div>
-              <div>
-                <p className="text-muted-foreground">CONTACT INFORMATION</p>
-                <h2 className="text-md font-bold">{member.contact}</h2>
-              </div>
-              <div className="col-span-2">
-                <p className="text-muted-foreground">ADDRESS</p>
-                <h2 className="text-md font-bold">{member.address}</h2>
-              </div>
-            </div>
+            <p className="text-muted-foreground">STATUS</p>
+            <Badge
+              className={
+                member.status === "Active" ? "bg-green-500" : "bg-red-500"
+              }
+            >
+              {member.status}
+            </Badge>
+          </div>
+          <div>
+            <p className="text-muted-foreground">PROFESSION</p>
+            <h2 className="text-md font-bold">{member.profession}</h2>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground">ADDRESS</p>
+            <h2 className="text-md font-bold">{member.address}</h2>
+          </div>
+          <div>
+            <p className="text-muted-foreground">CONTACT INFORMATION</p>
+            <h2 className="text-md font-bold">{member.contact}</h2>
+          </div>
+          <div>
+            <p className="text-muted-foreground">EMAIL</p>
+            <h2 className="text-md font-bold">{member.email}</h2>
           </div>
         </div>
       </Card>
@@ -242,21 +233,6 @@ export default function Profile() {
             <div>
               <h2 className="text-md font-bold">Certificae of Appreciation</h2>
               <p className="text-muted-foreground">Issued on: January 2024</p>
-            </div>
-          </div>
-          <Download />
-        </div>
-      </Card>
-      <Card className="m-4 p-4">
-        <h2 className="text-lg font-semibold mb-4">
-          Application Membership Forms
-        </h2>
-        <div className="flex items-center gap-4 pb-4">
-          <div className="w-full flex items-center gap-4">
-            <img src="/doc.png" alt="cert" width={100} />
-            <div>
-              <h2 className="text-md font-bold">Application Form</h2>
-              <p className="text-muted-foreground">Recieved on: January 2024</p>
             </div>
           </div>
           <Download />

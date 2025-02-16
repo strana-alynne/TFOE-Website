@@ -36,6 +36,54 @@ interface Member {
   feedback: string;
 }
 
+interface DownloadableItem {
+  imagePath: string;
+  title: string;
+  date: string;
+}
+
+// Function to handle image download
+const handleDownload = async (imagePath: string, fileName: string) => {
+  try {
+    const response = await fetch(imagePath);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading file:", error);
+  }
+};
+
+// Downloadable Item Component
+const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
+  <div className="flex items-center gap-4 pb-4">
+    <div className="w-full flex items-center gap-4">
+      <img src={imagePath} alt={title} width={100} />
+      <div>
+        <h2 className="text-md font-bold">{title}</h2>
+        <p className="text-muted-foreground">Issued on: {date}</p>
+      </div>
+    </div>
+    <button
+      onClick={() =>
+        handleDownload(
+          imagePath,
+          `${title.toLowerCase().replace(/ /g, "-")}.jpg`
+        )
+      }
+      className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+    >
+      <Download />
+    </button>
+  </div>
+);
+
 export default function Profile() {
   const id = "67b0877a16c61ff9590d17d7";
   const [member, setMember] = useState<Member | null>(null);
@@ -207,36 +255,21 @@ export default function Profile() {
         <h2 className="text-lg font-semibold mb-4">
           Certificates and Trainings
         </h2>
-        <div className="flex items-center gap-4 pb-4">
-          <div className="w-full flex items-center gap-4">
-            <img src="/cert-03.jpg" alt="cert" width={100} />
-            <div>
-              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
-              <p className="text-muted-foreground">Issued on: January 2024</p>
-            </div>
-          </div>
-          <Download />
-        </div>
-        <div className="flex items-center gap-4  pb-4">
-          <div className="w-full flex items-center gap-4">
-            <img src="/cert-01.png" alt="cert" width={100} />
-            <div>
-              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
-              <p className="text-muted-foreground">Issued on: January 2024</p>
-            </div>
-          </div>
-          <Download />
-        </div>
-        <div className="flex items-center gap-4 pb-4">
-          <div className="w-full flex items-center gap-4">
-            <img src="/cert-02.jpg" alt="cert" width={100} />
-            <div>
-              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
-              <p className="text-muted-foreground">Issued on: January 2024</p>
-            </div>
-          </div>
-          <Download />
-        </div>
+        <DownloadableItem
+          imagePath="/cert-03.jpg"
+          title="Certificate of Appreciation"
+          date="January 2024"
+        />
+        <DownloadableItem
+          imagePath="/cert-01.png"
+          title="Leadership Training Certificate"
+          date="February 2024"
+        />
+        <DownloadableItem
+          imagePath="/cert-02.jpg"
+          title="Community Service Award"
+          date="March 2024"
+        />
       </Card>
     </SidebarInset>
   );

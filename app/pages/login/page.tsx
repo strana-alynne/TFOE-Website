@@ -68,7 +68,10 @@ export default function LoginPage() {
               </Button>
             </form>
             <div className="text-center mt-12">
-              <Link href="/join" className="text-primary hover:underline">
+              <Link
+                href="/pages/signup"
+                className="text-primary hover:underline"
+              >
                 Not a member yet?{" "}
                 <span className="text-yellow-500 font-bold">Join Us NOW!</span>
               </Link>

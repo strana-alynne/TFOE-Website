@@ -16,6 +16,7 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Download } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 
+// Define the Member type
 interface Member {
   _id: string;
   firstName: string;
@@ -35,11 +36,8 @@ interface Member {
   feedback: string;
 }
 
-interface ProfileProps {
-  params: { id: string };
-}
-
-export default function MembersProfile({ params }: ProfileProps) {
+export default function Profile() {
+  const id = "67b0877a16c61ff9590d17d7";
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +45,7 @@ export default function MembersProfile({ params }: ProfileProps) {
   useEffect(() => {
     async function fetchMember() {
       try {
-        const response = await fetch(`/api/members/${params.id}`);
+        const response = await fetch(`/api/members/${id}`);
         if (!response.ok) throw new Error("Failed to fetch member data");
 
         const data = await response.json();
@@ -61,7 +59,7 @@ export default function MembersProfile({ params }: ProfileProps) {
     }
 
     fetchMember();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
@@ -97,14 +95,8 @@ export default function MembersProfile({ params }: ProfileProps) {
     );
   }
 
-  const fullName = [
-    member.firstName,
-    member.middleName,
-    member.lastName,
-    member.name_extension,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const fullName =
+    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.name_extension || ""}`.trim();
 
   return (
     <SidebarInset className="w-full">
@@ -128,7 +120,7 @@ export default function MembersProfile({ params }: ProfileProps) {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-
+      {/* Display member details */}
       <div className="p-4 pb-0">
         <h1 className="font-bold">Member Profile</h1>
       </div>
@@ -167,6 +159,7 @@ export default function MembersProfile({ params }: ProfileProps) {
                 </div>
               </div>
             </div>
+            {/* Other Details */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <p className="text-muted-foreground">AGE</p>
@@ -195,6 +188,7 @@ export default function MembersProfile({ params }: ProfileProps) {
 
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">Membership Details</h2>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-muted-foreground">DATE JOINED</p>
@@ -218,7 +212,6 @@ export default function MembersProfile({ params }: ProfileProps) {
           </div>
         </div>
       </Card>
-
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">
           Certificates and Trainings
@@ -227,17 +220,17 @@ export default function MembersProfile({ params }: ProfileProps) {
           <div className="w-full flex items-center gap-4">
             <img src="/cert-03.jpg" alt="cert" width={100} />
             <div>
-              <h2 className="text-md font-bold">Certificate of Appreciation</h2>
+              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
               <p className="text-muted-foreground">Issued on: January 2024</p>
             </div>
           </div>
           <Download />
         </div>
-        <div className="flex items-center gap-4 pb-4">
+        <div className="flex items-center gap-4  pb-4">
           <div className="w-full flex items-center gap-4">
             <img src="/cert-01.png" alt="cert" width={100} />
             <div>
-              <h2 className="text-md font-bold">Certificate of Appreciation</h2>
+              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
               <p className="text-muted-foreground">Issued on: January 2024</p>
             </div>
           </div>
@@ -247,14 +240,13 @@ export default function MembersProfile({ params }: ProfileProps) {
           <div className="w-full flex items-center gap-4">
             <img src="/cert-02.jpg" alt="cert" width={100} />
             <div>
-              <h2 className="text-md font-bold">Certificate of Appreciation</h2>
+              <h2 className="text-md font-bold">Certificae of Appreciation</h2>
               <p className="text-muted-foreground">Issued on: January 2024</p>
             </div>
           </div>
           <Download />
         </div>
       </Card>
-
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">
           Application Membership Forms
@@ -264,7 +256,7 @@ export default function MembersProfile({ params }: ProfileProps) {
             <img src="/doc.png" alt="cert" width={100} />
             <div>
               <h2 className="text-md font-bold">Application Form</h2>
-              <p className="text-muted-foreground">Received on: January 2024</p>
+              <p className="text-muted-foreground">Recieved on: January 2024</p>
             </div>
           </div>
           <Download />

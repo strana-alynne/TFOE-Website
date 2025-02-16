@@ -16,9 +16,9 @@ import { IdCard } from "lucide-react";
 export default async function MembersProfile({
   params,
 }: {
-  params: Promise<{ id: string }>; // ✅ `params` should not be a Promise
+  params: { id: string };
 }) {
-  const id = (await params).id; // ✅ Now, this is immediately available
+  const id = params.id; // No need to await
 
   // Fetch member data on the server
   async function getMemberById(id: string) {

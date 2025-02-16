@@ -1,5 +1,4 @@
 import DashboardBarChart from "@/components/DashbaordBarChart";
-import DashboardPieChart from "@/components/DashbaordPieChart";
 import { DashboardLineGraph } from "@/components/DashboardLineGraph";
 
 import {
@@ -8,10 +7,8 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb";
-import { CardTitle, Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { AssignmentInd, Group } from "@mui/icons-material";
 
 export default function Page() {
   return (

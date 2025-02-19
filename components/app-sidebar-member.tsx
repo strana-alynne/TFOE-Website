@@ -1,36 +1,27 @@
+"use client";
 import * as React from "react";
 import { VersionSwitcherMember } from "./version-switcher-member";
-import { VersionSwitcher } from "@/components/version-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { logout } from "@/app/login/actions";
 
 // This is sample data.
 const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
-    {
-      title: "Profile",
-      url: "/portal-member/profile",
-    },
-    {
-      title: "Annpuncements",
-      url: "#",
-    },
-    {
-      title: "Email Announcents",
-      url: "#",
-    },
+    { title: "Profile", url: "/portal-member/profile" },
+    { title: "Annpuncements", url: "#" },
+    { title: "Email Announcents", url: "#" },
   ],
 };
 
@@ -75,8 +66,8 @@ export function AppSidebarMember({
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive>
-              <a href="#">Logout</a>
+            <SidebarMenuButton onClick={() => logout()} asChild isActive>
+              <a>Logout</a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

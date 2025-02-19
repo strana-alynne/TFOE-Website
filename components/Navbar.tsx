@@ -90,13 +90,13 @@ const Navbar = () => {
               className={` hover:bg-yellow-500 hover:text-white
                 ${isScrolled ? "text-black" : "text-[#CC9A02]"}`}
             >
-              <Link href={"/pages/login"}>Login</Link>
+              <Link href={"/login"}>Login</Link>
             </Button>
             <Button
               asChild
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
             >
-              <Link href={"/pages/signup"}>Join Us!</Link>
+              <Link href={"/signup"}>Join Us!</Link>
             </Button>
           </div>
         </div>

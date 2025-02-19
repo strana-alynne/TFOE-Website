@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -5,8 +6,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft } from "@mui/icons-material";
+import { login } from "./actions";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
+export default function LoginForm() {
+  const [state, loginAction] = useActionState(login, undefined);
+  function SubmitButton() {
+    const { pending } = useFormStatus();
 
-export default function LoginPage() {
+    return (
+      <Button
+        disabled={pending}
+        type="submit"
+        className="bg-yellow-600 w-full mt-12"
+        variant="default"
+      >
+        Login
+      </Button>
+    );
+  }
   return (
     <div className="min-h-screen flex">
       {/* Left Side - Group Photo */}
@@ -56,16 +74,28 @@ export default function LoginPage() {
             </p>
           </CardHeader>
           <CardContent className="space-y-12">
-            <form className="space-y-4">
-              <Input type="text" placeholder="Username" className="w-full" />
+            <form action={loginAction} className="space-y-4">
               <Input
+                type="text"
+                id="email"
+                name="email"
+                placeholder="Username"
+                className="w-full"
+              />
+              {state?.errors?.email && (
+                <p className="text-red-500">{state.errors.email}</p>
+              )}
+              <Input
+                id="password"
+                name="password"
                 type="password"
                 placeholder="Password"
                 className="w-full"
               />
-              <Button className="bg-yellow-600 w-full mt-12" variant="default">
-                Login
-              </Button>
+              {state?.errors?.password && (
+                <p className="text-red-500">{state.errors.password}</p>
+              )}
+              <SubmitButton />
             </form>
             <div className="text-center mt-12">
               <Link

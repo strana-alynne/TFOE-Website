@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 
 import { VersionSwitcher } from "@/components/version-switcher";
@@ -14,6 +15,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { logout } from "@/app/login/actions";
 
 // This is sample data.
 const data = {
@@ -23,58 +25,31 @@ const data = {
       title: "Member Management",
       url: "#",
       items: [
-        {
-          title: "Members",
-          url: "/portal/members",
-        },
-        {
-          title: "SMS Blasting",
-          url: "#",
-        },
-        {
-          title: "Email Announcents",
-          url: "#",
-        },
+        { title: "Members", url: "/portal/members" },
+        { title: "SMS Blasting", url: "#" },
+        { title: "Email Announcents", url: "#" },
       ],
     },
     {
       title: "Reports",
       url: "#",
       items: [
-        {
-          title: "Financial Report Summary",
-          url: "#",
-        },
-        {
-          title: "Member Status",
-          url: "#",
-          isActive: true,
-        },
+        { title: "Financial Report Summary", url: "#" },
+        { title: "Member Status", url: "#", isActive: true },
       ],
     },
     {
       title: "Documents",
       url: "#",
       items: [
-        {
-          title: "GMM Notice",
-          url: "#",
-        },
-        {
-          title: "Minutes of the Meeting",
-          url: "#",
-        },
+        { title: "GMM Notice", url: "#" },
+        { title: "Minutes of the Meeting", url: "#" },
       ],
     },
     {
       title: "Content Management System",
       url: "#",
-      items: [
-        {
-          title: "TFOE Admin CMS",
-          url: "/admin-cms",
-        },
-      ],
+      items: [{ title: "TFOE Admin CMS", url: "/admin-cms" }],
     },
   ],
 };
@@ -121,8 +96,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive>
-              <a href="#">Logout</a>
+            <SidebarMenuButton onClick={() => logout()} asChild isActive>
+              <a>Logout</a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

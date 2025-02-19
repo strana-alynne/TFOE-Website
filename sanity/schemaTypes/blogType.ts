@@ -10,7 +10,6 @@ export const blogType = defineType({
       title: 'Hero Section?',
       name: 'HeroSection',
       type: 'boolean',
-      validation: (rule) => rule.required().error('Link is required'),
     
     }),
     defineField({

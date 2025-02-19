@@ -3,7 +3,6 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ReusableCarousel from "@/components/ReusableCarousel";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { sanityFetch } from "@/sanity/lib/live";
 import {
   ArrowBack,
@@ -13,12 +12,13 @@ import {
   Gite,
 } from "@mui/icons-material";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { defineQuery, PortableText } from "next-sanity";
+import { defineQuery } from "next-sanity";
 import { Key } from "react";
 
 const EVENTS_QUERY = defineQuery(`*[_type == "blog"]{
   Title, Category, Image, Link, Details, Date
 }`);
+
 export default async function Home() {
   const { data: blog } = await sanityFetch({ query: EVENTS_QUERY });
 

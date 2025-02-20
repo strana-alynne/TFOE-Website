@@ -9,9 +9,9 @@ import { ChevronLeft, Email, Lock, Person, Search } from "@mui/icons-material";
 export default function SignUpPage() {
   return (
     <div className="min-h-screen relative">
-      {/* Background image for both mobile and desktop */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
+      {/* Left Side - Background Image with Logo */}
+      <div className="relative w-full md:w-1/2 h-64 md:h-screen">
+        {/* Background Image */}
         <Image
           src="/image-8.png"
           alt="Philippine Eagles Group Photo"
@@ -19,50 +19,36 @@ export default function SignUpPage() {
           objectFit="cover"
           className="absolute inset-0"
         />
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+
+        {/* Logo Positioned on Top */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image
+            src="/logo.png"
+            alt="Philippine Eagles Logo"
+            width={250}
+            height={250}
+            className="w-40 h-40 md:w-64 md:h-64"
+          />
+        </div>
       </div>
 
-      {/* Desktop layout */}
-      <div className="relative z-10 min-h-screen flex flex-col md:flex-row">
-        {/* Left Side - only visible on desktop */}
-        <div className="hidden md:flex md:w-1/2 relative items-center justify-center">
-          <div className="p-3 rounded-full">
-            <Image
-              src="/logo.png"
-              alt="Philippine Eagles Logo"
-              width={300}
-              height={300}
-            />
-          </div>
-        </div>
-
-        {/* Back button - visible on all screens */}
-        <div className="absolute left-4 top-4 z-20">
+      {/* Right Side - Login Section */}
+      <div className="relative flex flex-col w-full md:w-1/2 items-center justify-center px-4 md:px-0">
+        {/* Back Button */}
+        <div className="absolute left-4 top-4">
           <Link
             href="/"
             className="flex items-center text-yellow-400 hover:underline"
           >
-            <span>
-              <ChevronLeft />
-            </span>
+            <ChevronLeft />
             Back to Home
           </Link>
         </div>
 
-        {/* Mobile header with logo - only visible on mobile */}
-        <div className="md:hidden pt-16 pb-6 flex justify-center">
-          <div className="p-3 rounded-full">
-            <Image
-              src="/logo.png"
-              alt="Philippine Eagles Logo"
-              width={120}
-              height={120}
-            />
-          </div>
-        </div>
-
         {/* Right Side - Signup Form (full width on mobile, half width on desktop) */}
         <div className="w-full md:w-1/2 flex items-center justify-center px-4 md:px-0 py-6 md:py-0">
-          <Card className="w-full max-w-md p-4 md:p-6 space-y-4 md:space-y-8 bg-white/95">
+          <Card className="w-full max-w-md p-4 md:p-6 space-y-4 md:space-y-8 bg-white/95 mt-16 md:mt-0">
             <CardHeader>
               <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-5xl font-bold">
                 Join the Community

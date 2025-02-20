@@ -32,7 +32,9 @@ export default function Page() {
         <h2>Welcome to the Dashboard </h2>
       </div>
       <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3 p-4 w-full">
-        <DashboardPieChart />
+        <div className="flex justify-center lg:justify-start w-full">
+          <DashboardPieChart />
+        </div>
         <div className="grid gap-4 grid-cols-2 col-span-2 w-full">
           <Card className="w-full flex-grow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -90,11 +92,11 @@ export default function Page() {
           </Card>
         </div>
       </div>
-      <div className="p-4 w-full grid grid-cols-3 md:grid-col-1 gap-4 justify-evenly h-full">
-        <div className="h-full flex">
+      <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+        <div className="h-full w-full">
           <DashboardBarChart />
         </div>
-        <div className="lg:col-span-2 md:col-span-1 h-full flex">
+        <div className="md:col-span-2 h-full w-full">
           <DashboardLineGraph />
         </div>
       </div>

@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 const testUser = {
     id: "1",
-    email: "contact@cosdensolutions.io",
+    email: "admin@email.com",
     password: "12345678",
     role: "admin" // Add role field
   };
@@ -14,7 +14,7 @@ const testUser = {
   // Example of another user with member role
   const anotherUser = {
     id: "2",
-    email: "member@example.com",
+    email: "member@email.com",
     password: "12345678",
     role: "member"
   };

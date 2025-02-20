@@ -9,26 +9,28 @@ import { ChevronLeft } from "@mui/icons-material";
 import { login } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+
 export default function LoginForm() {
   const [state, loginAction] = useActionState(login, undefined);
+  
   function SubmitButton() {
     const { pending } = useFormStatus();
-
     return (
       <Button
         disabled={pending}
         type="submit"
-        className="bg-yellow-600 w-full mt-12"
+        className="bg-yellow-600 w-full mt-8 md:mt-12"
         variant="default"
       >
         Login
       </Button>
     );
   }
+  
   return (
-    <div className="min-h-screen flex">
-      {/* Left Side - Group Photo */}
-      <div className="w-1/2 relative">
+    <div className="min-h-screen flex flex-col md:flex-row">
+      {/* Left Side - Group Photo (hidden on mobile) */}
+      <div className="hidden md:block md:w-1/2 relative">
         {/* Black overlay for the first image */}
         <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
         <Image
@@ -61,19 +63,40 @@ export default function LoginForm() {
         </div>
       </div>
 
+      {/* Mobile header with logo and back button */}
+      <div className="md:hidden bg-yellow-600 p-4 flex items-center justify-between">
+        <Link
+          href="/"
+          className="flex items-center text-white hover:underline"
+        >
+          <span>
+            <ChevronLeft />
+          </span>
+          Back
+        </Link>
+        <div className="flex justify-center">
+          <Image
+            src="/logo.png"
+            alt="Philippine Eagles Logo"
+            width={60}
+            height={60}
+          />
+        </div>
+        <div className="w-6"></div> {/* Empty div for spacing */}
+      </div>
+
       {/* Right Side - Login Form */}
-      <div className="w-1/2 flex items-center justify-center bg-white">
-        <Card className="w-[450px] p-6 space-y-8">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-white p-4 md:p-0">
+        <Card className="w-full max-w-md p-4 md:p-6 space-y-4 md:space-y-8">
           <CardHeader>
-            <h1 className=" text-md sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold">
-              {" "}
+            <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold">
               Welcome Back!
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm md:text-base">
               Hello Eagle! Please login to your Account
             </p>
           </CardHeader>
-          <CardContent className="space-y-12">
+          <CardContent className="space-y-6 md:space-y-12">
             <form action={loginAction} className="space-y-4">
               <Input
                 type="text"
@@ -83,7 +106,7 @@ export default function LoginForm() {
                 className="w-full"
               />
               {state?.errors?.email && (
-                <p className="text-red-500">{state.errors.email}</p>
+                <p className="text-red-500 text-sm">{state.errors.email}</p>
               )}
               <Input
                 id="password"
@@ -93,14 +116,14 @@ export default function LoginForm() {
                 className="w-full"
               />
               {state?.errors?.password && (
-                <p className="text-red-500">{state.errors.password}</p>
+                <p className="text-red-500 text-sm">{state.errors.password}</p>
               )}
               <SubmitButton />
             </form>
-            <div className="text-center mt-12">
+            <div className="text-center mt-6 md:mt-12">
               <Link
                 href="/pages/signup"
-                className="text-primary hover:underline"
+                className="text-primary hover:underline text-sm md:text-base"
               >
                 Not a member yet?{" "}
                 <span className="text-yellow-500 font-bold">Join Us NOW!</span>
@@ -111,4 +134,4 @@ export default function LoginForm() {
       </div>
     </div>
   );
-}
+} 

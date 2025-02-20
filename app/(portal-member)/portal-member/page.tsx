@@ -24,15 +24,14 @@ export default function Page() {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-      <div className="p-4 w-full text-2xl font-bold">
-        {" "}
-        <h2>Welcome, John! </h2>
+      <div className="p-4 w-full">
+        <h2 className="text-2xl font-bold">Welcome, John!</h2>
       </div>
-      <div className="p-4 w-full grid grid-cols-3 md:grid-col-1 gap-4 justify-evenly h-full">
-        <div className="h-full flex">
+      <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+        <div className="h-full w-full">
           <DashboardBarChart />
         </div>
-        <div className="lg:col-span-2 md:col-span-1 h-full flex">
+        <div className="md:col-span-2 h-full w-full">
           <DashboardLineGraph />
         </div>
       </div>

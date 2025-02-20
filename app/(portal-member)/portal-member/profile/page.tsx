@@ -176,56 +176,58 @@ export default function Profile() {
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">Member Information</h2>
 
-        <div className="flex items-center gap-4">
-          <img
-            src="/prof-pic.jpg"
-            alt="prof pic"
-            className="rounded-full h-40 w-40 object-cover object-top"
-          />
+        <div className="flex flex-col md:flex-row items-start gap-6">
+          <div className="self-center md:self-start">
+            <img
+              src="/prof-pic.jpg"
+              alt="prof pic"
+              className="rounded-full h-32 w-32 md:h-40 md:w-40 object-cover object-top"
+            />
+          </div>
 
-          <div>
-            <div className="flex items-center gap-4">
-              <div className="mb-4">
+          <div className="w-full">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
+              <div className="text-center flex flex-col items-center">
                 <h2 className="text-xl font-bold">{fullName}</h2>
-                <p className="text-muted-foreground flex items-center gap-2">
+                <p className="text-muted-foreground flex items-center justify-center gap-2">
                   <span>
                     <IdCard />
                   </span>
-                  {member._id}
+                  <span className="truncate max-w-xs">{member._id}</span>
                 </p>
               </div>
-              <div>
-                <div>
-                  <p className="text-muted-foreground">STATUS</p>
-                  <Badge
-                    className={
-                      member.status === "Active" ? "bg-green-500" : "bg-red-500"
-                    }
-                  >
-                    {member.status}
-                  </Badge>
-                </div>
+              <div className="mt-2 sm:mt-0 text-left">
+                <p className="text-muted-foreground">STATUS</p>
+                <Badge
+                  className={
+                    member.status === "Active" ? "bg-green-500" : "bg-red-500"
+                  }
+                >
+                  {member.status}
+                </Badge>
               </div>
             </div>
             {/* Other Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-left">
                 <p className="text-muted-foreground">AGE</p>
                 <h2 className="text-md font-bold">{member.age}</h2>
               </div>
-              <div>
+              <div className="text-left">
                 <p className="text-muted-foreground">PROFESSION</p>
                 <h2 className="text-md font-bold">{member.profession}</h2>
               </div>
-              <div>
+              <div className="text-left">
                 <p className="text-muted-foreground">EMAIL</p>
-                <h2 className="text-md font-bold">{member.email}</h2>
+                <h2 className="text-md font-bold overflow-hidden text-ellipsis">
+                  {member.email}
+                </h2>
               </div>
-              <div>
+              <div className="text-left">
                 <p className="text-muted-foreground">CONTACT INFORMATION</p>
                 <h2 className="text-md font-bold">{member.contact}</h2>
               </div>
-              <div className="col-span-2">
+              <div className="col-span-1 sm:col-span-2 text-left">
                 <p className="text-muted-foreground">ADDRESS</p>
                 <h2 className="text-md font-bold">{member.address}</h2>
               </div>

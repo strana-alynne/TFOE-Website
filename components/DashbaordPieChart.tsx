@@ -48,7 +48,7 @@ export default function DashboardPieChart() {
   }, []);
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col w-full">
       <CardHeader className="items-center pb-0">
         <CardTitle>Members</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

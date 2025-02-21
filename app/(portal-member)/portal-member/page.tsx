@@ -1,5 +1,7 @@
 import DashboardBarChart from "@/components/DashbaordBarChart";
 import { DashboardLineGraph } from "@/components/DashboardLineGraph";
+import MemberBarChart from "@/components/MemberBarChart";
+import { MemberLineGraph } from "@/components/MemberLineGraph";
 
 import {
   Breadcrumb,
@@ -29,10 +31,10 @@ export default function Page() {
       </div>
       <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
         <div className="h-full w-full">
-          <DashboardBarChart />
+          <MemberBarChart />
         </div>
         <div className="md:col-span-2 h-full w-full">
-          <DashboardLineGraph />
+          <MemberLineGraph />
         </div>
       </div>
     </SidebarInset>

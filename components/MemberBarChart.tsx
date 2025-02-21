@@ -33,7 +33,7 @@ const chartConfig = {
 
 export default function MemberBarChart() {
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full">
       <CardHeader>
         <CardTitle>My Performance</CardTitle>
         <CardDescription>2025</CardDescription>

@@ -33,7 +33,7 @@ const chartConfig = {
 
 export default function DashboardBarChart() {
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full">
       <CardHeader>
         <CardTitle>Quarterly Sale Deployment</CardTitle>
         <CardDescription>2025</CardDescription>

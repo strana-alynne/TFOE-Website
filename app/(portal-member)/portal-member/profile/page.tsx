@@ -155,7 +155,7 @@ export default function Profile() {
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
               <BreadcrumbLink
-                href="/portal/members"
+                href="/portal-member"
                 className="text-muted-foreground"
               >
                 Members

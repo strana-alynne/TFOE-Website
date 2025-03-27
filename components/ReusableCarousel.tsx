@@ -8,6 +8,7 @@ import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from "next-sanity";
 
 interface CarouselSlide {
+  _id: string;
   category: string;
   title: string;
   description: any;
@@ -59,7 +60,7 @@ export default function ReusableTextCarousel({
               asChild
               className="bg-yellow-500 hover:bg-yellow-600 text-white items-center gap-2"
             >
-              <Link href={slides[currentSlide].link}>
+              <Link href={`/blog/${slides[currentSlide]._id}`}>
                 {" "}
                 <span>
                   {" "}

@@ -1,5 +1,6 @@
 import type {StructureResolver} from 'sanity/structure'
 import {CalendarIcon, DocumentIcon, DesktopIcon, BarChartIcon, UsersIcon, FolderIcon} from '@sanity/icons'
+import { FormInputIcon } from 'lucide-react'
 
 export const structure: StructureResolver = (S) =>
   S.list()
@@ -7,8 +8,7 @@ export const structure: StructureResolver = (S) =>
     .title('Content')
     .items([
       S.documentTypeListItem('blog').title('Blog').icon(DocumentIcon),
-      S.documentTypeListItem('heroSection').title('Hero Section').icon(DesktopIcon),
       S.documentTypeListItem('statistics').title('Statistics').icon(BarChartIcon),
-      S.documentTypeListItem('membership').title('Membership').icon(UsersIcon),
       S.documentTypeListItem('about').title('About').icon(FolderIcon),
+      S.documentTypeListItem('form').title('Membership Forms').icon(FormInputIcon),
     ])

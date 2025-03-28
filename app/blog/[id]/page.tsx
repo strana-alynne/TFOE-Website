@@ -13,8 +13,18 @@ const BLOG_QUERY = defineQuery(`*[_type == "blog" && _id == $blogId][0]{
   HeroSection,
 }`);
 
-export default async function Blog({ params }: { params: { id: string } }) {
-  const blogId = await params.id;
+type BlogPageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default async function Blog({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id: blogId } = await params;
 
   // Fetch specific blog content using the ID
   const { data: blogContent } = await sanityFetch({

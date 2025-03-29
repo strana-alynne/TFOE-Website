@@ -69,7 +69,14 @@ export default function HomeClient({
       {/* Stats Section */}
       <section className="bg-yellow-600 px-4 sm:px-8 md:px-16 lg:px-32 py-5 grid grid-cols-1 sm:grid-cols-3 gap-4 place-items-center">
         <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-          <GroupsIcon className="text-4xl sm:text-5xl lg:text-6xl text-white" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="sm:h-12 sm:w-12 lg:h-16 lg:w-16 h-10 w-10"
+            fill="#FFFFFF"
+          >
+            <path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c.37-.06.74-.1 1.13-.1.99 0 1.93.21 2.78.58.74.32 1.22 1.04 1.22 1.85V18h-4.5v-1.61c0-.83-.23-1.61-.63-2.29zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z" />
+          </svg>
           <div>
             <h2 className="text-2xl sm:text-3xl lg:text-5xl text-white font-bold">
               {statistics.Members}
@@ -80,7 +87,17 @@ export default function HomeClient({
           </div>
         </div>
         <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-          <Gite className="text-4xl sm:text-5xl lg:text-6xl text-white" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="54px"
+            height="54px"
+            viewBox="0 0 24 24"
+          >
+            <path
+              fill="#FFFFFF"
+              d="M4 19q-.825 0-1.412-.587T2 17v-6.175q0-.4.15-.762t.425-.638l2.85-2.85q.275-.275.638-.425T6.825 6H7V5q0-.425.288-.712T8 4t.713.288T9 5v1h8.175q.4 0 .763.15t.637.425l2.85 2.85q.275.275.425.638t.15.762V17q0 .825-.587 1.413T20 19zm12-2h4v-6.175l-2-2l-2 2zm-2 0v-5H4v5z"
+            />
+          </svg>
           <div>
             <h2 className="text-2xl sm:text-3xl lg:text-5xl text-white font-bold">
               {statistics.Branches}

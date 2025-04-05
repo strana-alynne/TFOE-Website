@@ -24,6 +24,7 @@
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.74.1",
     "@tanstack/react-table": "^8.21.2",
+    "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.5.2",
@@ -36,6 +37,7 @@
     "next-sanity": "^9.8.54",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "recharts": "^2.15.1",
     "sanity": "^3.74.1",
     "styled-components": "^6.1.15",
@@ -44,6 +46,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

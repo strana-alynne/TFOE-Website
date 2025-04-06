@@ -262,7 +262,8 @@ export default function Profile() {
         <h2 className="text-lg font-semibold mb-4">
           Certificates and Trainings
         </h2>
-        <DownloadableItem
+        <h1>Comming Soon</h1>
+        {/* <DownloadableItem
           imagePath="/cert-03.jpg"
           title="Certificate of Appreciation"
           date="January 2024"
@@ -276,7 +277,7 @@ export default function Profile() {
           imagePath="/cert-02.jpg"
           title="Community Service Award"
           date="March 2024"
-        />
+        /> */}
       </Card>
     </SidebarInset>
   );

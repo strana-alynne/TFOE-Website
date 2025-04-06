@@ -3,21 +3,9 @@
 import { z } from "zod";
 import { createSession, deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-
-const testUser = {
-    id: "1",
-    email: "admin@email.com",
-    password: "12345678",
-    role: "admin" // Add role field
-  };
-  
-  // Example of another user with member role
-  const anotherUser = {
-    id: "2",
-    email: "member@email.com",
-    password: "12345678",
-    role: "member"
-  };
+import connectMongoDB from "@/lib/mongodb";
+import Member from "@/models/Member";
+import bcrypt from 'bcrypt';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }).trim(),
@@ -27,12 +15,14 @@ const loginSchema = z.object({
     .trim(),
 });
 
-function getUserByEmail(email: string) {
-    if (email === testUser.email) return testUser;
-    if (email === anotherUser.email) return anotherUser;
-    return null;
-  }
-  
+async function getUserByEmail(email: string) {
+  await connectMongoDB();
+  // include the hashed password (schema likely has select: false on password)
+  return await Member
+    .findOne({ email })
+    .select('+password');
+}
+
 export async function login(prevState: any, formData: FormData) {
   const result = loginSchema.safeParse(Object.fromEntries(formData));
 
@@ -43,10 +33,10 @@ export async function login(prevState: any, formData: FormData) {
   }
 
   const { email, password } = result.data;
+  const user = await getUserByEmail(email);
 
-  const user = getUserByEmail(email);
-
-  if (!user || user.password !== password) {
+  // defensive: ensure we actually got a hash back
+  if (!user || !user.password || !(await bcrypt.compare(password, user.password))) {
     return {
       errors: {
         email: ["Invalid email or password"],
@@ -54,7 +44,7 @@ export async function login(prevState: any, formData: FormData) {
     };
   }
 
-  await createSession(user.id, user.role);
+  await createSession(user._id.toString(), user.role);
 
   if (user.role === "admin") {
     redirect("/portal");

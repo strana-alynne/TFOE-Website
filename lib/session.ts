@@ -2,6 +2,7 @@ import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
+
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
@@ -16,7 +17,7 @@ export async function createSession(userId: string, role: string) {
   });
 }
 
-export async function deleteSession() {
+export async function deleteSession() { 
   (await cookies()).delete("session");
 }
 
@@ -54,4 +55,23 @@ export async function getUserRole() {
     
     const payload = await decrypt(session) as SessionPayload | null;
     return payload?.role || null;
+  }
+
+  export async function getCurrentUser() {
+    const sessionToken = (await cookies()).get("session")?.value;
+    if (!sessionToken) return null;
+  
+    const payload = (await decrypt(sessionToken)) as {
+      userId: string;
+      role: string;
+      expiresAt: string;
+    } | null;
+  
+    if (!payload) return null;
+    return payload;
+  }
+  
+  export async function getCurrentUserId(): Promise<string | null> {
+    const user = await getCurrentUser();
+    return user?.userId ?? null;
   }

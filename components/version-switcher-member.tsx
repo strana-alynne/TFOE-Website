@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { GalleryVerticalEnd } from "lucide-react";
 
 import {
   SidebarMenu,
@@ -10,14 +9,12 @@ import {
 } from "@/components/ui/sidebar";
 
 export function VersionSwitcherMember({
-  versions,
-  defaultVersion,
+  name,
+  role,
 }: {
-  versions: string[];
-  defaultVersion: string;
+  name: string;
+  role: string;
 }) {
-  const [selectedVersion, setSelectedVersion] = React.useState(defaultVersion);
-
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -29,8 +26,8 @@ export function VersionSwitcherMember({
             <img src="/logo.png" alt="logo" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-semibold">John Doe</span>
-            <span className="">Member</span>
+            <span className="font-semibold">{name}</span>
+            <span className="">{role}</span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

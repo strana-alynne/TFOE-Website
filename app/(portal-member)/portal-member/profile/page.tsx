@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,25 +14,26 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Download } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
+import { getMemberData } from "../../../../lib/getMemberData";
 
 // Define the Member type
 interface Member {
-  _id: string;
+  id: string;
   firstName: string;
   middleName?: string;
   lastName: string;
-  name_extension?: string;
+  nameExtensions?: string;
   status: string;
-  age: number;
+  age?: number; // Note: This isn't in getMemberData
   profession: string;
   email: string;
   contact: string;
-  address: string;
-  datejoined: string;
+  address?: string; // Note: This isn't in getMemberData
+  dateJoined: string;
   position: string;
   contribution: string;
-  absences: number;
-  feedback: string;
+  absences: string;
+  feedback?: string; // Note: This isn't in getMemberData
 }
 
 interface DownloadableItem {
@@ -42,7 +42,7 @@ interface DownloadableItem {
   date: string;
 }
 
-// Function to handle image download
+// Function to handle image download (unchanged)
 const handleDownload = async (imagePath: string, fileName: string) => {
   try {
     const response = await fetch(imagePath);
@@ -60,7 +60,7 @@ const handleDownload = async (imagePath: string, fileName: string) => {
   }
 };
 
-// Downloadable Item Component
+// Downloadable Item Component (unchanged)
 const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
   <div className="flex items-center gap-4 pb-4">
     <div className="w-full flex items-center gap-4">
@@ -85,30 +85,35 @@ const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
 );
 
 export default function Profile() {
-  const id = "67b0877a16c61ff9590d17d7";
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchMember() {
+    const fetchMember = async () => {
       try {
-        const response = await fetch(`/api/members/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch member data");
+        const res = await fetch("/api/member-data");
+        console.log("Raw response:", res);
 
-        const data = await response.json();
-        setMember(data.member);
-      } catch (err) {
-        setError("Error loading member profile");
-        console.error(err);
+        if (res.ok) {
+          const data = await res.json();
+          setMember(data);
+          console.log("Member data fetched successfully", data);
+        } else {
+          const msg = `API returned ${res.status}: ${res.statusText}`;
+          console.warn(msg);
+          setError(msg);
+        }
+      } catch (err: any) {
+        console.error("Error fetching member data:", err);
+        setError(err.message);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchMember();
-  }, [id]);
-
+  }, []);
   if (loading) {
     return (
       <SidebarInset className="w-full">
@@ -144,7 +149,7 @@ export default function Profile() {
   }
 
   const fullName =
-    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.name_extension || ""}`.trim();
+    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtensions || ""}`.trim();
 
   return (
     <SidebarInset className="w-full">
@@ -155,7 +160,7 @@ export default function Profile() {
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
               <BreadcrumbLink
-                href="/portal-member"
+                href="/portal/members"
                 className="text-muted-foreground"
               >
                 Members
@@ -176,62 +181,51 @@ export default function Profile() {
       <Card className="m-4 p-4">
         <h2 className="text-lg font-semibold mb-4">Member Information</h2>
 
-        <div className="flex flex-col md:flex-row items-start gap-6">
-          <div className="self-center md:self-start">
-            <img
-              src="/prof-pic.jpg"
-              alt="prof pic"
-              className="rounded-full h-32 w-32 md:h-40 md:w-40 object-cover object-top"
-            />
+        {member ? (
+          <div className="mb-4">
+            <h2 className="text-xl font-bold">{fullName}</h2>
+            <p className="text-muted-foreground flex items-center gap-2">
+              <span>
+                <IdCard />
+              </span>
+              {member.id}
+            </p>
+          </div>
+        ) : (
+          <p className="text-red-500">Member not found</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-muted-foreground">AGE</p>
+            <h2 className="text-md font-bold">{member.age || "N/A"}</h2>
           </div>
 
-          <div className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
-              <div className="text-center flex flex-col items-center">
-                <h2 className="text-xl font-bold">{fullName}</h2>
-                <p className="text-muted-foreground flex items-center justify-center gap-2">
-                  <span>
-                    <IdCard />
-                  </span>
-                  <span className="truncate max-w-xs">{member._id}</span>
-                </p>
-              </div>
-              <div className="mt-2 sm:mt-0 text-left">
-                <p className="text-muted-foreground">STATUS</p>
-                <Badge
-                  className={
-                    member.status === "Active" ? "bg-green-500" : "bg-red-500"
-                  }
-                >
-                  {member.status}
-                </Badge>
-              </div>
-            </div>
-            {/* Other Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="text-left">
-                <p className="text-muted-foreground">AGE</p>
-                <h2 className="text-md font-bold">{member.age}</h2>
-              </div>
-              <div className="text-left">
-                <p className="text-muted-foreground">PROFESSION</p>
-                <h2 className="text-md font-bold">{member.profession}</h2>
-              </div>
-              <div className="text-left">
-                <p className="text-muted-foreground">EMAIL</p>
-                <h2 className="text-md font-bold overflow-hidden text-ellipsis">
-                  {member.email}
-                </h2>
-              </div>
-              <div className="text-left">
-                <p className="text-muted-foreground">CONTACT INFORMATION</p>
-                <h2 className="text-md font-bold">{member.contact}</h2>
-              </div>
-              <div className="col-span-1 sm:col-span-2 text-left">
-                <p className="text-muted-foreground">ADDRESS</p>
-                <h2 className="text-md font-bold">{member.address}</h2>
-              </div>
-            </div>
+          <div>
+            <p className="text-muted-foreground">STATUS</p>
+            <Badge
+              className={
+                member.status === "Active" ? "bg-green-500" : "bg-red-500"
+              }
+            >
+              {member.status}
+            </Badge>
+          </div>
+          <div>
+            <p className="text-muted-foreground">PROFESSION</p>
+            <h2 className="text-md font-bold">{member.profession}</h2>
+          </div>
+          <div className="col-span-2">
+            <p className="text-muted-foreground">ADDRESS</p>
+            <h2 className="text-md font-bold">{member.address || "N/A"}</h2>
+          </div>
+          <div>
+            <p className="text-muted-foreground">CONTACT INFORMATION</p>
+            <h2 className="text-md font-bold">{member.contact}</h2>
+          </div>
+          <div>
+            <p className="text-muted-foreground">EMAIL</p>
+            <h2 className="text-md font-bold">{member.email}</h2>
           </div>
         </div>
       </Card>
@@ -242,7 +236,9 @@ export default function Profile() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <p className="text-muted-foreground">DATE JOINED</p>
-            <h2 className="text-md font-bold">{member.datejoined}</h2>
+            <h2 className="text-md font-bold">
+              {new Date(member.dateJoined).toLocaleDateString()}
+            </h2>
           </div>
           <div>
             <p className="text-muted-foreground">POSITION</p>
@@ -258,7 +254,7 @@ export default function Profile() {
           </div>
           <div>
             <p className="text-muted-foreground">FEEDBACK</p>
-            <h2 className="text-md font-bold">{member.feedback}</h2>
+            <h2 className="text-md font-bold">{member.feedback || "N/A"}</h2>
           </div>
         </div>
       </Card>
@@ -280,16 +276,6 @@ export default function Profile() {
           imagePath="/cert-02.jpg"
           title="Community Service Award"
           date="March 2024"
-        />
-      </Card>
-      <Card className="m-4 p-4">
-        <h2 className="text-lg font-semibold mb-4">
-          Membership Application Form
-        </h2>
-        <DownloadableItem
-          imagePath="/doc.png"
-          title="Application Form"
-          date="January 2024"
         />
       </Card>
     </SidebarInset>

@@ -26,15 +26,13 @@ const data = {
 };
 
 export function AppSidebarMember({
+  member,
   ...props
-}: React.ComponentProps<typeof Sidebar>) {
+}: React.ComponentProps<typeof Sidebar> & { member: any }) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <VersionSwitcherMember
-          versions={data.versions}
-          defaultVersion={data.versions[0]}
-        />
+        <VersionSwitcherMember name={member.firstName} role={member.role} />
       </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
@@ -43,7 +41,7 @@ export function AppSidebarMember({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive>
-                  <a href="/portal">Dashboard</a>
+                  <a href="/portal-member">Dashboard</a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>

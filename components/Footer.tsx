@@ -1,7 +1,9 @@
+"use client"; // Add this to mark as a client component
+
 import React from "react";
 import { Button } from "./ui/button";
 
-const Footer = () => {
+export default function Footer({ contacts }: { contacts: any }) {
   return (
     <footer className="bg-[#1F1F1F] px-4 sm:px-6 py-8 sm:py-12">
       <div className="container mx-auto">
@@ -30,8 +32,7 @@ const Footer = () => {
                 Address:
               </span>{" "}
               <br />
-              643, San Miguel, Manila, <br />
-              Metro Manila, Philippines
+              {contacts?.Address || "Address not available"}
             </p>
           </div>
 
@@ -41,30 +42,52 @@ const Footer = () => {
               Social Media
             </p>
             <div className="space-y-1 sm:space-y-2">
-              <Button
-                variant="link"
-                className="text-white p-0 text-xs sm:text-sm lg:text-base"
-              >
-                (PRIVATE) FACEBOOK
-              </Button>
-              <Button
-                variant="link"
-                className="text-white p-0 text-xs sm:text-sm lg:text-base block"
-              >
-                (PUBLIC - 1) FACEBOOK
-              </Button>
-              <Button
-                variant="link"
-                className="text-white p-0 text-xs sm:text-sm lg:text-base block"
-              >
-                (PUBLIC - 2) FACEBOOK
-              </Button>
-              <Button
-                variant="link"
-                className="text-white p-0 text-xs sm:text-sm lg:text-base block"
-              >
-                Eagle's Nest
-              </Button>
+              {contacts?.SocialMediaLinks &&
+              contacts.SocialMediaLinks.length > 0 ? (
+                contacts.SocialMediaLinks.map((link: any, index: any) => (
+                  <a
+                    key={link._key || index}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <Button
+                      variant="link"
+                      className="text-white p-0 text-xs sm:text-sm lg:text-base"
+                    >
+                      {link.label}
+                    </Button>
+                  </a>
+                ))
+              ) : (
+                <>
+                  <Button
+                    variant="link"
+                    className="text-white p-0 text-xs sm:text-sm lg:text-base"
+                  >
+                    (PRIVATE) FACEBOOK
+                  </Button>
+                  <Button
+                    variant="link"
+                    className="text-white p-0 text-xs sm:text-sm lg:text-base block"
+                  >
+                    (PUBLIC - 1) FACEBOOK
+                  </Button>
+                  <Button
+                    variant="link"
+                    className="text-white p-0 text-xs sm:text-sm lg:text-base block"
+                  >
+                    (PUBLIC - 2) FACEBOOK
+                  </Button>
+                  <Button
+                    variant="link"
+                    className="text-white p-0 text-xs sm:text-sm lg:text-base block"
+                  >
+                    Eagle's Nest
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -75,13 +98,11 @@ const Footer = () => {
             Copyright © 2025 Eagles Nest Online
           </p>
           <p className="text-white text-xs sm:text-sm lg:text-base">
-            For more info, email us at tfoe.philippineeagles@gmail.com and cc
-            support@tfoe-pe.com
+            For more info, email us at {contacts?.Email || "email"}
+            {contacts?.EmailCC && ` and cc ${contacts.EmailCC}`}.
           </p>
         </div>
       </div>
     </footer>
   );
-};
-
-export default Footer;
+}

@@ -1,11 +1,13 @@
 import { type SchemaTypeDefinition } from 'sanity'
-import {heroSectionType} from "./heroSectionType"
-import {blogType} from "./blogType"
-import {statisticsType} from "./statisticsType"
-import { membershipType } from './membershipType'
+import { blogType } from "./blogType"
+import { statisticsType } from "./statisticsType"
 import { aboutType } from './aboutType'
-import { formType } from './formType'
+import { loginandsignupType } from "./loginandsignupType"
+import { contactsType } from './ContactsType'
+import { certificateType } from './certificateType'
+import { logoType } from './logoType'
+import { membershipType } from './membershipType'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [heroSectionType, blogType, statisticsType, membershipType, aboutType, formType],
+  types: [ blogType, statisticsType, aboutType, loginandsignupType, contactsType, certificateType, logoType, membershipType],
 }

@@ -34,12 +34,31 @@ interface HomeClientProps {
   blog: any[];
   about: {
     Description: any;
-    AboutImage: string;
+    AboutImage: {
+      asset: {
+        url: string;
+      };
+    };
   };
   statistics: {
     Members: number;
     Branches: number;
     Years: number;
+  };
+  certificate: {
+    Title: string;
+    Description: any;
+    CertificateImage: {
+      asset: {
+        url: string;
+      };
+    };
+  };
+  contacts: {
+    Email: string;
+    EmailCC: string;
+    Address: string;
+    SocialMediaLinks: [];
   };
 }
 
@@ -49,6 +68,8 @@ export default function HomeClient({
   blog,
   statistics,
   about,
+  certificate,
+  contacts,
 }: HomeClientProps) {
   function handleOpenLink(url?: string): void {
     if (url) {
@@ -133,7 +154,7 @@ export default function HomeClient({
         className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
       >
         <img
-          src="/image-2.png"
+          src={about.AboutImage?.asset?.url || "/image-2.png"}
           alt="Eagle Members"
           className="w-full md:w-1/2 max-w-md"
         />
@@ -164,17 +185,15 @@ export default function HomeClient({
               Certificate
             </p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
-              NPC Certification and Seal
+              {certificate.Title}
             </h2>
           </div>
-          <p className="max-w-2xl my-4 sm:my-6 md:my-8 text-sm sm:text-base md:text-lg text-center md:text-left">
-            The Fraternal Order of Eagles (Philippine Eagles) was formally
-            recognized as compliant with National Privacy Commission (NPC)
-            standards earning the NPC Certification and Seal
-          </p>
+          <div className="max-w-2xl my-4 sm:my-6 md:my-8 text-sm sm:text-base md:text-lg text-center md:text-left">
+            <PortableText value={certificate.Description} />
+          </div>
         </div>
         <img
-          src="/image.png"
+          src={certificate.CertificateImage.asset.url}
           alt="Eagle Members"
           className="w-full md:w-1/2 max-w-md"
         />
@@ -340,11 +359,11 @@ export default function HomeClient({
           <h2 className="text-xl sm:text-2xl md:text-3xl">
             Email us at <br />
             <span className="text-blue-600 font-bold block mt-2 text-base sm:text-xl md:text-2xl">
-              tfoe.philippineeagles@gmail.com
+              {contacts.Email}
             </span>{" "}
             and cc{" "}
             <span className="text-blue-600 font-bold block mt-2 text-base sm:text-xl md:text-2xl">
-              support@tfoe-pe.com
+              {contacts.EmailCC}
             </span>
           </h2>
           <Button
@@ -356,9 +375,6 @@ export default function HomeClient({
           </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <Footer />
     </main>
   );
 }

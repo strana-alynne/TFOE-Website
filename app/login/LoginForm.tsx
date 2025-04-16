@@ -10,7 +10,13 @@ import { login } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
-export default function LoginForm() {
+export default function LoginForm({
+  image,
+  logo,
+}: {
+  image: string;
+  logo: string;
+}) {
   const [state, loginAction] = useActionState(login, undefined);
 
   function SubmitButton() {
@@ -26,14 +32,13 @@ export default function LoginForm() {
       </Button>
     );
   }
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left Side - Background Image with Logo */}
       <div className="relative w-full md:w-1/2 h-64 md:h-screen">
         {/* Background Image */}
         <Image
-          src="/image-7.png"
+          src={image}
           alt="Philippine Eagles Group Photo"
           layout="fill"
           objectFit="cover"
@@ -44,7 +49,7 @@ export default function LoginForm() {
         {/* Logo Positioned on Top */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
-            src="/logo.png"
+            src={logo}
             alt="Philippine Eagles Logo"
             width={250}
             height={250}

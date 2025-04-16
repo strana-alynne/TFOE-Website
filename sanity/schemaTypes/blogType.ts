@@ -9,6 +9,7 @@ export const blogType = defineType({
     defineField({
       title: 'Hero Section?',
       name: 'HeroSection',
+      description: 'Do want this blog to be displayed in the banner section?',
       type: 'boolean',
     
     }),
@@ -26,16 +27,18 @@ export const blogType = defineType({
         ],
         layout: 'radio',
       }
+
     }),
     defineField({
       name: 'Date',
       type: 'date',
       validation: (rule) => rule.required().error('Date is required'),
-
     }),
     defineField({
       name: 'Image',
       type: 'image',
+      description: 'Ensure the image is 1200x800 pixels',
+      validation: (rule) => rule.required().error('Image is required'),
 
     }),
     defineField({
@@ -43,12 +46,6 @@ export const blogType = defineType({
       type: 'array',
       of: [{type: 'block'}],
       validation: (rule) => rule.required().error('Details is required'),
-
-    }),
-    defineField({
-      name: 'Link',
-      type: 'string',
-      validation: (rule) => rule.required().error('Link is required'),
 
     }),
   ],

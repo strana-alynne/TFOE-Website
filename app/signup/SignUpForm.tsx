@@ -41,7 +41,13 @@ type FormState = {
   errors?: FormErrors;
 };
 
-export default function SignUpPage() {
+export default function SignUpPage({
+  image,
+  logo,
+}: {
+  image: string;
+  logo: string;
+}) {
   const [state, registerAction] = useActionState<FormState, FormData>(
     register,
     { errors: {} }
@@ -67,7 +73,7 @@ export default function SignUpPage() {
       <div className="relative w-full md:w-1/2 h-64 md:h-screen">
         {/* Background Image */}
         <Image
-          src="/image-8.png"
+          src={image}
           alt="Philippine Eagles Group Photo"
           layout="fill"
           objectFit="cover"
@@ -78,7 +84,7 @@ export default function SignUpPage() {
         {/* Logo Positioned on Top */}
         <div className="absolute inset-0 flex items-center justify-center">
           <Image
-            src="/logo.png"
+            src={logo}
             alt="Philippine Eagles Logo"
             width={250}
             height={250}

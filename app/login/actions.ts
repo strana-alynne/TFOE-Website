@@ -8,7 +8,7 @@ import Member from "@/models/Member";
 import bcrypt from 'bcrypt';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }).trim(),
+  email: z.string().email({ message: "Invalid email address." }).trim(),
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" })

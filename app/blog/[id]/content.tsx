@@ -66,7 +66,6 @@ const BlogContent = ({
           <PortableText value={content} />
         </div>
       </section>
-      <Footer />
     </main>
   );
 };

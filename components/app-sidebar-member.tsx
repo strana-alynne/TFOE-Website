@@ -20,8 +20,9 @@ const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     { title: "Profile", url: "/portal-member/profile" },
-    { title: "Annpuncements", url: "#" },
-    { title: "Email Announcents", url: "#" },
+    { title: "Announcements", url: "#" },
+    { title: "Email Announcements", url: "#" },
+    { title: "Organizational Chart", url: "/portal-member/genealogy" },
   ],
 };
 

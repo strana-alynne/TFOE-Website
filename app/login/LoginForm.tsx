@@ -85,13 +85,13 @@ export default function LoginForm({
             <form action={loginAction} className="space-y-4">
               <Input
                 type="text"
-                id="email"
-                name="email"
+                id="username"
+                name="username"
                 placeholder="Username"
                 className="w-full"
               />
-              {state?.errors?.email && (
-                <p className="text-red-500 text-sm">{state.errors.email}</p>
+              {state?.errors?.username && (
+                <p className="text-red-500 text-sm">{state.errors.username}</p>
               )}
               <Input
                 id="password"

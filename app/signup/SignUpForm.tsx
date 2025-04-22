@@ -195,42 +195,42 @@ export default function SignUpPage({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Age */}
-                  <div className="relative">
-                    <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                      <CalendarToday className="h-4 w-4" />
-                    </div>
-                    <Input
-                      id="age"
-                      name="age"
-                      type="number"
-                      placeholder="Age"
-                      className="w-full rounded-lg bg-background pl-8"
-                    />
-                    {state?.errors?.age && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {state.errors.age[0]}
-                      </p>
-                    )}
-                  </div>
+                  {/* <div className="relative"> */}
+                  {/*   <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground"> */}
+                  {/*     <CalendarToday className="h-4 w-4" /> */}
+                  {/*   </div> */}
+                  {/*   <Input */}
+                  {/*     id="age" */}
+                  {/*     name="age" */}
+                  {/*     type="number" */}
+                  {/*     placeholder="Age" */}
+                  {/*     className="w-full rounded-lg bg-background pl-8" */}
+                  {/*   /> */}
+                  {/*   {state?.errors?.age && ( */}
+                  {/*     <p className="text-red-500 text-xs mt-1"> */}
+                  {/*       {state.errors.age[0]} */}
+                  {/*     </p> */}
+                  {/*   )} */}
+                  {/* </div> */}
 
                   {/* Profession */}
-                  <div className="relative">
-                    <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                      <Work className="h-4 w-4" />
-                    </div>
-                    <Input
-                      id="profession"
-                      name="profession"
-                      type="text"
-                      placeholder="Profession"
-                      className="w-full rounded-lg bg-background pl-8"
-                    />
-                    {state?.errors?.profession && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {state.errors.profession[0]}
-                      </p>
-                    )}
-                  </div>
+                  {/* <div className="relative"> */}
+                  {/*   <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground"> */}
+                  {/*     <Work className="h-4 w-4" /> */}
+                  {/*   </div> */}
+                  {/*   <Input */}
+                  {/*     id="profession" */}
+                  {/*     name="profession" */}
+                  {/*     type="text" */}
+                  {/*     placeholder="Profession" */}
+                  {/*     className="w-full rounded-lg bg-background pl-8" */}
+                  {/*   /> */}
+                  {/*   {state?.errors?.profession && ( */}
+                  {/*     <p className="text-red-500 text-xs mt-1"> */}
+                  {/*       {state.errors.profession[0]} */}
+                  {/*     </p> */}
+                  {/*   )} */}
+                  {/* </div> */}
                 </div>
 
                 {/* Address */}
@@ -299,6 +299,24 @@ export default function SignUpPage({
               {/* Account Information Section */}
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold">Account Information</h2>
+                {/* Username */}
+                <div className="relative">
+                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
+                    <Person className="h-4 w-4" />
+                  </div>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Username"
+                    className="w-full rounded-lg bg-background pl-8"
+                  />
+                  {state?.errors?.username && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {state.errors.username[0]}
+                    </p>
+                  )}
+                </div>
 
                 {/* Password */}
                 <div className="relative">

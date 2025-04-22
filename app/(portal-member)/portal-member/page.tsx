@@ -1,8 +1,10 @@
 // app/portal-member/page.tsx
 import { redirect } from "next/navigation";
-import connectMongo from "@/lib/mongodb";
+// Removed MongoDB connection
+// import connectMongo from "@/lib/mongodb";
 import { getCurrentUser } from "@/lib/session";
-import Member from "@/models/Member";
+// Removed Member model
+// import Member from "@/models/Member";
 import MemberBarChart from "@/components/MemberBarChart";
 import { MemberLineGraph } from "@/components/MemberLineGraph";
 import {
@@ -14,29 +16,30 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 
-export default async function Page() {
-  // 1) ensure DB is ready
-  await connectMongo();
+// Define dummy data
+const dummyMember = {
+  _id: "user1",
+  firstName: "John",
+  lastName: "Smith",
+  email: "john.smith@example.com",
+  role: "member",
+};
 
-  // 2) pull the JWT payload from the cookie
+export default async function Page() {
+  // No need to connect to MongoDB
+  // await connectMongo();
+
+  // Still check for a valid session
   const user = await getCurrentUser();
   if (!user) {
     // no valid session → send them to login
     redirect("/login");
   }
 
-  // 3) fetch the member record
-  const member = (await Member.findById(user.userId).lean()) as {
-    firstName: string;
-  } | null;
-  if (!member) {
-    // somehow their userId is invalid
-    redirect("/login");
-  }
+  // Instead of fetching from MongoDB, use the dummy data
+  // We'll pretend the user ID matches our dummy data
+  const member = dummyMember;
 
-  console.log("member", member.firstName);
-
-  // 4) render
   return (
     <SidebarInset className="w-full">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">

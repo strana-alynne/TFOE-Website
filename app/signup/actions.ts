@@ -2,10 +2,12 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import connectMongo from "@/lib/mongodb";   
+// Remove MongoDB connection
+// import connectMongo from "@/lib/mongodb";   
 import { createSession } from "@/lib/session";
 import { hash } from "bcrypt";
-import Member from "@/models/Member";
+// Remove Member model
+// import Member from "@/models/Member";
 
 // Define validation schema with all required fields
 const signupSchema = z.object({
@@ -25,6 +27,18 @@ const signupSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// In-memory storage for registered members (will reset when server restarts)
+const registeredMembers = [
+  {
+    _id: "user1",
+    email: "member@example.com"
+  },
+  {
+    _id: "user2",
+    email: "admin@example.com"
+  }
+];
+
 export async function register(prevState: any, formData: FormData) {
   // Validate form data
   const result = signupSchema.safeParse(Object.fromEntries(formData));
@@ -36,8 +50,8 @@ export async function register(prevState: any, formData: FormData) {
   }
   
   try {
-    await connectMongo(); // Ensure MongoDB connection is established
-    const memberExist = await Member.findOne({ email: result.data.email });
+    // Check if email already exists in our dummy data
+    const memberExist = registeredMembers.find(member => member.email === result.data.email);
     
     if (memberExist) {
       return {
@@ -50,8 +64,12 @@ export async function register(prevState: any, formData: FormData) {
     // Hash the password
     const hashedPassword = await hash(result.data.password, 10);
     
+    // Create a new member ID
+    const newId = `user${registeredMembers.length + 1}`;
+    
     // Prepare user data
     const userData = {
+      _id: newId,
       firstName: result.data.firstName,
       middleName: result.data.middleName || "",
       lastName: result.data.lastName,
@@ -68,14 +86,16 @@ export async function register(prevState: any, formData: FormData) {
       absences: "0", // Default absences
       profession: result.data.profession,
       role: "member",
-      feedback: "N/A" // Default role
+      feedback: "N/A" // Default feedback
     };
     
-    const member = new Member(userData);
-    await member.save();
-    console.log("Member registered successfully:", member._id);
-    await createSession(member._id.toString(), "member");
-
+    // Instead of saving to MongoDB, store in our array
+    registeredMembers.push({ _id: newId, email: result.data.email });
+    
+    console.log("Member registered successfully:", newId);
+    
+    // Create session for the new member
+    await createSession(newId, "member");
     
   } catch (error) {
     console.error("Registration error:", error);
@@ -85,6 +105,7 @@ export async function register(prevState: any, formData: FormData) {
       },
     };
   }
-   // Redirect to member portal
-   redirect("/portal-member");
+  
+  // Redirect to member portal
+  redirect("/portal-member");
 }

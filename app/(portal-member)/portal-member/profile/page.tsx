@@ -14,7 +14,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Download } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
-import { getMemberData } from "../../../../lib/getMemberData";
 
 // Define the Member type
 interface Member {
@@ -24,16 +23,16 @@ interface Member {
   lastName: string;
   nameExtensions?: string;
   status: string;
-  age?: number; // Note: This isn't in getMemberData
+  age?: number;
   profession: string;
   email: string;
   contact: string;
-  address?: string; // Note: This isn't in getMemberData
+  address?: string;
   dateJoined: string;
   position: string;
   contribution: string;
   absences: string;
-  feedback?: string; // Note: This isn't in getMemberData
+  feedback?: string;
 }
 
 interface DownloadableItem {
@@ -84,36 +83,51 @@ const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
   </div>
 );
 
+// Dummy member data - this simulates what we'd get from the API
+const dummyMember: Member = {
+  id: "MEM-2023-001",
+  firstName: "John",
+  middleName: "David",
+  lastName: "Smith",
+  nameExtensions: "Jr.",
+  status: "Active",
+  age: 32,
+  profession: "Software Engineer",
+  email: "john.smith@example.com",
+  contact: "+1 (555) 123-4567",
+  address: "123 Main Street, Anytown, USA 12345",
+  dateJoined: "2023-01-15T00:00:00.000Z",
+  position: "Member",
+  contribution: "$500",
+  absences: "2",
+  feedback: "Excellent participation in community events",
+};
+
 export default function Profile() {
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Simulate API fetch delay with setTimeout
     const fetchMember = async () => {
       try {
-        const res = await fetch("/api/member-data");
-        console.log("Raw response:", res);
-
-        if (res.ok) {
-          const data = await res.json();
-          setMember(data);
-          console.log("Member data fetched successfully", data);
-        } else {
-          const msg = `API returned ${res.status}: ${res.statusText}`;
-          console.warn(msg);
-          setError(msg);
-        }
+        // Instead of fetching from an API, we'll use our dummyMember
+        setTimeout(() => {
+          setMember(dummyMember);
+          setLoading(false);
+          console.log("Member data fetched (dummy)", dummyMember);
+        }, 800); // Simulate a network delay of 800ms
       } catch (err: any) {
-        console.error("Error fetching member data:", err);
+        console.error("Error with dummy member data:", err);
         setError(err.message);
-      } finally {
         setLoading(false);
       }
     };
 
     fetchMember();
   }, []);
+
   if (loading) {
     return (
       <SidebarInset className="w-full">
@@ -262,8 +276,8 @@ export default function Profile() {
         <h2 className="text-lg font-semibold mb-4">
           Certificates and Trainings
         </h2>
-        <h1>Comming Soon</h1>
-        {/* <DownloadableItem
+        <h1>Coming Soon</h1>
+        <DownloadableItem
           imagePath="/cert-03.jpg"
           title="Certificate of Appreciation"
           date="January 2024"
@@ -277,7 +291,7 @@ export default function Profile() {
           imagePath="/cert-02.jpg"
           title="Community Service Award"
           date="March 2024"
-        /> */}
+        />
       </Card>
     </SidebarInset>
   );

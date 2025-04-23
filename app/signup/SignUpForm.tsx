@@ -1,8 +1,15 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -19,6 +26,12 @@ import {
 import { register } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { format } from "date-fns";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
+import { TextField } from "@mui/material";
+import OtpModal from "@/components/otp-modal";
+import * as countryCodes from "country-codes-list";
 
 // Define a type for our form errors
 type FormErrors = {
@@ -26,9 +39,9 @@ type FormErrors = {
   middleName?: string[];
   lastName?: string[];
   nameExtensions?: string[];
-  age?: string[];
+  dateOfBirth?: string[];
   address?: string[];
-  email?: string[];
+  username?: string[];
   password?: string[];
   confirmPassword?: string[];
   contact?: string[];
@@ -53,14 +66,51 @@ export default function SignUpPage({
     { errors: {} }
   );
 
+  const myCountryCodesObject = countryCodes.customList(
+    "countryCallingCode",
+    "{countryNameEn}: +{countryCallingCode}"
+  );
+
+  const [date, setDate] = React.useState<Date | null>(null);
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+
+  // Function to handle form submission
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsOtpModalOpen(true);
+  };
+
+  // Function to handle OTP verification
+  const handleOtpVerify = (otpValue: string) => {
+    console.log("OTP verified:", otpValue);
+    const formElement = document.getElementById(
+      "signupForm"
+    ) as HTMLFormElement;
+    if (formElement) {
+      const formData = new FormData(formElement);
+      const selectedCountryCode = formData.get("countryCode");
+      const contactNumber = formData.get("contact");
+      const fullContactNumber = `${selectedCountryCode}${contactNumber}`;
+      formData.set("contact", fullContactNumber);
+
+      // Add the dateOfBirth to the form data
+      if (date) {
+        formData.set("dateOfBirth", format(date, "yyyy-MM-dd"));
+      }
+
+      registerAction(formData);
+    }
+  };
+
   function SubmitButton() {
     const { pending } = useFormStatus();
     return (
       <Button
         disabled={pending}
-        type="submit"
+        type="button" // Changed from "submit" to "button"
         className="bg-yellow-600 w-full mt-6"
         variant="default"
+        onClick={handleFormSubmit}
       >
         Sign Up
       </Button>
@@ -117,7 +167,11 @@ export default function SignUpPage({
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            <form action={registerAction} className="space-y-4">
+            <form
+              id="signupForm"
+              onSubmit={handleFormSubmit}
+              className="space-y-4"
+            >
               {/* Personal Information Section */}
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold">Personal Information</h2>
@@ -125,15 +179,12 @@ export default function SignUpPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* First Name */}
                   <div className="relative">
-                    <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                      <Person className="h-4 w-4" />
-                    </div>
                     <Input
                       id="firstName"
                       name="firstName"
                       type="text"
                       placeholder="First Name"
-                      className="w-full rounded-lg bg-background pl-8"
+                      className="w-full rounded-lg bg-background"
                     />
                     {state?.errors?.firstName && (
                       <p className="text-red-500 text-xs mt-1">
@@ -194,43 +245,47 @@ export default function SignUpPage({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {/* Age */}
-                  {/* <div className="relative"> */}
-                  {/*   <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground"> */}
-                  {/*     <CalendarToday className="h-4 w-4" /> */}
-                  {/*   </div> */}
-                  {/*   <Input */}
-                  {/*     id="age" */}
-                  {/*     name="age" */}
-                  {/*     type="number" */}
-                  {/*     placeholder="Age" */}
-                  {/*     className="w-full rounded-lg bg-background pl-8" */}
-                  {/*   /> */}
-                  {/*   {state?.errors?.age && ( */}
-                  {/*     <p className="text-red-500 text-xs mt-1"> */}
-                  {/*       {state.errors.age[0]} */}
-                  {/*     </p> */}
-                  {/*   )} */}
-                  {/* </div> */}
+                  {/* Date of Birth - MUI DatePicker */}
+                  <div className="relative">
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DatePicker
+                        label="Date of Birth"
+                        value={date}
+                        onChange={(newValue) => setDate(newValue)}
+                        disableFuture
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            variant: "outlined",
+                          },
+                        }}
+                      />
+                    </LocalizationProvider>
+                    {state?.errors?.dateOfBirth && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {state.errors.dateOfBirth[0]}
+                      </p>
+                    )}
+                  </div>
 
                   {/* Profession */}
-                  {/* <div className="relative"> */}
-                  {/*   <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground"> */}
-                  {/*     <Work className="h-4 w-4" /> */}
-                  {/*   </div> */}
-                  {/*   <Input */}
-                  {/*     id="profession" */}
-                  {/*     name="profession" */}
-                  {/*     type="text" */}
-                  {/*     placeholder="Profession" */}
-                  {/*     className="w-full rounded-lg bg-background pl-8" */}
-                  {/*   /> */}
-                  {/*   {state?.errors?.profession && ( */}
-                  {/*     <p className="text-red-500 text-xs mt-1"> */}
-                  {/*       {state.errors.profession[0]} */}
-                  {/*     </p> */}
-                  {/*   )} */}
-                  {/* </div> */}
+                  <div className="relative">
+                    <div className="absolute left-2.5 top-1.5 h-8 w-4 text-muted-foreground">
+                      <Work className="h-4 w-4" />
+                    </div>
+                    <Input
+                      id="profession"
+                      name="profession"
+                      type="text"
+                      placeholder="Profession"
+                      className="w-full rounded-lg bg-background pl-8 h-12"
+                    />
+                    {state?.errors?.profession && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {state.errors.profession[0]}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Address */}
@@ -257,42 +312,63 @@ export default function SignUpPage({
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold">Contact Information</h2>
 
-                {/* Email */}
+                {/* username */}
                 <div className="relative">
                   <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
                     <Email className="h-4 w-4" />
                   </div>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="Email Address"
+                    id="username"
+                    name="username"
+                    type="username"
+                    placeholder="Username"
                     className="w-full rounded-lg bg-background pl-8"
                   />
-                  {state?.errors?.email && (
+                  {state?.errors?.username && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.email[0]}
+                      {state.errors.username[0]}
                     </p>
                   )}
                 </div>
 
                 {/* Contact Number */}
-                <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Phone className="h-4 w-4" />
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="col-span-1">
+                    <Select
+                      name="countryCode"
+                      defaultValue={Object.keys(myCountryCodesObject)[0]}
+                    >
+                      <SelectTrigger className="w-full rounded-lg bg-background">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(myCountryCodesObject).map(
+                          ([code, label]) => (
+                            <SelectItem key={code} value={code}>
+                              {label}
+                            </SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Input
-                    id="contact"
-                    name="contact"
-                    type="text"
-                    placeholder="Contact Number"
-                    className="w-full rounded-lg bg-background pl-8"
-                  />
-                  {state?.errors?.contact && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {state.errors.contact[0]}
-                    </p>
-                  )}
+                  <div className="col-span-2 relative">
+                    <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
+                      <Phone className="h-4 w-4" />
+                    </div>
+                    <Input
+                      id="contact"
+                      name="contact"
+                      type="text"
+                      placeholder="Contact Number"
+                      className="w-full rounded-lg bg-background pl-8"
+                    />
+                    {state?.errors?.contact && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {state.errors.contact[0]}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -380,6 +456,13 @@ export default function SignUpPage({
           </CardContent>
         </Card>
       </div>
+
+      {/* OTP Modal */}
+      <OtpModal
+        isOpen={isOtpModalOpen}
+        onClose={() => setIsOtpModalOpen(false)}
+        onVerify={handleOtpVerify}
+      />
     </div>
   );
 }

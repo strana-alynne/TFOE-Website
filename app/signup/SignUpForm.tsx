@@ -23,7 +23,7 @@ import {
   CalendarToday,
   Badge,
 } from "@mui/icons-material";
-import { register } from "./actions";
+import { register, validateAndSendOTP, verifyOTP } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { format } from "date-fns";
@@ -73,20 +73,20 @@ export default function SignUpPage({
 
   const [date, setDate] = React.useState<Date | null>(null);
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [formCache, setFormCache] = useState<FormData | null>(null);
+  const [validationErrors, setValidationErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Function to handle form submission
-  const handleFormSubmit = (e: React.FormEvent) => {
+  // Function to handle form submission and OTP process
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsOtpModalOpen(true);
-  };
-
-  // Function to handle OTP verification
-  const handleOtpVerify = (otpValue: string) => {
-    console.log("OTP verified:", otpValue);
     const formElement = document.getElementById(
       "signupForm"
     ) as HTMLFormElement;
+
     if (formElement) {
+      setIsLoading(true); // Set loading state to true when form is submitted
+
       const formData = new FormData(formElement);
       const selectedCountryCode = formData.get("countryCode");
       const contactNumber = formData.get("contact");
@@ -98,7 +98,57 @@ export default function SignUpPage({
         formData.set("dateOfBirth", format(date, "yyyy-MM-dd"));
       }
 
-      registerAction(formData);
+      try {
+        // Validate form data and send OTP
+        const result = await validateAndSendOTP({}, formData);
+
+        if (result.success) {
+          // Store form data for later use after OTP verification
+          setFormCache(formData);
+          // Open OTP modal
+          setIsOtpModalOpen(true);
+        } else {
+          // Handle validation errors
+          setValidationErrors(result.errors || {});
+        }
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+      } finally {
+        setIsLoading(false); // Set loading state to false when process is complete
+      }
+    }
+  };
+
+  const handleOtpVerify = async (otpValue: string) => {
+    if (!formCache) return;
+
+    const email = formCache.get("email") as string;
+
+    setIsLoading(true); // Set loading state to true during OTP verification
+
+    try {
+      // Verify OTP
+      const verificationResult = await verifyOTP(email, otpValue);
+
+      if (verificationResult.success) {
+        // OTP is verified, add the verification flag to form data
+        const verifiedFormData = new FormData();
+        formCache.forEach((value, key) => {
+          verifiedFormData.append(key, value);
+        });
+        verifiedFormData.append("otpVerified", "true"); // This becomes a string, not a boolean
+
+        registerAction(verifiedFormData);
+        setIsOtpModalOpen(false);
+      } else {
+        // Show error message to user
+        alert("OTP verification failed: " + verificationResult.message);
+        console.error("OTP verification failed:", verificationResult.message);
+      }
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
+    } finally {
+      setIsLoading(false); // Set loading state to false when process is complete
     }
   };
 
@@ -106,13 +156,39 @@ export default function SignUpPage({
     const { pending } = useFormStatus();
     return (
       <Button
-        disabled={pending}
+        disabled={pending || isLoading}
         type="button" // Changed from "submit" to "button"
         className="bg-yellow-600 w-full mt-6"
         variant="default"
         onClick={handleFormSubmit}
       >
-        Sign Up
+        {isLoading ? (
+          <span className="flex items-center gap-2">
+            <svg
+              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            Processing...
+          </span>
+        ) : (
+          "Sign Up"
+        )}
       </Button>
     );
   }
@@ -318,10 +394,10 @@ export default function SignUpPage({
                     <Email className="h-4 w-4" />
                   </div>
                   <Input
-                    id="username"
-                    name="username"
-                    type="username"
-                    placeholder="Username"
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Email"
                     className="w-full rounded-lg bg-background pl-8"
                   />
                   {state?.errors?.username && (

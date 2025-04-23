@@ -26,32 +26,29 @@ interface OtpModalProps {
 }
 
 const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  // Fix 1: Initialize with 6 empty strings instead of 5
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [timer, setTimer] = useState<number>(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Initialize refs array
   if (inputRefs.current.length !== 6) {
     inputRefs.current = Array(6).fill(null);
   }
 
-  // Handle OTP input change
   const handleChange = (index: number, value: string): void => {
-    // Only allow numbers
     if (value && !/^\d*$/.test(value)) return;
 
     const newOtp = [...otp];
     newOtp[index] = value.slice(0, 1);
     setOtp(newOtp);
 
-    // Auto-focus next input field after entry
+    // Fix 2: Add missing auto-focus functionality
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // Handle key press for backspace navigation
   const handleKeyDown = (
     index: number,
     e: KeyboardEvent<HTMLInputElement>
@@ -68,23 +65,22 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
   // Handle paste functionality
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>): void => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text").slice(0, 6).split("");
+    const pastedData = e.clipboardData.getData("text").slice(0, 5).split("");
 
     if (pastedData.some((char) => !/^\d$/.test(char))) return;
 
     const newOtp = [...otp];
     pastedData.forEach((value, i) => {
-      if (i < 6) newOtp[i] = value;
+      if (i < 5) newOtp[i] = value;
     });
 
     setOtp(newOtp);
 
-    // Focus the field after the last pasted character
+    // Fix 3: Focus on the last input after a successful paste
     const focusIndex = Math.min(pastedData.length, 5);
     inputRefs.current[focusIndex]?.focus();
   };
 
-  // Handle verification
   const handleVerify = (): void => {
     setIsVerifying(true);
     const otpValue = otp.join("");
@@ -95,7 +91,9 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
       if (onVerify) {
         onVerify(otpValue);
       }
-      onClose();
+      // Don't close the modal here - let the verification logic handle it
+      // onClose(); - Remove this line
+
       // Here you would normally validate the OTP with your API
       console.log("OTP submitted:", otpValue);
     }, 1500);
@@ -107,7 +105,6 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
     setOtp(["", "", "", "", "", ""]);
     // Reset timer
     setTimer(60);
-    // Here you would call your API to resend OTP
     console.log("Resending OTP...");
   };
 

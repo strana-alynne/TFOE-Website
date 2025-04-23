@@ -62,6 +62,7 @@ export async function getUserRole() {
     if (!sessionToken) return null;
   
     const payload = (await decrypt(sessionToken)) as {
+      [x: string]: any;
       userId: string;
       role: string;
       expiresAt: string;

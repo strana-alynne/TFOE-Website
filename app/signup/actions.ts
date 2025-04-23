@@ -2,21 +2,14 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-// Remove MongoDB connection
-// import connectMongo from "@/lib/mongodb";
 import { createSession } from "@/lib/session";
-import { hash } from "bcrypt";
-// Remove Member model
-// import Member from "@/models/Member";
 
-// Define validation schema with all required fields
 const signupSchema = z
   .object({
     firstName: z.string().min(1, { message: "First name is required" }),
     middleName: z.string().optional(),
     lastName: z.string().min(1, { message: "Last name is required" }),
     nameExtensions: z.string().optional(),
-    // age: z.string().transform((val) => parseInt(val, 10)),
     address: z.string().min(1, { message: "Address is required" }),
     email: z.string().email({ message: "Invalid email address" }),
     username: z.string().min(1, { message: "Username is required" }),
@@ -25,25 +18,102 @@ const signupSchema = z
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
     contact: z.string().min(1, { message: "Contact number is required" }),
-    // profession: z.string().min(1, { message: "Profession is required" }),
+    dateOfBirth: z.string().optional(),
+    otpVerified: z.boolean().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-// In-memory storage for registered members (will reset when server restarts)
-const registeredMembers = [
-  {
-    _id: "user1",
-    email: "member@example.com",
-  },
-  {
-    _id: "user2",
-    email: "admin@example.com",
-  },
-];
+// Function to send OTP to user's email
+export async function sendOTP(email: string) {
+  try {
+    // Call your OTP API endpoint
+    const response = await fetch("https://tfoe-backend.onrender.com/otp/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
 
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to send OTP");
+    }
+    
+    return { success: true, message: "OTP sent successfully" };
+  } catch (error) {
+    console.error("OTP sending error:", error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "Failed to send OTP" 
+    };
+  }
+}
+
+// Function to verify OTP
+export async function verifyOTP(email: string, otp: string) {
+  try {
+    // Call your OTP verification API endpoint
+    const response = await fetch("https://tfoe-backend.onrender.com/otp/verify", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || "OTP verification failed");
+    }
+    
+    return { success: true };
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    return { 
+      success: false, 
+      message: error instanceof Error ? error.message : "OTP verification failed" 
+    };
+  }
+}
+
+// Function to validate form and send OTP
+export async function validateAndSendOTP(prevState: any, formData: FormData) {
+  // Validate form data
+  const result = signupSchema.safeParse(Object.fromEntries(formData));
+
+  if (!result.success) {
+    return {
+      success: false,
+      errors: result.error.flatten().fieldErrors,
+    };
+  }
+  
+  // Send OTP to the user's email
+  const otpResponse = await sendOTP(result.data.email);
+  
+  if (!otpResponse.success) {
+    return {
+      success: false,
+      errors: {
+        _form: [otpResponse.message],
+      },
+    };
+  }
+
+  // Return the validated data
+  return {
+    success: true,
+    data: result.data,
+  };
+}
+
+// Original register function with added OTP verification check
 export async function register(prevState: any, formData: FormData) {
   // Validate form data
   const result = signupSchema.safeParse(Object.fromEntries(formData));
@@ -54,6 +124,15 @@ export async function register(prevState: any, formData: FormData) {
     };
   }
 
+  // Check if OTP was verified
+  const otpVerified = formData.get("otpVerified") === "true";
+  if (!otpVerified) {
+    return {
+      errors: {
+        _form: ["Email verification required. Please complete the OTP verification."],
+      },
+    };
+  }
   try {
     // Prepare user data
     const userData = {
@@ -71,6 +150,7 @@ export async function register(prevState: any, formData: FormData) {
         email: result.data.email,
         contact: result.data.contact,
         dateJoined: Date.now().toString(), // Current date
+        dateOfBirth: result.data.dateOfBirth || "",
       },
     };
 
@@ -83,15 +163,22 @@ export async function register(prevState: any, formData: FormData) {
       },
       body: JSON.stringify(userData),
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Registration failed");
+    }
+    
     const data = await response.json();
     console.log(data);
+    
     // Create session for the new member
     await createSession(data.id, "member");
   } catch (error) {
     console.error("Registration error:", error);
     return {
       errors: {
-        _form: ["Failed to register. Please try again."],
+        _form: [error instanceof Error ? error.message : "Failed to register. Please try again."],
       },
     };
   }
@@ -99,4 +186,3 @@ export async function register(prevState: any, formData: FormData) {
   // Redirect to member portal
   redirect("/portal-member");
 }
-

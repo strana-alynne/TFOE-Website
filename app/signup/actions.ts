@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { createSession } from "@/lib/session";
+
 
 const signupSchema = z
   .object({
@@ -172,8 +172,6 @@ export async function register(prevState: any, formData: FormData) {
     const data = await response.json();
     console.log(data);
     
-    // Create session for the new member
-    await createSession(data.id, "member");
   } catch (error) {
     console.error("Registration error:", error);
     return {

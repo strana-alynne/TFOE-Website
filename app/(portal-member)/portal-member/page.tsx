@@ -1,10 +1,5 @@
 // app/portal-member/page.tsx
 import { redirect } from "next/navigation";
-// Removed MongoDB connection
-// import connectMongo from "@/lib/mongodb";
-import { getCurrentUser } from "@/lib/session";
-// Removed Member model
-// import Member from "@/models/Member";
 import MemberBarChart from "@/components/MemberBarChart";
 import { MemberLineGraph } from "@/components/MemberLineGraph";
 import {
@@ -26,18 +21,6 @@ const dummyMember = {
 };
 
 export default async function Page() {
-  // No need to connect to MongoDB
-  // await connectMongo();
-
-  // Still check for a valid session
-  const user = await getCurrentUser();
-  if (!user) {
-    // no valid session → send them to login
-    redirect("/login");
-  }
-
-  // Instead of fetching from MongoDB, use the dummy data
-  // We'll pretend the user ID matches our dummy data
   const member = dummyMember;
 
   return (

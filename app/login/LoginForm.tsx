@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { ChevronLeft } from "@mui/icons-material";
 import { login } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm({
   image,
@@ -18,6 +19,13 @@ export default function LoginForm({
   logo: string;
 }) {
   const [state, loginAction] = useActionState(login, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success && state?.redirectTo) {
+      router.push(state.redirectTo);
+    }
+  }, [state, router]);
 
   function SubmitButton() {
     const { pending } = useFormStatus();
@@ -28,10 +36,11 @@ export default function LoginForm({
         className="bg-yellow-600 w-full mt-8 md:mt-12"
         variant="default"
       >
-        Login
+        {pending ? "Logging in..." : "Login"}
       </Button>
     );
   }
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left Side - Background Image with Logo */}
@@ -91,7 +100,9 @@ export default function LoginForm({
                 className="w-full"
               />
               {state?.errors?.username && (
-                <p className="text-red-500 text-sm">{state.errors.username}</p>
+                <p className="text-red-500 text-sm">
+                  {state.errors.username[0]}
+                </p>
               )}
               <Input
                 id="password"
@@ -101,7 +112,12 @@ export default function LoginForm({
                 className="w-full"
               />
               {state?.errors?.password && (
-                <p className="text-red-500 text-sm">{state.errors.password}</p>
+                <p className="text-red-500 text-sm">
+                  {state.errors.password[0]}
+                </p>
+              )}
+              {state?.errors?.form && (
+                <p className="text-red-500 text-sm">{state.errors.form}</p>
               )}
               <SubmitButton />
             </form>

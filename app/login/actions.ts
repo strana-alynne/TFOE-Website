@@ -1,7 +1,6 @@
 "use server";
 
 import { z } from "zod";
-import { createSession, deleteSession } from "@/lib/session";
 import { redirect } from "next/navigation";
 
 const loginSchema = z.object({
@@ -12,51 +11,68 @@ const loginSchema = z.object({
     .trim(),
 });
 
-function getUserByEmail(email: string) {
-  if (email === testUser.email) return testUser;
-  if (email === anotherUser.email) return anotherUser;
-  return null;
-}
+// Unified errors shape for all failure modes
+type ErrorFields = {
+  username?: string[];
+  password?: string[];
+  form?: string;
+};
 
-export async function login(prevState: any, formData: FormData) {
+type LoginState =
+  | { success?: undefined; errors: ErrorFields }
+  | { success: true; redirectTo: string; errors?: undefined }
+  | { success: false; errors: ErrorFields; redirectTo?: undefined };
+
+export async function login(
+  prevState: LoginState | undefined,
+  formData: FormData
+): Promise<LoginState> {
+  console.log("Login action triggered", formData);
   const result = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
+    // Zod validation failed
     return {
       errors: result.error.flatten().fieldErrors,
     };
   }
 
   const { username, password } = result.data;
-
   const url = "https://tfoe-backend.onrender.com/user/login";
-  const response = await fetch(url, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      username: username,
-      password: password,
-    }),
-  });
 
-  if (response.ok) {
-    const data = await response.json();
-    await createSession(data.id, data.isAdmin ? "admin" : "member");
-    if (data.isAdmin) {
-      redirect("/portal");
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ username, password }),
+    });
+
+    if (response.ok) {
+      console.log("Login successful", response);
+      const data = await response.json();
+      return {
+        success: true,
+        redirectTo: data.isAdmin ? "/portal" : "/portal-member",
+      };
     } else {
-      redirect("/portal-member");
+      console.error("Login failed with status:", response.status);
+      return {
+        success: false,
+        errors: { form: "Invalid username or password" },
+      };
     }
-  } else {
-    console.error(response.status);
+  } catch (error) {
+    console.error("Login error:", error);
+    return {
+      success: false,
+      errors: { form: "An error occurred during login" },
+    };
   }
 }
 
 export async function logout() {
-  await deleteSession();
   redirect("/login");
 }
-

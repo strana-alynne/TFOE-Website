@@ -23,6 +23,7 @@ export default function LoginForm({
 
   useEffect(() => {
     if (state?.success && state?.redirectTo) {
+      localStorage.setItem("access_token", state.token);
       router.push(state.redirectTo);
     }
   }, [state, router]);

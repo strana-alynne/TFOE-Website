@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
 const loginSchema = z.object({
   username: z.string().trim(),
@@ -20,12 +21,12 @@ type ErrorFields = {
 
 type LoginState =
   | { success?: undefined; errors: ErrorFields }
-  | { success: true; redirectTo: string; errors?: undefined }
+  | { success: true; redirectTo: string; token: string; errors?: undefined }
   | { success: false; errors: ErrorFields; redirectTo?: undefined };
 
 export async function login(
   prevState: LoginState | undefined,
-  formData: FormData
+  formData: FormData,
 ): Promise<LoginState> {
   console.log("Login action triggered", formData);
   const result = loginSchema.safeParse(Object.fromEntries(formData));
@@ -56,6 +57,7 @@ export async function login(
       return {
         success: true,
         redirectTo: data.isAdmin ? "/portal" : "/portal-member",
+        token: data.access_token,
       };
     } else {
       console.error("Login failed with status:", response.status);
@@ -74,5 +76,8 @@ export async function login(
 }
 
 export async function logout() {
-  redirect("/login");
+  return {
+    success: true,
+    redirectTo: "/login",
+  };
 }

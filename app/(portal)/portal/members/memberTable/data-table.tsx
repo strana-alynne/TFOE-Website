@@ -62,9 +62,9 @@ export function DataTable<TData, TValue>({
     } else {
       // Default behavior: navigate to detail page
       // Assuming your data has an _id field
-      const id = (row as any)._id;
+      const id = (row as any).id;
       if (id) {
-        router.push(`/portal/membersProfile`);
+        router.push(`/portal/members/membersProfile/${id}`);
       }
     }
   };

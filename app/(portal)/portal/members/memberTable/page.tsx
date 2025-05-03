@@ -12,11 +12,12 @@ export default function MembersTable() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch("/api/members");
+        const response = await fetch("http://localhost:3001/members");
         if (!response.ok) throw new Error("Failed to fetch members");
 
         const data = await response.json();
-        setData(data.members);
+        console.log(data);
+        setData(data);
       } catch (err) {
         setError("Error fetching members");
         console.error(err);

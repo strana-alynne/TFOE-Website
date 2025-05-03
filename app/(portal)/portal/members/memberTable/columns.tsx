@@ -27,7 +27,7 @@ export type Member = {
 // Update the column definitions to match your Member type
 export const columns: ColumnDef<Member>[] = [
   {
-    accessorKey: "_id",
+    accessorKey: "id",
     header: "Member ID",
   },
   {
@@ -85,12 +85,5 @@ export const columns: ColumnDef<Member>[] = [
   {
     accessorKey: "contribution",
     header: "Contribution",
-    cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("contribution") ?? "0");
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-    },
   },
 ];

@@ -9,11 +9,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Download } from "@mui/icons-material";
+import { Download, FileUpload, UploadFile } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // Define the Member type
 interface Member {
@@ -273,25 +274,29 @@ export default function Profile() {
         </div>
       </Card>
       <Card className="m-4 p-4">
-        <h2 className="text-lg font-semibold mb-4">
-          Certificates and Trainings
-        </h2>
-        <h1>Coming Soon</h1>
-        <DownloadableItem
-          imagePath="/cert-03.jpg"
-          title="Certificate of Appreciation"
-          date="January 2024"
-        />
-        <DownloadableItem
-          imagePath="/cert-01.png"
-          title="Leadership Training Certificate"
-          date="February 2024"
-        />
-        <DownloadableItem
-          imagePath="/cert-02.jpg"
-          title="Community Service Award"
-          date="March 2024"
-        />
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Certificates and Trainings</CardTitle>
+          <Button variant="outline">
+            <UploadFile /> Upload your Certificate
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <DownloadableItem
+            imagePath="/cert-03.jpg"
+            title="Certificate of Appreciation"
+            date="January 2024"
+          />
+          <DownloadableItem
+            imagePath="/cert-01.png"
+            title="Leadership Training Certificate"
+            date="February 2024"
+          />
+          <DownloadableItem
+            imagePath="/cert-02.jpg"
+            title="Community Service Award"
+            date="March 2024"
+          />
+        </CardContent>
       </Card>
     </SidebarInset>
   );

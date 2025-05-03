@@ -1,0 +1,55 @@
+{
+  "members": [
+    {
+      "id": "MEM-2023-001",
+      "firstName": "Yoooooowww",
+      "middleName": "David",
+      "lastName": "Smith",
+      "nameExtensions": "Jr.",
+      "status": "Active",
+      "birthDate": "2002-05-15T00:00:00.000Z",
+      "profession": "Software Engineer",
+      "email": "john.smith@example.com",
+      "contact": "+1 (555) 123-4567",
+      "address": "123 Main Street, Anytown, USA 12345",
+      "dateJoined": "2023-01-15T00:00:00.000Z",
+      "position": "Member",
+      "contribution": "$500",
+      "absences": "2"
+    },
+    {
+      "id": "MEM-2023-002",
+      "firstName": "Betty",
+      "middleName": "Ann",
+      "lastName": "Smith",
+      "nameExtensions": "",
+      "status": "Active",
+      "birthDate": "1998-02-10T00:00:00.000Z",
+      "profession": "UI/UX Designer",
+      "email": "betty.smith@example.com",
+      "contact": "+1 (555) 987-6543",
+      "address": "456 Oak Avenue, Somewhere, USA 67890",
+      "dateJoined": "2023-03-20T00:00:00.000Z",
+      "position": "Member",
+      "contribution": "$450",
+      "absences": "1"
+    },
+    {
+      "id": "MEM-2023-003",
+      "firstName": "Mary",
+      "middleName": "Jane",
+      "lastName": "Wilson",
+      "nameExtensions": "",
+      "status": "Active",
+      "birthDate": "1990-11-22T00:00:00.000Z",
+      "profession": "Project Manager",
+      "email": "mary.wilson@example.com",
+      "contact": "+1 (555) 234-5678",
+      "address": "789 Pine Street, Elsewhere, USA 13579",
+      "dateJoined": "2023-02-05T00:00:00.000Z",
+      "position": "Committee Head",
+      "contribution": "$600",
+      "absences": "0"
+    }
+  ]
+}

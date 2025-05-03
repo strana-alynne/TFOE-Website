@@ -1,6 +1,5 @@
 import { AppSidebarMember } from "@/components/app-sidebar-member";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import connectMongo from "@/lib/mongodb";
 import Member from "@/models/Member";
 import { redirect } from "next/navigation";
 
@@ -9,8 +8,6 @@ export default async function PortalLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  await connectMongo();
-
   const member = "Johnny Bravo"; // Replace with actual member data fetching logic
 
   return (

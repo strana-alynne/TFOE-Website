@@ -12,10 +12,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Download, FileUpload, UploadFile } from "@mui/icons-material";
+import { Download, Edit, UploadFile } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import { EditMemberModal } from "@/components/edit-member-modal";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 // Define the Member type
 interface Member {
   id: string;
@@ -24,7 +27,7 @@ interface Member {
   lastName: string;
   nameExtensions?: string;
   status: string;
-  age?: number;
+  birthDate: string;
   profession: string;
   email: string;
   contact: string;
@@ -35,7 +38,6 @@ interface Member {
   absences: string;
   feedback?: string;
 }
-
 interface DownloadableItem {
   imagePath: string;
   title: string;
@@ -84,41 +86,34 @@ const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
   </div>
 );
 
-// Dummy member data - this simulates what we'd get from the API
-const dummyMember: Member = {
-  id: "MEM-2023-001",
-  firstName: "John",
-  middleName: "David",
-  lastName: "Smith",
-  nameExtensions: "Jr.",
-  status: "Active",
-  age: 32,
-  profession: "Software Engineer",
-  email: "john.smith@example.com",
-  contact: "+1 (555) 123-4567",
-  address: "123 Main Street, Anytown, USA 12345",
-  dateJoined: "2023-01-15T00:00:00.000Z",
-  position: "Member",
-  contribution: "$500",
-  absences: "2",
-  feedback: "Excellent participation in community events",
+const calculateAge = (birthDateString: string) => {
+  const today = new Date();
+  const birthDate = new Date(birthDateString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
 };
 
 export default function Profile() {
+  const { toast } = useToast();
   const [member, setMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
-    // Simulate API fetch delay with setTimeout
     const fetchMember = async () => {
       try {
-        // Instead of fetching from an API, we'll use our dummyMember
-        setTimeout(() => {
-          setMember(dummyMember);
-          setLoading(false);
-          console.log("Member data fetched (dummy)", dummyMember);
-        }, 800); // Simulate a network delay of 800ms
+        const response = await axios.get(
+          "http://localhost:3001/members?id=MEM-2023-001"
+        ); // Replace with your API endpoint
+        setMember(response.data[0]);
+        setLoading(false);
       } catch (err: any) {
         console.error("Error with dummy member data:", err);
         setError(err.message);
@@ -128,6 +123,60 @@ export default function Profile() {
 
     fetchMember();
   }, []);
+
+  const handleSave = async (updatedMember: Partial<Member>) => {
+    try {
+      setUpdateLoading(true);
+
+      // Only update the fields that are editable
+      const memberUpdate = {
+        ...member,
+        firstName: updatedMember.firstName,
+        middleName: updatedMember.middleName,
+        lastName: updatedMember.lastName,
+        // Convert "none" to empty string for nameExtensions
+        nameExtensions:
+          updatedMember.nameExtensions === "none"
+            ? ""
+            : updatedMember.nameExtensions,
+        birthDate: updatedMember.birthDate,
+        profession: updatedMember.profession,
+        address: updatedMember.address,
+        contact: updatedMember.contact,
+      };
+
+      // Use the specific member ID in the URL for the PUT request
+      const response = await axios.put(
+        `http://localhost:3001/members/${member?.id || ""}`,
+        memberUpdate
+      );
+
+      if (response.data) {
+        setMember(response.data);
+        toast({
+          title: "Profile Updated",
+          content: "Your profile has been updated successfully.",
+        });
+      } else {
+        console.log("No response data, using local update:", memberUpdate);
+        // Still update the local state if the server didn't return data
+        setMember(memberUpdate as Member);
+      }
+      console.log("Profile updated successfully");
+      return true;
+    } catch (error) {
+      console.error("Error updating member:", error);
+      setError("Failed to update profile. Please try again.");
+      toast({
+        title: "Update Failed",
+        content: "There was a problem updating your profile.",
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -194,84 +243,105 @@ export default function Profile() {
       </div>
 
       <Card className="m-4 p-4">
-        <h2 className="text-lg font-semibold mb-4">Member Information</h2>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Member Information</CardTitle>
+          <Button
+            variant="outline"
+            disabled={updateLoading}
+            onClick={() => {
+              setSelectedMember(member);
+              setEditOpen(true);
+            }}
+          >
+            {updateLoading ? (
+              <>Loading...</>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" /> Edit your Profile
+              </>
+            )}
+          </Button>
+        </CardHeader>
 
-        {member ? (
-          <div className="mb-4">
-            <h2 className="text-xl font-bold">{fullName}</h2>
-            <p className="text-muted-foreground flex items-center gap-2">
-              <span>
-                <IdCard />
-              </span>
-              {member.id}
-            </p>
+        <CardContent>
+          {member ? (
+            <div className="mb-4">
+              <h2 className="text-xl font-bold">{fullName}</h2>
+              <p className="text-muted-foreground flex items-center gap-2">
+                <span>
+                  <IdCard />
+                </span>
+                {member.id}
+              </p>
+            </div>
+          ) : (
+            <p className="text-red-500">Member not found</p>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-muted-foreground">AGE</p>
+              <h2 className="text-md font-bold">
+                {" "}
+                {calculateAge(member.birthDate) || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">STATUS</p>
+              <Badge
+                className={
+                  member.status === "Active" ? "bg-green-500" : "bg-red-500"
+                }
+              >
+                {member.status}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-muted-foreground">PROFESSION</p>
+              <h2 className="text-md font-bold">{member.profession}</h2>
+            </div>
+            <div className="col-span-2">
+              <p className="text-muted-foreground">ADDRESS</p>
+              <h2 className="text-md font-bold">{member.address || "N/A"}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">CONTACT INFORMATION</p>
+              <h2 className="text-md font-bold">{member.contact}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">EMAIL</p>
+              <h2 className="text-md font-bold">{member.email}</h2>
+            </div>
           </div>
-        ) : (
-          <p className="text-red-500">Member not found</p>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-muted-foreground">AGE</p>
-            <h2 className="text-md font-bold">{member.age || "N/A"}</h2>
-          </div>
-
-          <div>
-            <p className="text-muted-foreground">STATUS</p>
-            <Badge
-              className={
-                member.status === "Active" ? "bg-green-500" : "bg-red-500"
-              }
-            >
-              {member.status}
-            </Badge>
-          </div>
-          <div>
-            <p className="text-muted-foreground">PROFESSION</p>
-            <h2 className="text-md font-bold">{member.profession}</h2>
-          </div>
-          <div className="col-span-2">
-            <p className="text-muted-foreground">ADDRESS</p>
-            <h2 className="text-md font-bold">{member.address || "N/A"}</h2>
-          </div>
-          <div>
-            <p className="text-muted-foreground">CONTACT INFORMATION</p>
-            <h2 className="text-md font-bold">{member.contact}</h2>
-          </div>
-          <div>
-            <p className="text-muted-foreground">EMAIL</p>
-            <h2 className="text-md font-bold">{member.email}</h2>
-          </div>
-        </div>
+        </CardContent>
       </Card>
 
       <Card className="m-4 p-4">
-        <h2 className="text-lg font-semibold mb-4">Membership Details</h2>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Membership Details</CardTitle>
+        </CardHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <p className="text-muted-foreground">DATE JOINED</p>
-            <h2 className="text-md font-bold">
-              {new Date(member.dateJoined).toLocaleDateString()}
-            </h2>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-muted-foreground">DATE JOINED</p>
+              <h2 className="text-md font-bold">
+                {new Date(member.dateJoined).toLocaleDateString()}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">POSITION</p>
+              <h2 className="text-md font-bold">{member.position}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">CONTRIBUTION</p>
+              <h2 className="text-md font-bold">{member.contribution}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">ABSENCES</p>
+              <h2 className="text-md font-bold">{member.absences}</h2>
+            </div>
           </div>
-          <div>
-            <p className="text-muted-foreground">POSITION</p>
-            <h2 className="text-md font-bold">{member.position}</h2>
-          </div>
-          <div>
-            <p className="text-muted-foreground">CONTRIBUTION</p>
-            <h2 className="text-md font-bold">{member.contribution}</h2>
-          </div>
-          <div>
-            <p className="text-muted-foreground">ABSENCES</p>
-            <h2 className="text-md font-bold">{member.absences}</h2>
-          </div>
-          <div>
-            <p className="text-muted-foreground">FEEDBACK</p>
-            <h2 className="text-md font-bold">{member.feedback || "N/A"}</h2>
-          </div>
-        </div>
+        </CardContent>
       </Card>
       <Card className="m-4 p-4">
         <CardHeader className="flex flex-row items-center justify-between">
@@ -298,6 +368,12 @@ export default function Profile() {
           />
         </CardContent>
       </Card>
+      <EditMemberModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        member={selectedMember}
+        onSave={handleSave}
+      />
     </SidebarInset>
   );
 }

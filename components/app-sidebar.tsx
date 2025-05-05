@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useEffect, startTransition } from "react";
 
 import { VersionSwitcher } from "@/components/version-switcher";
 import {
@@ -16,6 +17,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/actions";
+import { useActionState } from "react";
+import { redirect, useRouter } from "next/navigation";
 
 // This is sample data.
 const data = {
@@ -55,6 +58,21 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [state, logoutAction] = useActionState(logout, undefined);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state?.success && state?.redirectTo) {
+      localStorage.removeItem("access_token");
+      router.push(state.redirectTo);
+    }
+  }, [state, router]);
+
+  const handleLogout = () => {
+    startTransition(() => {
+      logoutAction();
+    });
+  };
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -96,7 +114,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => logout()} asChild isActive>
+            <SidebarMenuButton onClick={() => handleLogout()} asChild isActive>
               <a>Logout</a>
             </SidebarMenuButton>
           </SidebarMenuItem>

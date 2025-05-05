@@ -19,6 +19,7 @@ import { EditMemberModal } from "@/components/edit-member-modal";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { getDetails } from "./actions.ts";
 // Define the Member type
 interface Member {
   id: string;
@@ -107,21 +108,22 @@ export default function Profile() {
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
-    const fetchMember = async () => {
+    const fetchDetails = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
       try {
-        const response = await axios.get(
-          "http://localhost:3001/members?id=MEM-2023-001"
-        ); // Replace with your API endpoint
-        setMember(response.data[0]);
+        const response = await getDetails(token);
+        setMember(response.data);
         setLoading(false);
-      } catch (err: any) {
-        console.error("Error with dummy member data:", err);
-        setError(err.message);
+      } catch (error) {
+        console.error("Failed to fetch member details:", error);
+        setError(error.message);
         setLoading(false);
       }
     };
 
-    fetchMember();
+    fetchDetails();
   }, []);
 
   const handleSave = async (updatedMember: Partial<Member>) => {

@@ -1,4 +1,6 @@
+"use client";
 // app/portal-member/page.tsx
+import React, { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
 import MemberBarChart from "@/components/MemberBarChart";
 import { MemberLineGraph } from "@/components/MemberLineGraph";
@@ -10,6 +12,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { getDetails } from "./actions.ts";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 // Define dummy data
 const dummyMember = {
@@ -20,8 +25,24 @@ const dummyMember = {
   role: "member",
 };
 
-export default async function Page() {
-  const member = dummyMember;
+export default function Page() {
+  const [member, setMember] = useState(dummyMember);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
+      try {
+        const response = await getDetails(token);
+        setMember(response.data);
+      } catch (error) {
+        console.error("Failed to fetch member details:", error);
+      }
+    };
+
+    fetchDetails();
+  }, []);
 
   return (
     <SidebarInset className="w-full">
@@ -38,7 +59,7 @@ export default async function Page() {
       </header>
 
       <div className="p-4 w-full">
-        <h2 className="text-2xl font-bold">Welcome {member.firstName}!</h2>
+        { member ? <h2 className="text-2xl font-bold">Welcome {member.firstName}!</h2> : <h2 className="text-2xl font-bold">Loading....</h2> } 
       </div>
 
       <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">

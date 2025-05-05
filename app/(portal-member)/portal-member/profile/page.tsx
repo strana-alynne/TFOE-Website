@@ -19,6 +19,7 @@ import { EditMemberModal } from "@/components/edit-member-modal";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { getDetails } from "./actions.ts";
 // Define the Member type
 interface Member {
   id: string;
@@ -107,26 +108,29 @@ export default function Profile() {
   const [updateLoading, setUpdateLoading] = useState(false);
 
   useEffect(() => {
-    const fetchMember = async () => {
+    const fetchDetails = async () => {
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
+
       try {
-        const response = await axios.get(
-          "http://localhost:3001/members?id=MEM-2023-001"
-        ); // Replace with your API endpoint
-        setMember(response.data[0]);
+        const response = await getDetails(token);
+        setMember(response.data);
         setLoading(false);
-      } catch (err: any) {
-        console.error("Error with dummy member data:", err);
-        setError(err.message);
+      } catch (error) {
+        console.error("Failed to fetch member details:", error);
+        setError(error.message);
         setLoading(false);
       }
     };
 
-    fetchMember();
+    fetchDetails();
   }, []);
 
   const handleSave = async (updatedMember: Partial<Member>) => {
     try {
       setUpdateLoading(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
 
       // Only update the fields that are editable
       const memberUpdate = {
@@ -147,12 +151,18 @@ export default function Profile() {
 
       // Use the specific member ID in the URL for the PUT request
       const response = await axios.put(
-        `http://localhost:3001/members/${member?.id || ""}`,
-        memberUpdate
+        "https://tfoe-backend.onrender.com/member/",
+        memberUpdate,
+        {
+          headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+          }
+        }
       );
 
       if (response.data) {
-        setMember(response.data);
+        setMember(response.data.data);
         toast({
           title: "Profile Updated",
           content: "Your profile has been updated successfully.",

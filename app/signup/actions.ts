@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 
-
 const signupSchema = z
   .object({
     firstName: z.string().min(1, { message: "First name is required" }),
@@ -18,6 +17,7 @@ const signupSchema = z
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
     contact: z.string().min(1, { message: "Contact number is required" }),
+    dateJoined: z.string().optional().default(Date().toString()),
     dateOfBirth: z.string().optional(),
     otpVerified: z.boolean().optional(),
   })
@@ -39,17 +39,17 @@ export async function sendOTP(email: string) {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to send OTP");
     }
-    
+
     return { success: true, message: "OTP sent successfully" };
   } catch (error) {
     console.error("OTP sending error:", error);
-    return { 
-      success: false, 
-      message: error instanceof Error ? error.message : "Failed to send OTP" 
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Failed to send OTP",
     };
   }
 }
@@ -58,26 +58,30 @@ export async function sendOTP(email: string) {
 export async function verifyOTP(email: string, otp: string) {
   try {
     // Call your OTP verification API endpoint
-    const response = await fetch("https://tfoe-backend.onrender.com/otp/verify", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      "https://tfoe-backend.onrender.com/otp/verify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, otp }),
       },
-      body: JSON.stringify({ email, otp }),
-    });
+    );
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.message || "OTP verification failed");
     }
-    
+
     return { success: true };
   } catch (error) {
     console.error("OTP verification error:", error);
-    return { 
-      success: false, 
-      message: error instanceof Error ? error.message : "OTP verification failed" 
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "OTP verification failed",
     };
   }
 }
@@ -93,10 +97,10 @@ export async function validateAndSendOTP(prevState: any, formData: FormData) {
       errors: result.error.flatten().fieldErrors,
     };
   }
-  
+
   // Send OTP to the user's email
   const otpResponse = await sendOTP(result.data.email);
-  
+
   if (!otpResponse.success) {
     return {
       success: false,
@@ -129,7 +133,9 @@ export async function register(prevState: any, formData: FormData) {
   if (!otpVerified) {
     return {
       errors: {
-        _form: ["Email verification required. Please complete the OTP verification."],
+        _form: [
+          "Email verification required. Please complete the OTP verification.",
+        ],
       },
     };
   }
@@ -163,20 +169,23 @@ export async function register(prevState: any, formData: FormData) {
       },
       body: JSON.stringify(userData),
     });
-    
+
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.message || "Registration failed");
     }
-    
+
     const data = await response.json();
     console.log(data);
-    
   } catch (error) {
     console.error("Registration error:", error);
     return {
       errors: {
-        _form: [error instanceof Error ? error.message : "Failed to register. Please try again."],
+        _form: [
+          error instanceof Error
+            ? error.message
+            : "Failed to register. Please try again.",
+        ],
       },
     };
   }
@@ -184,3 +193,4 @@ export async function register(prevState: any, formData: FormData) {
   // Redirect to member portal
   redirect("/portal-member");
 }
+

@@ -28,12 +28,14 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
+  deleteConfirmationDialog?: React.ReactNode; // For rendering the delete confirmation dialog
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   onRowClick,
+  deleteConfirmationDialog,
 }: DataTableProps<TData, TValue>) {
   const router = useRouter();
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -56,13 +58,18 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const handleRowClick = (row: TData) => {
+  const handleRowClick = (row: TData, event: React.MouseEvent) => {
+    // Check if the click event originated from a delete button
+    if ((event.target as HTMLElement).closest('[data-delete-button="true"]')) {
+      // If it's a delete button click, don't navigate
+      return;
+    }
+
     if (onRowClick) {
       onRowClick(row);
     } else {
       // Default behavior: navigate to detail page
-      // Assuming your data has an _id field
-      const id = (row as any).id;
+      const id = (row as any)._id;
       if (id) {
         router.push(`/portal/members/membersProfile/${id}`);
       }
@@ -107,13 +114,17 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  onClick={() => handleRowClick(row.original)}
+                  onClick={(e) => handleRowClick(row.original, e)}
                   className="cursor-pointer hover:bg-gray-100 transition-colors"
                   role="button"
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      handleRowClick(row.original);
+                      // We can't pass the event directly here, so we create a mock event object
+                      const mockEvent = {
+                        target: e.target,
+                      } as unknown as React.MouseEvent;
+                      handleRowClick(row.original, mockEvent);
                     }
                   }}
                 >
@@ -158,6 +169,9 @@ export function DataTable<TData, TValue>({
           Next
         </Button>
       </div>
+
+      {/* Render the delete confirmation dialog */}
+      {deleteConfirmationDialog}
     </>
   );
 }

@@ -129,6 +129,8 @@ export default function Profile() {
   const handleSave = async (updatedMember: Partial<Member>) => {
     try {
       setUpdateLoading(true);
+      const token = localStorage.getItem("access_token");
+      if (!token) return;
 
       // Only update the fields that are editable
       const memberUpdate = {
@@ -149,12 +151,18 @@ export default function Profile() {
 
       // Use the specific member ID in the URL for the PUT request
       const response = await axios.put(
-        `http://localhost:3001/members/${member?.id || ""}`,
-        memberUpdate
+        "https://tfoe-backend.onrender.com/member/",
+        memberUpdate,
+        {
+          headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+          }
+        }
       );
 
       if (response.data) {
-        setMember(response.data);
+        setMember(response.data.data);
         toast({
           title: "Profile Updated",
           content: "Your profile has been updated successfully.",

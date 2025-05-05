@@ -1,7 +1,4 @@
 "use server";
-
-import { redirect } from "next/navigation";
-
 // Function to send OTP to user's email
 export async function getDetails(token: string) {
   try {
@@ -15,7 +12,6 @@ export async function getDetails(token: string) {
     });
 
     const data = await response.json();
-
     if (!response.ok) {
     }
 

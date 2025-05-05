@@ -1,7 +1,4 @@
 "use server";
-
-import { redirect } from "next/navigation";
-
 // Function to send OTP to user's email
 export async function getDetails(token: string) {
   try {

@@ -18,8 +18,7 @@ import { Button } from "@/components/ui/button";
 import { EditMemberModal } from "@/components/edit-member-modal";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { getDetails } from "./actions.ts";
+import { getDetails } from "./actions";
 // Define the Member type
 interface Member {
   id: string;
@@ -118,7 +117,11 @@ export default function Profile() {
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
-        setError(error.message);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch member details"
+        );
         setLoading(false);
       }
     };
@@ -155,9 +158,9 @@ export default function Profile() {
         memberUpdate,
         {
           headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-          }
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 

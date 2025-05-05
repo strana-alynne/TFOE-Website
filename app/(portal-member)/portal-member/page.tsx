@@ -12,9 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { getDetails } from "./actions.ts";
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
+import { getDetails } from "./actions";
 
 // Define dummy data
 const dummyMember = {
@@ -35,6 +33,7 @@ export default function Page() {
 
       try {
         const response = await getDetails(token);
+        console.log("Member details:", response.data);
         setMember(response.data);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
@@ -59,7 +58,11 @@ export default function Page() {
       </header>
 
       <div className="p-4 w-full">
-        { member ? <h2 className="text-2xl font-bold">Welcome {member.firstName}!</h2> : <h2 className="text-2xl font-bold">Loading....</h2> } 
+        {member ? (
+          <h2 className="text-2xl font-bold">Welcome {member.firstName}!</h2>
+        ) : (
+          <h2 className="text-2xl font-bold">Loading....</h2>
+        )}
       </div>
 
       <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">

@@ -51,5 +51,38 @@
       "contribution": "$600",
       "absences": "0"
     }
+  ],
+
+  "event": [
+    {
+      "id": "EVT-2023-001",
+      "imageUrl": "https://images.pexels.com/photos/9543740/pexels-photo-9543740.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      "name": "Community Clean-up",
+      "date": "2025-05-15",
+      "starttime": "10:00 AM",
+      "endtime": "12:00 PM",
+      "attended": true,
+      "happeningNow": true
+    },
+    {
+      "id": "EVT-2023-002",
+      "imageUrl": "https://images.pexels.com/photos/6646855/pexels-photo-6646855.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      "name": "Charity Run",
+      "date": "2025-05-20",
+      "starttime": "08:00 AM",
+      "endtime": "10:00 AM",
+      "attended": false,
+      "happeningNow": false
+    },
+    {
+      "id": "EVT-2023-003",
+      "imageUrl": "https://images.pexels.com/photos/1181622/pexels-photo-1181622.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+      "name": "Tech Meetup",
+      "date": "2025-05-25",
+      "starttime": "6:30 PM",
+      "endtime": "8:30 PM",
+      "attended": false,
+      "happeningNow": true
+    }
   ]
 }

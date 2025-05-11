@@ -23,12 +23,11 @@ const data = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     { title: "Profile", url: "/portal-member/profile" },
-    { title: "Announcements", url: "#" },
+    { title: "Event", url: "/portal-member/eagle-events" },
     { title: "Email Announcements", url: "#" },
     { title: "Organizational Chart", url: "/portal-member/genealogy" },
   ],
 };
-
 
 export function AppSidebarMember({
   member,

@@ -61,8 +61,18 @@
       "date": "2025-05-15",
       "starttime": "10:00 AM",
       "endtime": "12:00 PM",
-      "attended": true,
-      "happeningNow": true
+      "attendanceCode": "CC2023",
+      "happeningNow": true,
+      "participants": [
+        {
+          "id": "MEM-2023-001",
+          "name": "Yoooooowww David Smith Jr."
+        },
+        {
+          "id": "MEM-2023-002",
+          "name": "Betty Ann Smith"
+        }
+      ]
     },
     {
       "id": "EVT-2023-002",
@@ -71,8 +81,18 @@
       "date": "2025-05-20",
       "starttime": "08:00 AM",
       "endtime": "10:00 AM",
-      "attended": false,
-      "happeningNow": false
+      "attendanceCode": "CR2023",
+      "happeningNow": false,
+      "participants": [
+        {
+          "id": "MEM-2023-001",
+          "name": "Yoooooowww David Smith Jr."
+        },
+        {
+          "id": "MEM-2023-003",
+          "name": "Mary Jane Wilson"
+        }
+      ]
     },
     {
       "id": "EVT-2023-003",
@@ -81,8 +101,18 @@
       "date": "2025-05-25",
       "starttime": "6:30 PM",
       "endtime": "8:30 PM",
-      "attended": false,
-      "happeningNow": true
+      "attendanceCode": "TM2023",
+      "happeningNow": true,
+      "participants": [
+        {
+          "id": "MEM-2023-002",
+          "name": "Betty Ann Smith"
+        },
+        {
+          "id": "MEM-2023-003",
+          "name": "Mary Jane Wilson"
+        }
+      ]
     }
   ]
 }

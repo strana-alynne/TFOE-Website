@@ -1,0 +1,163 @@
+"use client";
+import { useEffect, useState } from "react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { Search } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AdminEvent } from "@/components/admin-event";
+import { getDetails } from "./actions";
+import { Button } from "@/components/ui/button";
+import { Add } from "@mui/icons-material";
+import { AddEvent } from "@/components/add-event-modal";
+
+interface Event {
+  id: string;
+  imageUrl: string;
+  name: string;
+  date: string;
+  starttime: string;
+  endtime: string;
+  attendedCount: number;
+  happeningNow: boolean;
+  attendanceCode: string;
+  participants: { id: string; name: string }[];
+}
+
+export default function Page() {
+  const [event, setEvent] = useState<Event[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const token = "rawr";
+      if (!token) return;
+
+      try {
+        const response = await getDetails(token);
+        setEvent(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.error("Failed to fetch member details:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch member details"
+        );
+      }
+    };
+
+    fetchDetails();
+  }, []);
+
+  const handleSave = async (addEvent: Event) => {
+    // Handle the save logic here, e.g., send the updated event to the server
+    console.log("Updated Event:", addEvent);
+    setOpen(false);
+  };
+
+  return (
+    <SidebarInset className="w-full">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink
+                href="/portal/eagle-events"
+                className="text-muted-foreground"
+              >
+                Events
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Rawr</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </header>
+      {/* Display member details */}
+      <div className="p-4 pb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* H1 taking full width on mobile, flex-grow on larger screens */}
+          <h1 className="font-bold text-xl w-full sm:flex-1">Events</h1>
+
+          <Button
+            onClick={() => {
+              setOpen(true);
+            }}
+          >
+            <Add />
+            Add New Event
+          </Button>
+          {/* Search Input */}
+          <div className="relative w-full sm:w-auto min-w-[200px]">
+            <div className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground">
+              <Search className="h-4 w-4" />
+            </div>
+            <Input
+              id="search"
+              name="search"
+              type="search"
+              placeholder="Search events..."
+              className="w-full rounded-lg bg-background pl-8"
+            />
+          </div>
+
+          {/* Select Dropdown */}
+          <div className="relative w-full sm:w-auto min-w-[150px]">
+            <Select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a filter" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Filters</SelectLabel>
+                  <SelectItem value="all">All Events</SelectItem>
+                  <SelectItem value="attended">Attended Events</SelectItem>
+                  <SelectItem value="upcoming">Upcoming Events</SelectItem>
+                  <SelectItem value="missed">Missed Events</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <div className="p-4 w-full h-full flex items-center justify-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
+          {event.map((e) => (
+            <AdminEvent
+              key={e.id}
+              imageUrl={e.imageUrl}
+              name={e.name}
+              date={e.date}
+              time={`${e.starttime} - ${e.endtime}`}
+              attendedCount={e.participants.length}
+              attendanceCode={e.attendanceCode}
+            />
+          ))}
+        </div>
+      </div>
+      <AddEvent open={open} setOpen={setOpen} />;
+    </SidebarInset>
+  );
+}

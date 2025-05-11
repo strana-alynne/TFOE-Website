@@ -1,17 +1,16 @@
 "use server";
 
-export async function getDetails(token: string, id: string) {
+export async function getDetails(token: string) {
   try {
-    const response = await fetch(`http://localhost:3001/members/${id}`);
+    const response = await fetch(`http://localhost:3001/event`);
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
     }
 
-    // Get the raw response body as text
     const data = await response.json();
 
-    // OPTION 1: Return raw text (unparsed)
+
     return { data: data };
 
   } catch (error) {

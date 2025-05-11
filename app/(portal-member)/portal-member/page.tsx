@@ -33,7 +33,6 @@ export default function Page() {
 
       try {
         const response = await getDetails(token);
-        console.log("Member details:", response.data);
         setMember(response.data);
       } catch (error) {
         console.error("Failed to fetch member details:", error);

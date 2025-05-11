@@ -29,7 +29,7 @@ const data = {
       url: "#",
       items: [
         { title: "Members", url: "/portal/members" },
-        { title: "SMS Blasting", url: "#" },
+        { title: "Events", url: "/portal/eagle-events" },
         { title: "Email Announcents", url: "#" },
       ],
     },

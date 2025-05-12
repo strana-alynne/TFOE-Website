@@ -66,11 +66,13 @@
       "participants": [
         {
           "id": "MEM-2023-001",
-          "name": "Yoooooowww David Smith Jr."
+          "name": "Yoooooowww David Smith Jr.",
+          "feedback": "Great event!"
         },
         {
           "id": "MEM-2023-002",
-          "name": "Betty Ann Smith"
+          "name": "Betty Ann Smith",
+          "feedback": "Very informative."
         }
       ]
     },
@@ -86,11 +88,13 @@
       "participants": [
         {
           "id": "MEM-2023-001",
-          "name": "Yoooooowww David Smith Jr."
+          "name": "Yoooooowww David Smith Jr.",
+          "feedback": "Had a great time!"
         },
         {
           "id": "MEM-2023-003",
-          "name": "Mary Jane Wilson"
+          "name": "Mary Jane Wilson",
+          "feedback": "Great experience!"
         }
       ]
     },
@@ -106,11 +110,13 @@
       "participants": [
         {
           "id": "MEM-2023-002",
-          "name": "Betty Ann Smith"
+          "name": "Betty Ann Smith",
+          "feedback": "Great event!"
         },
         {
           "id": "MEM-2023-003",
-          "name": "Mary Jane Wilson"
+          "name": "Mary Jane Wilson",
+          "feedback": "Very informative."
         }
       ]
     }

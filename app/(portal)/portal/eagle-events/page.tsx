@@ -89,9 +89,6 @@ export default function Page() {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Rawr</BreadcrumbPage>
-            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </header>
@@ -147,6 +144,7 @@ export default function Page() {
           {event.map((e) => (
             <AdminEvent
               key={e.id}
+              id={e.id}
               imageUrl={e.imageUrl}
               name={e.name}
               date={e.date}

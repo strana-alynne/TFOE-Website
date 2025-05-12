@@ -147,6 +147,17 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
               )}
             </div>
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="time" className="text-right">
+              Upload Image
+            </Label>
+            <div className="col-span-3">
+              <Input id="picture" type="file" />
+              {errors.time && (
+                <p className="text-red-500 text-xs mt-1">{errors.time}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <DialogFooter>

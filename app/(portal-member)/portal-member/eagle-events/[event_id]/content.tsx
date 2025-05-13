@@ -12,16 +12,12 @@ import {
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  ChatBubble,
-  ChatBubbleOutline,
-  Edit,
-  Timer,
-} from "@mui/icons-material";
+import { Timer } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getEventDetail } from "../actions";
+import { getEventDetail, addFeedback } from "../actions";
 import { useToast } from "@/hooks/use-toast";
+import AttendanceDialog from "@/components/attandance-dailogue";
 
 // Define the Member type
 interface EventDetailsProps {
@@ -49,10 +45,50 @@ export default function EventDetails({ id }: EventID) {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [editOpen, setEditOpen] = useState(false);
-  const [selectedMember, setSelectedMember] =
-    useState<EventDetailsProps | null>(null);
+  const [open, setOpen] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
+
+  const handleAttendanceSubmit = async ({
+    attendanceCode,
+    feedback,
+  }: {
+    attendanceCode: string;
+    feedback: string;
+  }) => {
+    setUpdateLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        toast({
+          title: "Error",
+          description: "Access token is missing.",
+          variant: "destructive",
+        });
+        setUpdateLoading(false);
+        return;
+      }
+      const memberid = "MEM-2023-001"; // Replace with actual member ID
+      addFeedback(token, id, memberid, attendanceCode, feedback);
+
+      // Fake delay (for demo)
+      await new Promise((res) => setTimeout(res, 1000));
+
+      toast({
+        title: "Success",
+        description: "Your attendance has been recorded.",
+      });
+
+      setOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit attendance.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -114,8 +150,7 @@ export default function EventDetails({ id }: EventID) {
             variant="outline"
             disabled={updateLoading}
             onClick={() => {
-              setSelectedMember(eventdetail);
-              setEditOpen(true);
+              setOpen(true);
             }}
           >
             {updateLoading ? (
@@ -162,6 +197,13 @@ export default function EventDetails({ id }: EventID) {
           </div>
         </CardContent>
       </Card>
+
+      <AttendanceDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onSubmit={handleAttendanceSubmit}
+        loading={updateLoading}
+      />
     </SidebarInset>
   );
 }

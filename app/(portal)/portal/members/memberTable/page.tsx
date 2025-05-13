@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { DataTable } from "./data-table";
 import { MembersColumns } from "./columns";
 import { Toaster } from "@/components/ui/toaster";

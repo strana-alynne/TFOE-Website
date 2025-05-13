@@ -31,13 +31,37 @@ interface Event {
   date: string;
   starttime: string;
   endtime: string;
-  attended: boolean;
+  attended: string;
+  attendanceCode: string;
   happeningNow: boolean;
 }
 
 export default function Page() {
   const [event, setEvent] = useState<Event[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("all");
+
+  const filteredEvents = event.filter((e) => {
+    const matchesSearch = e.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    const now = new Date();
+    const eventDate = new Date(e.date);
+
+    let matchesFilter = true;
+
+    if (selectedFilter === "Attended") {
+      matchesFilter = e.attended === "Attended";
+    } else if (selectedFilter === "Missed") {
+      matchesFilter = e.attended === "Missed";
+    } else if (selectedFilter === "Upcoming") {
+      matchesFilter = e.attended === "n/a" && eventDate >= now;
+    }
+
+    return matchesSearch && matchesFilter;
+  });
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -100,12 +124,17 @@ export default function Page() {
               type="search"
               placeholder="Search events..."
               className="w-full rounded-lg bg-background pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Select Dropdown */}
           <div className="relative w-full sm:w-auto min-w-[150px]">
-            <Select>
+            <Select
+              onValueChange={(value) => setSelectedFilter(value)}
+              defaultValue="all"
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a filter" />
               </SelectTrigger>
@@ -113,9 +142,9 @@ export default function Page() {
                 <SelectGroup>
                   <SelectLabel>Filters</SelectLabel>
                   <SelectItem value="all">All Events</SelectItem>
-                  <SelectItem value="attended">Attended Events</SelectItem>
+                  <SelectItem value="Attended">Attended Events</SelectItem>
                   <SelectItem value="upcoming">Upcoming Events</SelectItem>
-                  <SelectItem value="missed">Missed Events</SelectItem>
+                  <SelectItem value="Missed">Missed Events</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -125,15 +154,15 @@ export default function Page() {
 
       <div className="p-4 w-full h-full flex items-center justify-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
-          {event.map((e) => (
+          {filteredEvents.map((e) => (
             <MemberEvent
               key={e.id}
+              id={e.id}
               imageUrl={e.imageUrl}
               name={e.name}
               date={e.date}
               time={`${e.starttime} - ${e.endtime}`}
               attended={e.attended}
-              happeningNow={e.happeningNow}
             />
           ))}
         </div>

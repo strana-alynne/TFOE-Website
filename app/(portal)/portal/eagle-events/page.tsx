@@ -67,12 +67,6 @@ export default function Page() {
     fetchDetails();
   }, []);
 
-  const handleSave = async (addEvent: Event) => {
-    // Handle the save logic here, e.g., send the updated event to the server
-    console.log("Updated Event:", addEvent);
-    setOpen(false);
-  };
-
   return (
     <SidebarInset className="w-full">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">

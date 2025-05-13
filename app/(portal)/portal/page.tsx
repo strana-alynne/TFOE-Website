@@ -92,14 +92,14 @@ export default function Page() {
           </Card>
         </div>
       </div>
-      <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
+      {/* <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
         <div className="h-full w-full">
           <DashboardBarChart />
         </div>
         <div className="md:col-span-2 h-full w-full">
           <DashboardLineGraph />
         </div>
-      </div>
+      </div> */}
     </SidebarInset>
   );
 }

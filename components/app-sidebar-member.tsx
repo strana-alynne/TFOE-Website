@@ -24,7 +24,6 @@ const data = {
   navMain: [
     { title: "Profile", url: "/portal-member/profile" },
     { title: "Event", url: "/portal-member/eagle-events" },
-    { title: "Email Announcements", url: "#" },
     { title: "Organizational Chart", url: "/portal-member/genealogy" },
   ],
 };

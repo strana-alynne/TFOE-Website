@@ -30,25 +30,25 @@ const data = {
       items: [
         { title: "Members", url: "/portal/members" },
         { title: "Events", url: "/portal/eagle-events" },
-        { title: "Email Announcents", url: "#" },
+        // { title: "Email Announcents", url: "#" },
       ],
     },
-    {
-      title: "Reports",
-      url: "#",
-      items: [
-        { title: "Financial Report Summary", url: "#" },
-        { title: "Member Status", url: "#", isActive: true },
-      ],
-    },
-    {
-      title: "Documents",
-      url: "#",
-      items: [
-        { title: "GMM Notice", url: "#" },
-        { title: "Minutes of the Meeting", url: "#" },
-      ],
-    },
+    // {
+    //   title: "Reports",
+    //   url: "#",
+    //   items: [
+    //     { title: "Financial Report Summary", url: "#" },
+    //     { title: "Member Status", url: "#", isActive: true },
+    //   ],
+    // },
+    // {
+    //   title: "Documents",
+    //   url: "#",
+    //   items: [
+    //     { title: "GMM Notice", url: "#" },
+    //     { title: "Minutes of the Meeting", url: "#" },
+    //   ],
+    // },
     {
       title: "Content Management System",
       url: "#",
@@ -101,7 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild={item.isActive}>
+                    <SidebarMenuButton>
                       <a href={item.url}>{item.title}</a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

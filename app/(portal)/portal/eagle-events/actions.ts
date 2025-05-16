@@ -2,7 +2,13 @@
 
 export async function getDetails(token: string) {
   try {
-    const response = await fetch(`http://localhost:3001/event`);
+    const response = await fetch(`https://tfoe-backend.onrender.com/user/events`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);

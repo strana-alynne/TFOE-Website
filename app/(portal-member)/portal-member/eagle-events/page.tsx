@@ -42,26 +42,28 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
 
-  const filteredEvents = event.filter((e) => {
-    const matchesSearch = e.name
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+  const filteredEvents = Array.isArray(event)
+    ? event.filter((e) => {
+        const matchesSearch = e.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
-    const now = new Date();
-    const eventDate = new Date(e.date);
+        const now = new Date();
+        const eventDate = new Date(e.date);
 
-    let matchesFilter = true;
+        let matchesFilter = true;
 
-    if (selectedFilter === "Attended") {
-      matchesFilter = e.attended === "Attended";
-    } else if (selectedFilter === "Missed") {
-      matchesFilter = e.attended === "Missed";
-    } else if (selectedFilter === "Upcoming") {
-      matchesFilter = e.attended === "n/a" && eventDate >= now;
-    }
+        if (selectedFilter === "Attended") {
+          matchesFilter = e.attended === "Attended";
+        } else if (selectedFilter === "Missed") {
+          matchesFilter = e.attended === "Missed";
+        } else if (selectedFilter === "Upcoming") {
+          matchesFilter = e.attended === "n/a" && eventDate >= now;
+        }
 
-    return matchesSearch && matchesFilter;
-  });
+        return matchesSearch && matchesFilter;
+      })
+    : [];
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -70,7 +72,8 @@ export default function Page() {
 
       try {
         const response = await getDetails(token);
-        setEvent(response.data);
+        const events = Array.isArray(response.data) ? response.data : [];
+        setEvent(events);
         console.log(response.data);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
@@ -154,17 +157,23 @@ export default function Page() {
 
       <div className="p-4 w-full h-full flex items-center justify-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
-          {filteredEvents.map((e) => (
-            <MemberEvent
-              key={e.id}
-              id={e.id}
-              imageUrl={e.imageUrl}
-              name={e.name}
-              date={e.date}
-              time={`${e.starttime} - ${e.endtime}`}
-              attended={e.attended}
-            />
-          ))}
+          {filteredEvents.length === 0 ? (
+            <div className="col-span-full text-center text-muted-foreground">
+              No events yet.
+            </div>
+          ) : (
+            filteredEvents.map((e) => (
+              <MemberEvent
+                key={e.id}
+                id={e.id}
+                imageUrl={e.imageUrl}
+                name={e.name}
+                date={e.date}
+                time={`${e.starttime} - ${e.endtime}`}
+                attended={e.attended}
+              />
+            ))
+          )}
         </div>
       </div>
     </SidebarInset>

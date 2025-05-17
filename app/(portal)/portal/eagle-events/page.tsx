@@ -47,7 +47,7 @@ export default function Page() {
 
   useEffect(() => {
     const fetchDetails = async () => {
-      const token = "rawr";
+      const token = localStorage.getItem("access_token");
       if (!token) return;
 
       try {
@@ -135,7 +135,7 @@ export default function Page() {
       </div>
       <div className="p-4 w-full h-full flex items-center justify-center">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
-          {event.map((e) => (
+          {!event.map((e) => (
             <AdminEvent
               key={e.id}
               id={e.id}

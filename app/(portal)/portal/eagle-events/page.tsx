@@ -42,6 +42,7 @@ interface Event {
 
 export default function Page() {
   const [event, setEvent] = useState<Event[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -52,8 +53,8 @@ export default function Page() {
 
       try {
         const response = await getDetails(token);
-        setEvent(response.data);
-        console.log(response.data);
+        const events = Array.isArray(response.data) ? response.data : [];
+        setEvent(events);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
         setError(
@@ -61,6 +62,8 @@ export default function Page() {
             ? error.message
             : "Failed to fetch member details"
         );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -133,23 +136,32 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="p-4 w-full h-full flex items-center justify-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
-          {!event.map((e) => (
-            <AdminEvent
-              key={e.id}
-              id={e.id}
-              imageUrl={e.imageUrl}
-              name={e.name}
-              date={e.date}
-              time={`${e.starttime} - ${e.endtime}`}
-              attendedCount={e.participants.length}
-              attendanceCode={e.attendanceCode}
-            />
-          ))}
-        </div>
+      <div className="p-4 w-full min-h-[200px] flex items-center justify-center">
+        {loading ? (
+          <p className="text-muted-foreground">Loading events...</p>
+        ) : error ? (
+          <p className="text-destructive">{error}</p>
+        ) : event.length === 0 ? (
+          <p className="text-muted-foreground">No events added yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+            {event.map((e) => (
+              <AdminEvent
+                key={e.id}
+                id={e.id}
+                imageUrl={e.imageUrl}
+                name={e.name}
+                date={e.date}
+                time={`${e.starttime} - ${e.endtime}`}
+                attendedCount={e.participants.length}
+                attendanceCode={e.attendanceCode}
+              />
+            ))}
+          </div>
+        )}
       </div>
-      <AddEvent open={open} setOpen={setOpen} />;
+
+      <AddEvent open={open} setOpen={setOpen} />
     </SidebarInset>
   );
 }

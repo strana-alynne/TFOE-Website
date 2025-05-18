@@ -46,3 +46,29 @@ export async function getEventDetail(token: string, eventId: string) {
     };
   }
 }
+
+
+export async function addEvent(token: string, eventData: any) {
+  try {
+    const response = await fetch(`http://localhost:3001/event`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to create event: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { data };
+  } catch (error) {
+    console.error("Error creating event:", error);
+    return {
+      message: error instanceof Error ? error.message : "Failed to create event!",
+    };
+  }
+}

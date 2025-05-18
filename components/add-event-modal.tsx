@@ -12,12 +12,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { addEvent } from "@/app/(portal)/portal/eagle-events/actions";
 
 interface Event {
   imageUrl: string;
   name: string;
   date: string;
   time: string;
+  startTime: string;
+  endTime: string;
   happeningNow: boolean;
 }
 
@@ -30,10 +33,21 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
   const [formData, setFormData] = useState<Event | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setSaving] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   useEffect(() => {
     if (open) {
+      setFormData({
+        name: "",
+        date: "",
+        time: "",
+        startTime: "",
+        endTime: "",
+        imageUrl: "",
+        happeningNow: false,
+      });
       setErrors({});
+      setHasSubmitted(false);
     }
   }, [open]);
 
@@ -57,16 +71,55 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
   };
 
   const handleSave = async () => {
-    console.log("Saving event:", formData);
+    setHasSubmitted(true);
+    if (!validateForm()) return;
+
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) throw new Error("Missing access token");
+
+      const payload = {
+        name: formData?.name,
+        date: formData?.date,
+        starttime: formData?.startTime,
+        endtime: formData?.endTime,
+        imageUrl: formData?.imageUrl,
+        happeningNow: formData?.happeningNow,
+      };
+
+      const response = await addEvent(token, payload);
+
+      if (response?.data) {
+        setOpen(false);
+      } else {
+        console.error("Failed to create event:", response.message);
+      }
+    } catch (error) {
+      console.error("Failed to save:", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Required fields validation
     if (!formData?.name?.trim()) newErrors.name = "Event name is required";
     if (!formData?.date) newErrors.date = "Date is required";
     if (!formData?.time?.trim()) newErrors.time = "Time is required";
+    if (!formData?.startTime?.trim())
+      newErrors.startTime = "Start time is required";
+    if (!formData?.endTime?.trim()) newErrors.endTime = "End time is required";
+
+    // Optional: startTime should be before endTime
+    if (
+      formData?.startTime &&
+      formData?.endTime &&
+      formData.startTime > formData.endTime
+    ) {
+      newErrors.endTime = "End time must be after start time";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -87,7 +140,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
           </DialogDescription>
         </DialogHeader>
 
-        {Object.keys(errors).length > 0 && (
+        {hasSubmitted && Object.keys(errors).length > 0 && (
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -132,18 +185,37 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="time" className="text-right">
-              Time
+            <Label htmlFor="startTime" className="text-right">
+              Start Time
             </Label>
             <div className="col-span-3">
               <Input
-                id=""
-                value={formData?.time || ""}
-                onChange={(e) => handleChange("time", e.target.value)}
-                className={errors.time ? "border-red-500" : ""}
+                id="startTime"
+                type="time"
+                value={formData?.startTime || ""}
+                onChange={(e) => handleChange("startTime", e.target.value)}
+                className={errors.startTime ? "border-red-500" : ""}
               />
-              {errors.time && (
-                <p className="text-red-500 text-xs mt-1">{errors.time}</p>
+              {errors.startTime && (
+                <p className="text-red-500 text-xs mt-1">{errors.startTime}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="endTime" className="text-right">
+              End Time
+            </Label>
+            <div className="col-span-3">
+              <Input
+                id="endTime"
+                type="time"
+                value={formData?.endTime || ""}
+                onChange={(e) => handleChange("endTime", e.target.value)}
+                className={errors.endTime ? "border-red-500" : ""}
+              />
+              {errors.endTime && (
+                <p className="text-red-500 text-xs mt-1">{errors.endTime}</p>
               )}
             </div>
           </div>
@@ -168,8 +240,8 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
           >
             Cancel
           </Button>
-          <Button disabled={isSaving}>
-            {isSaving ? "Saving..." : "Save changes"}
+          <Button onClick={handleSave} disabled={isSaving}>
+            {isSaving ? "Saving..." : "Add Event"}
           </Button>
         </DialogFooter>
       </DialogContent>

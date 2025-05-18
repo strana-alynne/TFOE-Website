@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AdminEvent } from "@/components/admin-event";
+import { EditEvent } from "@/components/edit-event-modal";
 import { getDetails } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Add } from "@mui/icons-material";
@@ -162,6 +163,12 @@ export default function Page() {
       </div>
 
       <AddEvent open={open} setOpen={setOpen} />
+      <EditEvent
+        open={editOpen}
+        setOpen={setEditOpen}
+        event={selectedMember}
+        onUpdated={() => window.location.reload()} // or a better way to refetch
+      />
     </SidebarInset>
   );
 }

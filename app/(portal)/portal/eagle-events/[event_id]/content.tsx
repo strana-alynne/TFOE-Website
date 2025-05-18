@@ -19,6 +19,7 @@ import { getEventDetail } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
+import { EditEvent } from "@/components/edit-event-modal";
 // Define the Member type
 interface EventDetailsProps {
   id: string;
@@ -39,6 +40,7 @@ interface EventID {
 
 export default function EventDetails({ id }: EventID) {
   const { toast } = useToast();
+
   const [eventdetail, setEventDetail] = useState<EventDetailsProps | null>(
     null
   );
@@ -168,6 +170,12 @@ export default function EventDetails({ id }: EventID) {
         </h2>{" "}
         <FeedbackTable participants={eventdetail?.participants || []} />
       </div>
+      <EditEvent
+        open={editOpen}
+        setOpen={setEditOpen}
+        event={selectedMember}
+        onUpdated={() => window.location.reload()} // or a better way to refetch
+      />
     </SidebarInset>
   );
 }

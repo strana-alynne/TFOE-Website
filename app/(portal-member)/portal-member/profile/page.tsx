@@ -113,6 +113,7 @@ export default function Profile() {
 
       try {
         const response = await getDetails(token);
+        console.log("Member details:", response.data);
         setMember(response.data);
         setLoading(false);
       } catch (error) {

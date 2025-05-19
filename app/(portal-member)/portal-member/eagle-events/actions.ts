@@ -56,14 +56,12 @@ export async function getEventDetail(token: string, eventId: string) {
   }
 }
 export async function addFeedback(
-  token: string,
-  memberId: string,
-  feedback: string,
+token: string, memberid: string, attendanceCode: string, feedback: string
 ) {
   try {
     const body = {
       feedbackContent: feedback,
-      feedbackSenderId: memberId,
+      feedbackSenderId: memberid,
       feedbackDate: Date.now(),
     };
     const response = await fetch(

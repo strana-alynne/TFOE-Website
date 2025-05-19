@@ -1,8 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { startTransition, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,27 +12,13 @@ import {
 } from "@/components/ui/select";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  Email,
-  Lock,
-  Person,
-  Home,
-  Phone,
-  Work,
-  CalendarToday,
-  Badge,
-} from "@mui/icons-material";
+import { ChevronLeft } from "@mui/icons-material";
 import { register, validateAndSendOTP, verifyOTP } from "./actions";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { format } from "date-fns";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { TextField } from "@mui/material";
 import OtpModal from "@/components/otp-modal";
 import * as countryCodes from "country-codes-list";
-
 // Define a type for our form errors
 type FormErrors = {
   firstName?: string[];
@@ -47,6 +33,7 @@ type FormErrors = {
   contact?: string[];
   profession?: string[];
   _form?: string[];
+  email?: string[];
 };
 
 // Define state type
@@ -99,9 +86,46 @@ export default function SignUpPage({
       }
 
       try {
+        const requiredFields = [
+          "firstName",
+          "middleName",
+          "lastName",
+          "dateOfBirth",
+          "address",
+          "username",
+          "password",
+          "confirmPassword",
+          "countryCode",
+          "contact",
+          "profession",
+          "email",
+        ];
+
+        const missingFields: FormErrors = {};
+
+        for (const field of requiredFields) {
+          const value = formData.get(field);
+          if (!value || (typeof value === "string" && value.trim() === "")) {
+            missingFields[field as keyof FormErrors] = [
+              "This field is required.",
+            ];
+          }
+        }
+
+        // Special handling for contact — if contact or countryCode is missing
+        if (!formData.get("contact") || !formData.get("countryCode")) {
+          missingFields.contact = ["Contact number is required."];
+        }
+
+        if (Object.keys(missingFields).length > 0) {
+          setValidationErrors(missingFields);
+          setIsLoading(false);
+          return;
+        }
+
         // Validate form data and send OTP
         const result = await validateAndSendOTP({}, formData);
-
+        console.log("Validate", result);
         if (result.success) {
           // Store form data for later use after OTP verification
           setFormCache(formData);
@@ -127,28 +151,30 @@ export default function SignUpPage({
     setIsLoading(true); // Set loading state to true during OTP verification
 
     try {
-      // Verify OTP
+      console.log("OTP Value:", otpValue);
       const verificationResult = await verifyOTP(email, otpValue);
 
+      console.log("Verification Result:", verificationResult);
       if (verificationResult.success) {
-        // OTP is verified, add the verification flag to form data
         const verifiedFormData = new FormData();
         formCache.forEach((value, key) => {
           verifiedFormData.append(key, value);
         });
-        verifiedFormData.append("otpVerified", "true"); // This becomes a string, not a boolean
+        verifiedFormData.append("otpVerified", "true");
 
-        registerAction(verifiedFormData);
+        // ✅ Wrap in startTransition
+        startTransition(() => {
+          registerAction(verifiedFormData);
+        });
+
         setIsOtpModalOpen(false);
       } else {
-        // Show error message to user
-        alert("OTP verification failed: " + verificationResult.message);
-        console.error("OTP verification failed:", verificationResult.message);
+        console.log("OTP verification failed: " + verificationResult.message);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
     } finally {
-      setIsLoading(false); // Set loading state to false when process is complete
+      setIsLoading(false); // Done
     }
   };
 
@@ -262,9 +288,13 @@ export default function SignUpPage({
                       placeholder="First Name"
                       className="w-full rounded-lg bg-background"
                     />
-                    {state?.errors?.firstName && (
+                    {(state?.errors?.firstName ||
+                      validationErrors?.firstName) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.firstName[0]}
+                        {
+                          (state?.errors?.firstName ||
+                            validationErrors?.firstName)?.[0]
+                        }
                       </p>
                     )}
                   </div>
@@ -278,9 +308,13 @@ export default function SignUpPage({
                       placeholder="Middle Name"
                       className="w-full rounded-lg bg-background"
                     />
-                    {state?.errors?.middleName && (
+                    {(state?.errors?.middleName ||
+                      validationErrors?.middleName) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.middleName[0]}
+                        {
+                          (state?.errors?.middleName ||
+                            validationErrors?.middleName)?.[0]
+                        }
                       </p>
                     )}
                   </div>
@@ -296,21 +330,49 @@ export default function SignUpPage({
                       placeholder="Last Name"
                       className="w-full rounded-lg bg-background"
                     />
-                    {state?.errors?.lastName && (
+                    {(state?.errors?.lastName ||
+                      validationErrors?.lastName) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.lastName[0]}
+                        {
+                          (state?.errors?.lastName ||
+                            validationErrors?.lastName)?.[0]
+                        }
                       </p>
                     )}
                   </div>
 
                   {/* Name Extensions */}
                   <div className="relative">
-                    <Input
-                      id="nameExtensions"
+                    <Select
+                      value={formCache?.get("nameExtensions")?.toString() || ""}
+                      onValueChange={(value) => {
+                        // Create or update hidden input field manually
+                        const input = document.querySelector(
+                          "input[name='nameExtensions']"
+                        ) as HTMLInputElement;
+
+                        if (input) {
+                          input.value = value === "none" ? "" : value;
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full rounded-lg bg-background">
+                        <SelectValue placeholder="Select Extension (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">None</SelectItem>
+                        <SelectItem value="Jr.">Jr.</SelectItem>
+                        <SelectItem value="Sr.">Sr.</SelectItem>
+                        <SelectItem value="II">II</SelectItem>
+                        <SelectItem value="III">III</SelectItem>
+                        <SelectItem value="IV">IV</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {/* Hidden input for nameExtensions to be submitted with the form */}
+                    <input
+                      type="hidden"
                       name="nameExtensions"
-                      type="text"
-                      placeholder="Name Extensions (Jr., Sr., etc.)"
-                      className="w-full rounded-lg bg-background"
+                      defaultValue=""
                     />
                     {state?.errors?.nameExtensions && (
                       <p className="text-red-500 text-xs mt-1">
@@ -322,43 +384,43 @@ export default function SignUpPage({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {/* Date of Birth - MUI DatePicker */}
+
                   <div className="relative">
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
-                      <DatePicker
-                        label="Date of Birth"
-                        value={date}
-                        onChange={(newValue) => setDate(newValue)}
-                        disableFuture
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            variant: "outlined",
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-                    {state?.errors?.dateOfBirth && (
+                    <Input
+                      type="date"
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      value={date ? format(date, "yyyy-MM-dd") : ""}
+                      onChange={(e) => setDate(new Date(e.target.value))}
+                      className={`w-full rounded-lg bg-background ${state?.errors?.dateOfBirth ? "border-red-500" : ""}`}
+                    />
+                    {(state?.errors?.dateOfBirth ||
+                      validationErrors?.dateOfBirth) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.dateOfBirth[0]}
+                        {
+                          (state?.errors?.dateOfBirth ||
+                            validationErrors?.dateOfBirth)?.[0]
+                        }
                       </p>
                     )}
                   </div>
 
                   {/* Profession */}
                   <div className="relative">
-                    <div className="absolute left-2.5 top-1.5 h-8 w-4 text-muted-foreground">
-                      <Work className="h-4 w-4" />
-                    </div>
                     <Input
                       id="profession"
                       name="profession"
                       type="text"
                       placeholder="Profession"
-                      className="w-full rounded-lg bg-background pl-8 h-12"
+                      className="w-full rounded-lg bg-background h-12"
                     />
-                    {state?.errors?.profession && (
+                    {(state?.errors?.profession ||
+                      validationErrors?.profession) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.profession[0]}
+                        {
+                          (state?.errors?.profession ||
+                            validationErrors?.profession)?.[0]
+                        }
                       </p>
                     )}
                   </div>
@@ -366,19 +428,19 @@ export default function SignUpPage({
 
                 {/* Address */}
                 <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Home className="h-4 w-4" />
-                  </div>
                   <Input
                     id="address"
                     name="address"
                     type="text"
                     placeholder="Complete Address"
-                    className="w-full rounded-lg bg-background pl-8"
+                    className="w-full rounded-lg bg-background "
                   />
-                  {state?.errors?.address && (
+                  {(state?.errors?.address || validationErrors?.address) && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.address[0]}
+                      {
+                        (state?.errors?.address ||
+                          validationErrors?.address)?.[0]
+                      }
                     </p>
                   )}
                 </div>
@@ -390,19 +452,16 @@ export default function SignUpPage({
 
                 {/* username */}
                 <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Email className="h-4 w-4" />
-                  </div>
                   <Input
                     id="email"
                     name="email"
                     type="email"
                     placeholder="Email"
-                    className="w-full rounded-lg bg-background pl-8"
+                    className="w-full rounded-lg bg-background "
                   />
-                  {state?.errors?.username && (
+                  {(state?.errors?.email || validationErrors?.email) && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.username[0]}
+                      {(state?.errors?.email || validationErrors?.email)?.[0]}
                     </p>
                   )}
                 </div>
@@ -429,19 +488,19 @@ export default function SignUpPage({
                     </Select>
                   </div>
                   <div className="col-span-2 relative">
-                    <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                      <Phone className="h-4 w-4" />
-                    </div>
                     <Input
                       id="contact"
                       name="contact"
                       type="text"
                       placeholder="Contact Number"
-                      className="w-full rounded-lg bg-background pl-8"
+                      className="w-full rounded-lg bg-background "
                     />
-                    {state?.errors?.contact && (
+                    {(state?.errors?.contact || validationErrors?.contact) && (
                       <p className="text-red-500 text-xs mt-1">
-                        {state.errors.contact[0]}
+                        {
+                          (state?.errors?.contact ||
+                            validationErrors?.contact)?.[0]
+                        }
                       </p>
                     )}
                   </div>
@@ -453,57 +512,58 @@ export default function SignUpPage({
                 <h2 className="text-lg font-semibold">Account Information</h2>
                 {/* Username */}
                 <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Person className="h-4 w-4" />
-                  </div>
                   <Input
                     id="username"
                     name="username"
                     type="text"
                     placeholder="Username"
-                    className="w-full rounded-lg bg-background pl-8"
+                    className="w-full rounded-lg bg-background "
                   />
-                  {state?.errors?.username && (
+                  {(state?.errors?.username || validationErrors?.username) && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.username[0]}
+                      {
+                        (state?.errors?.username ||
+                          validationErrors?.username)?.[0]
+                      }
                     </p>
                   )}
                 </div>
 
                 {/* Password */}
                 <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Lock className="h-4 w-4" />
-                  </div>
                   <Input
                     id="password"
                     name="password"
                     type="password"
                     placeholder="Password"
-                    className="w-full rounded-lg bg-background pl-8"
+                    className="w-full rounded-lg bg-background "
                   />
-                  {state?.errors?.password && (
+                  {(state?.errors?.password || validationErrors?.password) && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.password[0]}
+                      {
+                        (state?.errors?.password ||
+                          validationErrors?.password)?.[0]
+                      }
                     </p>
                   )}
                 </div>
 
                 {/* Confirm Password */}
                 <div className="relative">
-                  <div className="absolute left-2.5 top-1.5 h-4 w-4 text-muted-foreground">
-                    <Lock className="h-4 w-4" />
-                  </div>
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
                     placeholder="Confirm Password"
-                    className="w-full rounded-lg bg-background pl-8"
+                    className="w-full rounded-lg bg-background "
                   />
-                  {state?.errors?.confirmPassword && (
+                  {(state?.errors?.confirmPassword ||
+                    validationErrors?.confirmPassword) && (
                     <p className="text-red-500 text-xs mt-1">
-                      {state.errors.confirmPassword[0]}
+                      {
+                        (state?.errors?.confirmPassword ||
+                          validationErrors?.confirmPassword)?.[0]
+                      }
                     </p>
                   )}
                 </div>

@@ -30,7 +30,7 @@ import { AddEvent } from "@/components/add-event-modal";
 
 interface Event {
   id: string;
-  imageUrl: string;
+  description: string;
   name: string;
   date: string;
   starttime: string;
@@ -70,6 +70,10 @@ export default function Page() {
 
     fetchDetails();
   }, []);
+
+  function setEditOpen(open: boolean): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <SidebarInset className="w-full">
@@ -150,12 +154,13 @@ export default function Page() {
               <AdminEvent
                 key={e.id}
                 id={e.id}
-                imageUrl={e.imageUrl}
                 name={e.name}
+                description={e.description}
                 date={e.date}
                 time={`${e.starttime} - ${e.endtime}`}
                 attendedCount={e.participants.length}
                 attendanceCode={e.attendanceCode}
+                imageUrl={""}
               />
             ))}
           </div>
@@ -163,12 +168,6 @@ export default function Page() {
       </div>
 
       <AddEvent open={open} setOpen={setOpen} />
-      <EditEvent
-        open={editOpen}
-        setOpen={setEditOpen}
-        event={selectedMember}
-        onUpdated={() => window.location.reload()} // or a better way to refetch
-      />
     </SidebarInset>
   );
 }

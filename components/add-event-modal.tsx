@@ -13,15 +13,16 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { addEvent } from "@/app/(portal)/portal/eagle-events/actions";
+import { de } from "date-fns/locale";
 
 interface Event {
-  imageUrl: string;
   name: string;
   date: string;
   time: string;
   startTime: string;
   endTime: string;
   happeningNow: boolean;
+  description?: string;
 }
 
 interface AddEventProps {
@@ -43,9 +44,10 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
         time: "",
         startTime: "",
         endTime: "",
-        imageUrl: "",
         happeningNow: false,
+        description: "",
       });
+
       setErrors({});
       setHasSubmitted(false);
     }
@@ -80,16 +82,18 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
       if (!token) throw new Error("Missing access token");
 
       const payload = {
-        name: formData?.name,
-        date: formData?.date,
-        starttime: formData?.startTime,
-        endtime: formData?.endTime,
-        imageUrl: formData?.imageUrl,
-        happeningNow: formData?.happeningNow,
+        eventCode: generateEventCode(),
+        eventTitle: formData?.name,
+        eventDetails: formData?.description,
+        eventAttendees: 0,
+        eventDate: formData?.date,
+        startTime: formData?.startTime,
+        endTime: formData?.endTime,
       };
 
+      console.log("Payload:", payload);
       const response = await addEvent(token, payload);
-
+      console.log("Response:", response);
       if (response?.data) {
         setOpen(false);
       } else {
@@ -102,17 +106,24 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
     }
   };
 
+  function generateEventCode(length = 8) {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    return Array.from(
+      { length },
+      () => chars[Math.floor(Math.random() * chars.length)]
+    ).join("");
+  }
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData?.name?.trim()) newErrors.name = "Event name is required";
+    if (!formData?.description?.trim())
+      newErrors.description = "Event description is required";
     if (!formData?.date) newErrors.date = "Date is required";
-    if (!formData?.time?.trim()) newErrors.time = "Time is required";
     if (!formData?.startTime?.trim())
       newErrors.startTime = "Start time is required";
     if (!formData?.endTime?.trim()) newErrors.endTime = "End time is required";
-
-    // Optional: startTime should be before endTime
     if (
       formData?.startTime &&
       formData?.endTime &&
@@ -168,6 +179,25 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right">
+              Description
+            </Label>
+            <div className="col-span-3">
+              <Input
+                id="description"
+                placeholder="Enter Description"
+                value={formData?.description || ""}
+                onChange={(e) => handleChange("description", e.target.value)}
+                className={errors.description ? "border-red-500" : ""}
+              />
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.description}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
               Date
             </Label>
@@ -216,17 +246,6 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
               />
               {errors.endTime && (
                 <p className="text-red-500 text-xs mt-1">{errors.endTime}</p>
-              )}
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="time" className="text-right">
-              Upload Image
-            </Label>
-            <div className="col-span-3">
-              <Input id="picture" type="file" />
-              {errors.time && (
-                <p className="text-red-500 text-xs mt-1">{errors.time}</p>
               )}
             </div>
           </div>

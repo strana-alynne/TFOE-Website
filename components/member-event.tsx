@@ -22,7 +22,6 @@ export function MemberEvent({
   return (
     <Link href={`/portal-member/eagle-events/${id}`}>
       <Card className="w-full max-w-md overflow-hidden rounded-2xl shadow-md">
-        <img src={imageUrl} alt={name} className="h-48 w-full object-cover" />
         <CardHeader>
           <CardTitle className="text-xl font-bold">{name}</CardTitle>
           <div className="flex items-center justify-between text-sm text-muted-foreground">

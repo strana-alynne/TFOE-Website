@@ -32,8 +32,8 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
   const [timer, setTimer] = useState<number>(60);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  if (inputRefs.current.length !== 6) {
-    inputRefs.current = Array(6).fill(null);
+  if (inputRefs.current.length !== 5) {
+    inputRefs.current = Array(5).fill(null);
   }
 
   const handleChange = (index: number, value: string): void => {
@@ -77,24 +77,21 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
     setOtp(newOtp);
 
     // Fix 3: Focus on the last input after a successful paste
-    const focusIndex = Math.min(pastedData.length, 5);
+    const focusIndex = Math.min(pastedData.length, 4);
     inputRefs.current[focusIndex]?.focus();
   };
 
   const handleVerify = (): void => {
     setIsVerifying(true);
+    console.log("otp", otp);
     const otpValue = otp.join("");
 
-    // Simulate verification API call
     setTimeout(() => {
       setIsVerifying(false);
       if (onVerify) {
         onVerify(otpValue);
       }
-      // Don't close the modal here - let the verification logic handle it
-      // onClose(); - Remove this line
 
-      // Here you would normally validate the OTP with your API
       console.log("OTP submitted:", otpValue);
     }, 1500);
   };
@@ -102,7 +99,7 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
   // Handle resend OTP
   const handleResend = (): void => {
     // Reset OTP fields
-    setOtp(["", "", "", "", "", ""]);
+    setOtp(["", "", "", "", ""]);
     // Reset timer
     setTimer(60);
     console.log("Resending OTP...");

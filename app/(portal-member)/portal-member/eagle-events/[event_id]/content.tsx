@@ -22,7 +22,6 @@ import AttendanceDialog from "@/components/attandance-dailogue";
 // Define the Member type
 interface EventDetailsProps {
   id: string;
-  imageUrl: string;
   name: string;
   date: string;
   starttime: string;
@@ -68,7 +67,7 @@ export default function EventDetails({ id }: EventID) {
         return;
       }
       const memberid = "MEM-2023-001"; // Replace with actual member ID
-      addFeedback(token, id, memberid, attendanceCode, feedback);
+      addFeedback(token, id, attendanceCode, feedback);
 
       // Fake delay (for demo)
       await new Promise((res) => setTimeout(res, 1000));
@@ -139,11 +138,6 @@ export default function EventDetails({ id }: EventID) {
       </header>
 
       <Card className="m-4 mb-0">
-        <img
-          src={eventdetail?.imageUrl}
-          alt={eventdetail?.name}
-          className="h-48 w-full object-cover"
-        />
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Event Information</CardTitle>
           <Button

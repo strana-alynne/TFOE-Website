@@ -2,7 +2,16 @@
 
 export async function getDetails(token: string, id: string) {
   try {
-    const response = await fetch(`http://localhost:3001/members/${id}`);
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/member/${id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
@@ -13,7 +22,6 @@ export async function getDetails(token: string, id: string) {
 
     // OPTION 1: Return raw text (unparsed)
     return { data: data };
-
   } catch (error) {
     console.error("Error fetching details:", error);
     return {

@@ -162,8 +162,14 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
       // Use the specific member ID in the URL for the PUT request
       const response = await axios.put(
-        `http://localhost:3001/member/${memberId}`,
-        memberUpdate
+        `https://tfoe-backend.onrender.com/admin/member/${updatedMember.id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(memberUpdate)
+        },
       );
 
       if (response.data) {

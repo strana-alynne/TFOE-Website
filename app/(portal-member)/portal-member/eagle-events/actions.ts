@@ -2,13 +2,16 @@
 
 export async function getDetails(token: string) {
   try {
-    const response = await fetch(`https://tfoe-backend.onrender.com/user/events`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/user/events`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
@@ -16,9 +19,7 @@ export async function getDetails(token: string) {
 
     const data = await response.json();
 
-
     return { data: data };
-
   } catch (error) {
     console.error("Error fetching details:", error);
     return {
@@ -29,7 +30,16 @@ export async function getDetails(token: string) {
 
 export async function getEventDetail(token: string, eventId: string) {
   try {
-    const response = await fetch(`http://localhost:3001/event/${eventId}`);
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
@@ -37,9 +47,7 @@ export async function getEventDetail(token: string, eventId: string) {
 
     const data = await response.json();
 
-
     return { data: data };
-
   } catch (error) {
     console.error("Error fetching details:", error);
     return {
@@ -47,9 +55,28 @@ export async function getEventDetail(token: string, eventId: string) {
     };
   }
 }
-export async function addFeedback(token: string, eventId: string, memberId: string, attendanceCode: string, feedback: string) {
+export async function addFeedback(
+  token: string,
+  memberId: string,
+  feedback: string,
+) {
   try {
-    const response = await fetch(`http://localhost:3001/event/${eventId}`);
+    const body = {
+      feedbackContent: feedback,
+      feedbackSenderId: memberId,
+      feedbackDate: Date.now(),
+    };
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/member/feedback`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Request failed: ${response.status}`);
@@ -57,9 +84,7 @@ export async function addFeedback(token: string, eventId: string, memberId: stri
 
     const data = await response.json();
 
-
     return { data: data };
-
   } catch (error) {
     console.error("Error fetching details:", error);
     return {

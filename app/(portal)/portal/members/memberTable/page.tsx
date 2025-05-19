@@ -13,8 +13,16 @@ export default function MembersTable() {
   // Function to fetch members data
   const fetchData = async () => {
     setLoading(true);
+    const token = localStorage.getItem("access_token");
     try {
-      const response = await fetch("http://localhost:3001/members");
+      const response = await fetch("https://tfoe-backend.onrender.com/admin/member",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        })
       if (!response.ok) throw new Error("Failed to fetch members");
 
       const data = await response.json();

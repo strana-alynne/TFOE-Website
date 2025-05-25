@@ -1,5 +1,5 @@
 "use client";
-import React, { startTransition, useState } from "react";
+import React, { startTransition, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -63,6 +63,7 @@ export default function SignUpPage({
   const [formCache, setFormCache] = useState<FormData | null>(null);
   const [validationErrors, setValidationErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [nameExtension, setNameExtension] = useState("");
 
   // Function to handle form submission and OTP process
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -148,7 +149,7 @@ export default function SignUpPage({
 
     const email = formCache.get("email") as string;
 
-    setIsLoading(true); // Set loading state to true during OTP verification
+    setIsLoading(true);
 
     try {
       console.log("OTP Value:", otpValue);
@@ -161,23 +162,35 @@ export default function SignUpPage({
           verifiedFormData.append(key, value);
         });
         verifiedFormData.append("otpVerified", "true");
+        console.log("Verified Form Data:", verifiedFormData);
 
-        // ✅ Wrap in startTransition
-        startTransition(() => {
-          registerAction(verifiedFormData);
-        });
+        console.log("Calling register function directly");
 
-        setIsOtpModalOpen(false);
+        // Call the register function directly instead of using the action
+        const registrationResult = await register({}, verifiedFormData);
+
+        console.log("Registration result:", registrationResult);
+
+        if (registrationResult?.errors) {
+          // Registration failed
+          console.error("Registration failed:", registrationResult.errors);
+        } else {
+          // Registration successful - the register function handles redirect
+          console.log("Registration completed successfully");
+          setIsOtpModalOpen(false);
+          setFormCache(null);
+        }
       } else {
         console.log("OTP verification failed: " + verificationResult.message);
+        alert("OTP verification failed: " + verificationResult.message);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
+      alert("Error verifying OTP: " + error);
     } finally {
-      setIsLoading(false); // Done
+      setIsLoading(false);
     }
   };
-
   function SubmitButton() {
     const { pending } = useFormStatus();
     return (
@@ -344,17 +357,10 @@ export default function SignUpPage({
                   {/* Name Extensions */}
                   <div className="relative">
                     <Select
-                      value={formCache?.get("nameExtensions")?.toString() || ""}
-                      onValueChange={(value) => {
-                        // Create or update hidden input field manually
-                        const input = document.querySelector(
-                          "input[name='nameExtensions']"
-                        ) as HTMLInputElement;
-
-                        if (input) {
-                          input.value = value === "none" ? "" : value;
-                        }
-                      }}
+                      value={nameExtension}
+                      onValueChange={(value) =>
+                        setNameExtension(value === "none" ? "" : value)
+                      }
                     >
                       <SelectTrigger className="w-full rounded-lg bg-background">
                         <SelectValue placeholder="Select Extension (optional)" />
@@ -368,12 +374,12 @@ export default function SignUpPage({
                         <SelectItem value="IV">IV</SelectItem>
                       </SelectContent>
                     </Select>
-                    {/* Hidden input for nameExtensions to be submitted with the form */}
                     <input
                       type="hidden"
                       name="nameExtensions"
-                      defaultValue=""
+                      value={nameExtension}
                     />
+
                     {state?.errors?.nameExtensions && (
                       <p className="text-red-500 text-xs mt-1">
                         {state.errors.nameExtensions[0]}

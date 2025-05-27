@@ -23,8 +23,16 @@ const dummyMember = {
   role: "member",
 };
 
+type Member = {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+};
+
 export default function Page() {
-  const [member, setMember] = useState(dummyMember);
+  const [member, setMember] = useState<Member | undefined>();
 
   useEffect(() => {
     const fetchDetails = async () => {

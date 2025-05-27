@@ -129,6 +129,7 @@ export async function validateAndSendOTP(prevState: any, formData: FormData) {
   };
 }
 
+
 // Function to register the user
 export async function register(prevState: any, formData: FormData) {
   console.log("➡️ Starting registration");
@@ -206,12 +207,11 @@ export async function register(prevState: any, formData: FormData) {
       },
       body: JSON.stringify(userData),
     });
-    console.log("Response Status:", response);
+    console.log("Response Status:", response.status);
 
     if (!response.ok) {
       const errorData = await response.json();
-        console.log("User Data:", userData);
-      console.log("Error Data:", errorData);
+      throw new Error(errorData.message || "Registration failed");
     }
 
     const registrationData = await response.json();
@@ -232,10 +232,6 @@ export async function register(prevState: any, formData: FormData) {
         "Auto-login failed after registration";
       throw new Error(errorMsg);
     }
-    
-    console.log("Auto-login successful");
-
-    // Return success with redirect info instead of calling redirect()
     return {
       success: true,
       redirectTo: "/portal-member",

@@ -108,6 +108,7 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchDetails = async () => {
+      console.log("Fetching member details...");
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
@@ -238,10 +239,19 @@ export default function Profile() {
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
               <BreadcrumbLink
-                href="/portal/members"
+                href="/portal-member"
                 className="text-muted-foreground"
               >
-                Members
+                Dashboard
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator className="hidden md:block" />
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink
+                href="/portal-member/profile"
+                className="text-muted-foreground"
+              >
+                Profile
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />

@@ -181,6 +181,7 @@ export default function SignUpPage({
           console.log("Registration completed successfully");
           setIsOtpModalOpen(false);
           setFormCache(null);
+
           router.push(registrationResult.redirectTo);
         }
       } else {

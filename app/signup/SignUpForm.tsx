@@ -19,6 +19,7 @@ import { useFormStatus } from "react-dom";
 import { format } from "date-fns";
 import OtpModal from "@/components/otp-modal";
 import * as countryCodes from "country-codes-list";
+import { useRouter } from "next/navigation";
 // Define a type for our form errors
 type FormErrors = {
   firstName?: string[];
@@ -64,6 +65,7 @@ export default function SignUpPage({
   const [validationErrors, setValidationErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
   const [nameExtension, setNameExtension] = useState("");
+  const router = useRouter();
 
   // Function to handle form submission and OTP process
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -179,6 +181,7 @@ export default function SignUpPage({
           console.log("Registration completed successfully");
           setIsOtpModalOpen(false);
           setFormCache(null);
+          router.push(registrationResult.redirectTo);
         }
       } else {
         console.log("OTP verification failed: " + verificationResult.message);

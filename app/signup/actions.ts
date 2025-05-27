@@ -19,6 +19,8 @@ const signupSchema = z
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
     contact: z.string().min(1, { message: "Contact number is required" }),
+    profession: z.string().optional(), // <-- ADD THIS
+    countryCode: z.string().optional(), // <-- AND THIS
     dateJoined: z.string().optional().default(Date().toString()),
     dateOfBirth: z.string().optional(),
     // Fix: Handle string boolean conversion
@@ -127,15 +129,15 @@ export async function validateAndSendOTP(prevState: any, formData: FormData) {
   };
 }
 
-// Function to login the user
+// Function to register the user
 export async function register(prevState: any, formData: FormData) {
-
   console.log("➡️ Starting registration");
   // Validate form data
   const result = signupSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
     return {
+      success: false,
       errors: result.error.flatten().fieldErrors,
     };
   }
@@ -144,6 +146,7 @@ export async function register(prevState: any, formData: FormData) {
   const otpVerified = formData.get("otpVerified") === "true";
   if (!otpVerified) {
     return {
+      success: false,
       errors: {
         _form: [
           "Email verification required. Please complete the OTP verification.",
@@ -153,7 +156,20 @@ export async function register(prevState: any, formData: FormData) {
   }
   
   try {
-    // Prepare user data
+    // Helper function to calculate age from date of birth
+    function calculateAge(dateOfBirth: string): number {
+      if (!dateOfBirth) return 0;
+      const today = new Date();
+      const birthDate = new Date(dateOfBirth);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    // Prepare user data to match the expected API structure
     const userData = {
       user: {
         username: result.data.username,
@@ -168,8 +184,14 @@ export async function register(prevState: any, formData: FormData) {
         address: result.data.address,
         email: result.data.email,
         contact: result.data.contact,
-        dateJoined: Date.now().toString(), // Current date
-        dateOfBirth: result.data.dateOfBirth || "",
+        status: "ACTIVE",
+        age: result.data.dateOfBirth ? calculateAge(result.data.dateOfBirth) : 0,
+        absences: 0,
+        contribution: 0,
+        position: "",
+        feedback: "",
+        profession: result.data.profession || "", // Get profession from form data
+        dateJoined: new Date().toISOString(),
       },
     };
 
@@ -184,11 +206,12 @@ export async function register(prevState: any, formData: FormData) {
       },
       body: JSON.stringify(userData),
     });
-    console.log("Response Status:", response.status);
+    console.log("Response Status:", response);
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Registration failed");
+        console.log("User Data:", userData);
+      console.log("Error Data:", errorData);
     }
 
     const registrationData = await response.json();
@@ -212,9 +235,17 @@ export async function register(prevState: any, formData: FormData) {
     
     console.log("Auto-login successful");
 
+    // Return success with redirect info instead of calling redirect()
+    return {
+      success: true,
+      redirectTo: "/portal-member",
+      token: loginResult.token, // Pass along the token from login
+    };
+
   } catch (error) {
     console.error("Registration error:", error);
     return {
+      success: false,
       errors: {
         _form: [
           error instanceof Error
@@ -224,7 +255,4 @@ export async function register(prevState: any, formData: FormData) {
       },
     };
   }
-
-  // Redirect to member portal
-  redirect("/portal-member");
 }

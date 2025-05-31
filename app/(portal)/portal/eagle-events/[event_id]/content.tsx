@@ -1,6 +1,5 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
 import { EditEvent } from "@/components/edit-event-modal";
+
 // Define the Member type
 interface EventDetailsProps {
   id: string;
@@ -50,30 +50,133 @@ export default function EventDetails({ id }: EventID) {
     useState<EventDetailsProps | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchDetails = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
+  // Create a memoized function to fetch event details
+  const fetchEventDetails = useCallback(async () => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+    if (!token) {
+      setError("No access token found");
+      setLoading(false);
+      return;
+    }
 
-      try {
-        console.log("id", id);
-        const response = await getEventDetail(token, id);
-        console.log(`Response ni ${id} `, response);
+    try {
+      console.log("Fetching event details for id:", id);
+      setLoading(true);
+      const response = await getEventDetail(token, id);
+      console.log(`Response for ${id}:`, response);
+
+      if (response?.data?.data) {
         setEventDetail(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch member details:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch member details"
-        );
-        setLoading(false);
+        setError(null);
+      } else {
+        setError("No event data received");
       }
-    };
-
-    fetchDetails();
+    } catch (error) {
+      console.error("Failed to fetch event details:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch event details"
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchEventDetails();
+  }, [fetchEventDetails]);
+
+  // Handle successful update
+  const handleEventUpdated = useCallback(async () => {
+    console.log("Event updated successfully, refetching data...");
+
+    // Show success toast
+    toast({
+      title: "Success",
+      description: "Event updated successfully!",
+      variant: "default",
+    });
+
+    // Refetch the event details to get updated data
+    await fetchEventDetails();
+
+    // Close the edit modal
+    setEditOpen(false);
+    setSelectedMember(null);
+  }, [fetchEventDetails, toast]);
+
+  const handleEditClick = () => {
+    setSelectedMember(eventdetail);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditOpen(false);
+    setSelectedMember(null);
+  };
+
+  if (loading && !eventdetail) {
+    return (
+      <SidebarInset className="w-full">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink
+                  href="/portal/eagle-events"
+                  className="text-muted-foreground"
+                >
+                  Event
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Loading...</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div className="flex items-center justify-center p-8">
+          <p>Loading event details...</p>
+        </div>
+      </SidebarInset>
+    );
+  }
+
+  if (error) {
+    return (
+      <SidebarInset className="w-full">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink
+                  href="/portal/eagle-events"
+                  className="text-muted-foreground"
+                >
+                  Event
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Error</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </header>
+        <div className="flex items-center justify-center p-8">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </SidebarInset>
+    );
+  }
 
   return (
     <SidebarInset className="w-full">
@@ -92,7 +195,9 @@ export default function EventDetails({ id }: EventID) {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>{eventdetail?.eventTitle}</BreadcrumbPage>
+              <BreadcrumbPage>
+                {eventdetail?.eventTitle || "Event Details"}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -103,13 +208,10 @@ export default function EventDetails({ id }: EventID) {
           <CardTitle>Event Information</CardTitle>
           <Button
             variant="outline"
-            disabled={updateLoading}
-            onClick={() => {
-              setSelectedMember(eventdetail);
-              setEditOpen(true);
-            }}
+            disabled={updateLoading || loading}
+            onClick={handleEditClick}
           >
-            {updateLoading ? (
+            {updateLoading || loading ? (
               <>Loading...</>
             ) : (
               <>
@@ -127,27 +229,49 @@ export default function EventDetails({ id }: EventID) {
                 <span>
                   <IdCard />
                 </span>
-                {id}
+                {eventdetail.id}
               </p>
             </div>
           ) : (
-            <p className="text-red-500">Fetching data ...</p>
+            <p className="text-muted-foreground">No event data available</p>
           )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-muted-foreground">DATE</p>
-              <h2 className="text-md font-bold">{eventdetail?.eventDate}</h2>
+              <h2 className="text-md font-bold">
+                {eventdetail?.eventDate || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">TIME</p>
+              <h2 className="text-md font-bold">
+                {eventdetail?.startTime && eventdetail?.endTime
+                  ? `${eventdetail.startTime} - ${eventdetail.endTime}`
+                  : "N/A"}
+              </h2>
             </div>
           </div>
-          <div className="col-span-2">
-            <p className="text-muted-foreground">Time</p>
+
+          <div className="mt-4">
+            <p className="text-muted-foreground">ATTENDANCE CODE</p>
             <h2 className="text-md font-bold">
-              {eventdetail?.startTime}-{eventdetail?.endTime}
+              {eventdetail?.eventCode || "N/A"}
             </h2>
           </div>
-          <div>
-            <p className="text-muted-foreground">ATTENDANCE CODE</p>
-            <h2 className="text-md font-bold">{eventdetail?.eventCode}</h2>
+
+          {eventdetail?.eventDetails && (
+            <div className="mt-4">
+              <p className="text-muted-foreground">DETAILS</p>
+              <p className="text-sm">{eventdetail.eventDetails}</p>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <p className="text-muted-foreground">EXPECTED ATTENDEES</p>
+            <h2 className="text-md font-bold">
+              {eventdetail?.eventAttendees || 0}
+            </h2>
           </div>
         </CardContent>
       </Card>
@@ -155,30 +279,22 @@ export default function EventDetails({ id }: EventID) {
       <div className="px-4 py-8 pb-0 w-full">
         <h2 className="text-2xl font-semibold leading-none tracking-tight">
           Participants
-        </h2>{" "}
+        </h2>
         <ParticipantsTable participants={eventdetail?.participants || []} />
       </div>
+
       <div className="px-4 py-0 w-full">
         <h2 className="text-2xl pb-4 font-semibold leading-none tracking-tight">
           Feedback
-        </h2>{" "}
+        </h2>
         <FeedbackTable participants={eventdetail?.participants || []} />
       </div>
+
       <EditEvent
         open={editOpen}
-        setOpen={setEditOpen}
-        event={
-          selectedMember
-            ? {
-                ...selectedMember,
-                name: selectedMember.eventTitle,
-                date: selectedMember.eventDate,
-                starttime: selectedMember.startTime,
-                endtime: selectedMember.endTime,
-              }
-            : null
-        }
-        onUpdated={() => window.location.reload()} // or a better way to refetch
+        setOpen={handleEditClose}
+        event={selectedMember}
+        onUpdated={handleEventUpdated} // Use the improved callback
       />
     </SidebarInset>
   );

@@ -18,23 +18,24 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the Member type based on your MongoDB model
+// Updated Member type to match your actual data structure
 export type Member = {
-  _id: string;
+  id: string; // Changed from _id to id
   firstName: string;
   middleName?: string | null;
   lastName: string;
-  name_extension?: string | null;
-  age: number;
+  nameExtension?: string | null; // Changed from name_extension to nameExtension
   address: string;
   email: string;
   contact: string;
+  birthDate: string;
   status: string;
   position: string;
   contribution?: number | null;
   absences: number;
   profession: string;
   feedback: string;
+  dateJoined: string;
 };
 
 interface MembersColumnsProps {
@@ -50,7 +51,7 @@ export const MembersColumns = ({ onRefresh }: MembersColumnsProps) => {
     if (!memberToDelete) return;
 
     try {
-      // Make API call to delete the member
+      // Make API call to delete the member (using id instead of _id)
       await axios.delete(`http://localhost:3001/members/${memberToDelete}`);
 
       // Show success message
@@ -81,17 +82,17 @@ export const MembersColumns = ({ onRefresh }: MembersColumnsProps) => {
   // Column definitions with the new action column
   const columns: ColumnDef<Member>[] = [
     {
-      accessorKey: "_id",
+      accessorKey: "id", // Changed from _id to id
       header: "Member ID",
     },
     {
       header: "Name",
       cell: ({ row }) => {
-        const { firstName, middleName, lastName, name_extension } =
-          row.original || {};
+        const { firstName, middleName, lastName, nameExtension } =
+          row.original || {}; // Changed name_extension to nameExtension
 
         const fullName =
-          `${firstName || ""} ${middleName || ""} ${lastName || ""} ${name_extension || ""}`.trim();
+          `${firstName || ""} ${middleName || ""} ${lastName || ""} ${nameExtension || ""}`.trim();
 
         return fullName || "N/A"; // Return "N/A" if all values are missing
       },
@@ -140,6 +141,10 @@ export const MembersColumns = ({ onRefresh }: MembersColumnsProps) => {
       header: "Contribution",
     },
     {
+      accessorKey: "profession", // Added profession column
+      header: "Profession",
+    },
+    {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => {
@@ -152,7 +157,7 @@ export const MembersColumns = ({ onRefresh }: MembersColumnsProps) => {
             className="text-red-500 hover:text-red-700 hover:bg-red-100"
             onClick={(e) => {
               e.stopPropagation(); // Prevent row click event
-              setMemberToDelete(member._id);
+              setMemberToDelete(member.id); // Changed from member._id to member.id
               setIsDeleteDialogOpen(true);
             }}
             data-delete-button="true" // Add this attribute for event handling
@@ -195,20 +200,33 @@ export const MembersColumns = ({ onRefresh }: MembersColumnsProps) => {
   };
 };
 
-// Exporting column definitions for backwards compatibility
+// Utility function to filter out null values and transform data if needed
+export const filterAndTransformMemberData = (data: any[]): Member[] => {
+  return data
+    .filter((item) => item !== null && item !== undefined) // Remove null/undefined entries
+    .map((item) => ({
+      ...item,
+      // If your backend sends _id instead of id, uncomment the next line:
+      // id: item._id || item.id,
+      // If your backend sends name_extension instead of nameExtension, uncomment the next line:
+      // nameExtension: item.name_extension || item.nameExtension,
+    }));
+};
+
+// Exporting column definitions for backwards compatibility (updated)
 export const columns: ColumnDef<Member>[] = [
   {
-    accessorKey: "_id",
+    accessorKey: "id", // Changed from _id to id
     header: "Member ID",
   },
   {
     header: "Name",
     cell: ({ row }) => {
-      const { firstName, middleName, lastName, name_extension } =
-        row.original || {};
+      const { firstName, middleName, lastName, nameExtension } =
+        row.original || {}; // Changed name_extension to nameExtension
 
       const fullName =
-        `${firstName || ""} ${middleName || ""} ${lastName || ""} ${name_extension || ""}`.trim();
+        `${firstName || ""} ${middleName || ""} ${lastName || ""} ${nameExtension || ""}`.trim();
 
       return fullName || "N/A"; // Return "N/A" if all values are missing
     },
@@ -255,5 +273,9 @@ export const columns: ColumnDef<Member>[] = [
   {
     accessorKey: "contribution",
     header: "Contribution",
+  },
+  {
+    accessorKey: "profession", // Added profession column
+    header: "Profession",
   },
 ];

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { addEvent } from "@/app/(portal)/portal/eagle-events/actions";
 
 interface Event {
@@ -93,31 +94,57 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
       // Format the date properly for the API
       const formattedDate = formatDateForAPI(formData?.date || "");
 
+      // Validate that we have a proper date
+      if (!formattedDate) {
+        setErrors({ date: "Invalid date format" });
+        setSaving(false);
+        return;
+      }
+
+      // Create clean payload object
       const payload = {
         eventCode: generateEventCode(),
-        eventTitle: formData?.name || "",
-        eventDetails: formData?.description || "",
-        eventAttendees: 0,
-        eventDate: formattedDate, // Use formatted date
+        eventTitle: formData?.name?.trim() || "",
+        eventDate: formattedDate,
         startTime: formData?.startTime || "",
         endTime: formData?.endTime || "",
+        ...(formData?.description?.trim() && {
+          eventDetails: formData.description.trim(),
+        }),
       };
+
+      // Validate required fields are not empty
+      if (
+        !payload.eventTitle ||
+        !payload.eventDate ||
+        !payload.startTime ||
+        !payload.endTime
+      ) {
+        setErrors({ general: "All required fields must be filled" });
+        setSaving(false);
+        return;
+      }
 
       console.log("Payload being sent:", payload);
 
       const response = await addEvent(token, payload);
-      console.log("Response:", response);
+      console.log("Full Response:", response);
 
-      if (response?.data) {
+      // Check if the response indicates success
+      if (response && !response.error && response.data) {
+        console.log("Event created successfully");
         setOpen(false);
       } else {
-        console.error("Failed to create event:", response?.message);
-        // Show error to user
-        setErrors({ submit: response?.message || "Failed to create event" });
+        console.error("Failed to create event:", response);
+        const errorMessage =
+          response?.data?.detail ||
+          response?.message ||
+          "Failed to create event";
+        setErrors({ general: errorMessage });
       }
     } catch (error) {
       console.error("Failed to save:", error);
-      setErrors({ submit: "An unexpected error occurred" });
+      setErrors({ general: "An unexpected error occurred" });
     } finally {
       setSaving(false);
     }
@@ -135,9 +162,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData?.name?.trim()) newErrors.name = "Event name is required";
-    if (!formData?.description?.trim())
-      newErrors.description = "Event description is required";
+    if (!formData?.name?.trim()) newErrors.name = "Event title is required";
     if (!formData?.date) newErrors.date = "Date is required";
     if (!formData?.startTime?.trim())
       newErrors.startTime = "Start time is required";
@@ -146,6 +171,16 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
     // Validate date format
     if (formData?.date && !formatDateForAPI(formData.date)) {
       newErrors.date = "Please enter a valid date";
+    }
+
+    // Validate date is not in the past
+    if (formData?.date) {
+      const selectedDate = new Date(formData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        newErrors.date = "Event date cannot be in the past";
+      }
     }
 
     if (
@@ -160,14 +195,19 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleClose = () => {
+    if (!isSaving) {
+      setOpen(false);
+      // Clear form state when closing
+      setFormData(null);
+      setErrors({});
+      setHasSubmitted(false);
+    }
+  };
+
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isSaving) setOpen(isOpen);
-      }}
-    >
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Event</DialogTitle>
           <DialogDescription>
@@ -179,74 +219,65 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              {errors.submit ||
-                "Please fix the errors in the form to continue."}
+              Please fix the errors in the form to continue.
+              {errors.general && (
+                <div className="mt-2 font-medium">{errors.general}</div>
+              )}
             </AlertDescription>
           </Alert>
         )}
 
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-2">
             <Label htmlFor="name" className="text-right">
-              Event Name
+              Event Title *
             </Label>
-            <div className="col-span-3">
-              <Input
-                id="name"
-                placeholder="Enter Event Name"
-                value={formData?.name || ""}
-                onChange={(e) => handleChange("name", e.target.value)}
-                className={errors.name ? "border-red-500" : ""}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-              )}
-            </div>
+            <Input
+              id="name"
+              value={formData?.name || ""}
+              onChange={(e) => handleChange("name", e.target.value)}
+              className={errors.name ? "border-red-500" : ""}
+              placeholder="Enter event title"
+            />
+            {errors.name && (
+              <p className="text-sm text-red-500">{errors.name}</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-2">
             <Label htmlFor="description" className="text-right">
-              Description
+              Event Details
             </Label>
-            <div className="col-span-3">
-              <Input
-                id="description"
-                placeholder="Enter Description"
-                value={formData?.description || ""}
-                onChange={(e) => handleChange("description", e.target.value)}
-                className={errors.description ? "border-red-500" : ""}
-              />
-              {errors.description && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.description}
-                </p>
-              )}
-            </div>
+            <Textarea
+              id="description"
+              value={formData?.description || ""}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Enter event description"
+              rows={3}
+            />
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
+          <div className="space-y-2">
             <Label htmlFor="date" className="text-right">
-              Registration Date
+              Date *
             </Label>
-            <div className="col-span-3">
-              <Input
-                id="date"
-                type="date"
-                value={formData?.date || ""}
-                onChange={(e) => handleChange("date", e.target.value)}
-                className={errors.date ? "border-red-500" : ""}
-              />
-              {errors.date && (
-                <p className="text-red-500 text-xs mt-1">{errors.date}</p>
-              )}
-            </div>
+            <Input
+              type="date"
+              id="date"
+              value={formData?.date || ""}
+              onChange={(e) => handleChange("date", e.target.value)}
+              className={errors.date ? "border-red-500" : ""}
+            />
+            {errors.date && (
+              <p className="text-sm text-red-500">{errors.date}</p>
+            )}
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="startTime" className="text-right">
-              Start Time
-            </Label>
-            <div className="col-span-3">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startTime" className="text-right">
+                Start Time *
+              </Label>
               <Input
                 id="startTime"
                 type="time"
@@ -255,16 +286,14 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
                 className={errors.startTime ? "border-red-500" : ""}
               />
               {errors.startTime && (
-                <p className="text-red-500 text-xs mt-1">{errors.startTime}</p>
+                <p className="text-sm text-red-500">{errors.startTime}</p>
               )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="endTime" className="text-right">
-              End Time
-            </Label>
-            <div className="col-span-3">
+            <div className="space-y-2">
+              <Label htmlFor="endTime" className="text-right">
+                End Time *
+              </Label>
               <Input
                 id="endTime"
                 type="time"
@@ -273,18 +302,14 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
                 className={errors.endTime ? "border-red-500" : ""}
               />
               {errors.endTime && (
-                <p className="text-red-500 text-xs mt-1">{errors.endTime}</p>
+                <p className="text-sm text-red-500">{errors.endTime}</p>
               )}
             </div>
           </div>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setOpen(false)}
-            disabled={isSaving}
-          >
+          <Button variant="outline" onClick={handleClose} disabled={isSaving}>
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={isSaving}>

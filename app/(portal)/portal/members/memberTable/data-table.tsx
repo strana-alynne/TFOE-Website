@@ -28,7 +28,7 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
-  deleteConfirmationDialog?: React.ReactNode; // For rendering the delete confirmation dialog
+  deleteConfirmationDialog?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,9 +43,30 @@ export function DataTable<TData, TValue>({
     []
   );
 
+  // DEBUG: Log the data being passed to the table
+  React.useEffect(() => {
+    console.log("=== DATATABLE DEBUG ===");
+    console.log("Raw data received:", data);
+    console.log("Data length:", data?.length);
+    console.log("Data type:", typeof data);
+    console.log("Is data an array?", Array.isArray(data));
+
+    if (data && data.length > 0) {
+      console.log(
+        "First non-null item:",
+        data.find((item) => item !== null)
+      );
+      console.log("Sample data structure:", JSON.stringify(data[0], null, 2));
+    }
+
+    console.log("Columns received:", columns);
+    console.log("Number of columns:", columns?.length);
+    console.log("========================");
+  }, [data, columns]);
+
   const table = useReactTable({
-    data,
-    columns,
+    data: data || [], // Ensure data is never undefined
+    columns: columns || [], // Ensure columns is never undefined
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -58,18 +79,28 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  // DEBUG: Log table state
+  React.useEffect(() => {
+    console.log("=== TABLE STATE DEBUG ===");
+    console.log("Table row count:", table.getRowModel().rows?.length);
+    console.log("Table rows:", table.getRowModel().rows);
+    console.log(
+      "Filtered row count:",
+      table.getFilteredRowModel().rows?.length
+    );
+    console.log("===========================");
+  }, [table.getRowModel().rows]);
+
   const handleRowClick = (row: TData, event: React.MouseEvent) => {
-    // Check if the click event originated from a delete button
     if ((event.target as HTMLElement).closest('[data-delete-button="true"]')) {
-      // If it's a delete button click, don't navigate
       return;
     }
 
     if (onRowClick) {
       onRowClick(row);
     } else {
-      // Default behavior: navigate to detail page
-      const id = (row as any)._id;
+      const id = (row as any).id || (row as any)._id;
+      console.log("Row clicked, ID:", id, "Row data:", row);
       if (id) {
         router.push(`/portal/members/membersProfile/${id}`);
       }
@@ -120,7 +151,6 @@ export function DataTable<TData, TValue>({
                   tabIndex={0}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
-                      // We can't pass the event directly here, so we create a mock event object
                       const mockEvent = {
                         target: e.target,
                       } as unknown as React.MouseEvent;
@@ -144,7 +174,13 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  <div>
+                    <p>No results.</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Data length: {data?.length || 0} | Rows:{" "}
+                      {table.getRowModel().rows?.length || 0}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
@@ -170,7 +206,6 @@ export function DataTable<TData, TValue>({
         </Button>
       </div>
 
-      {/* Render the delete confirmation dialog */}
       {deleteConfirmationDialog}
     </>
   );

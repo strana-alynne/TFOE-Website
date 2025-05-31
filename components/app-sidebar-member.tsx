@@ -1,6 +1,8 @@
 "use client";
 import * as React from "react";
 import { useEffect, startTransition } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { VersionSwitcherMember } from "./version-switcher-member";
 import {
   Sidebar,
@@ -16,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/actions";
 import { useActionState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // This is sample data.
 const data = {
@@ -34,6 +36,7 @@ export function AppSidebarMember({
 }: React.ComponentProps<typeof Sidebar> & { member: any }) {
   const [state, logoutAction] = useActionState(logout, undefined);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (state?.success && state?.redirectTo) {
@@ -48,31 +51,44 @@ export function AppSidebarMember({
     });
   };
 
+  // Helper function to check if a path is active
+  const isPathActive = (url: string) => {
+    if (url === "/portal-member") {
+      return pathname === "/portal-member";
+    }
+    return pathname === url || pathname.startsWith(url + "/");
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
         <VersionSwitcherMember name={member.firstName} role={member.role} />
       </SidebarHeader>
       <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
+        {/* Dashboard Link */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive>
-                  <a href="/portal-member">Dashboard</a>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isPathActive("/portal-member")}
+                >
+                  <Link href="/portal-member">Dashboard</Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* Navigation Items */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>{item.title}</a>
+                  <SidebarMenuButton asChild isActive={isPathActive(item.url)}>
+                    <Link href={item.url}>{item.title}</Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
@@ -83,8 +99,8 @@ export function AppSidebarMember({
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => handleLogout()} asChild isActive>
-              <a>Logout</a>
+            <SidebarMenuButton onClick={handleLogout} asChild>
+              <button>Logout</button>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

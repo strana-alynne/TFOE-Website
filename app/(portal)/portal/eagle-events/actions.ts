@@ -1,6 +1,8 @@
 "use server";
 
-export async function getDetails(token: string) {
+import { AnyAaaaRecord } from "node:dns";
+
+export async function getDetails(token: any) {
   try {
     const response = await fetch(
       `https://tfoe-backend.onrender.com/admin/event`,
@@ -14,7 +16,7 @@ export async function getDetails(token: string) {
     );
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+     console.log("Response status:", response);
     }
 
     const data = await response.json();
@@ -27,19 +29,29 @@ export async function getDetails(token: string) {
     };
   }
 }
-export async function getEventDetail(token: string, eventId: string) {
+
+export async function getEventDetail(token: any, eventId: any) {
   try {
-    const response = await fetch(`http://localhost:3001/event/${eventId}`);
+     const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
-    }
+      console.log("Response status:", response);
+      }
 
     const data = await response.json();
 
     return { data: data };
   } catch (error) {
-    console.error("Error fetching details:", error);
+    console.log("Error fetching event details:", error);
     return {
       message: error instanceof Error ? error.message : "Failed to fetch data!",
     };
@@ -60,8 +72,9 @@ export async function addEvent(token: string, eventData: any) {
       },
     );
 
+    console.log("Response status:", response);
     if (!response.ok) {
-      throw new Error(`Failed to create event: ${response.status}`);
+      console.log("Response status:", response);
     }
 
     const data = await response.json();

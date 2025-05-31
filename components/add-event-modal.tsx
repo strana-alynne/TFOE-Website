@@ -13,7 +13,6 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 import { addEvent } from "@/app/(portal)/portal/eagle-events/actions";
-import { de } from "date-fns/locale";
 
 interface Event {
   name: string;
@@ -63,9 +62,19 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
     });
   };
 
-  const formatDate = (dateString: string) => {
+  // Fixed date formatting function
+  const formatDateForAPI = (dateString: string) => {
+    if (!dateString) return "";
+
+    // If it's already in YYYY-MM-DD format, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+      return dateString;
+    }
+
+    // Otherwise, try to parse and format
     try {
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "";
       return date.toISOString().split("T")[0];
     } catch (e) {
       return "";
@@ -81,26 +90,34 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
       const token = localStorage.getItem("access_token");
       if (!token) throw new Error("Missing access token");
 
+      // Format the date properly for the API
+      const formattedDate = formatDateForAPI(formData?.date || "");
+
       const payload = {
         eventCode: generateEventCode(),
-        eventTitle: formData?.name,
-        eventDetails: formData?.description,
+        eventTitle: formData?.name || "",
+        eventDetails: formData?.description || "",
         eventAttendees: 0,
-        eventDate: formData?.date,
-        startTime: formData?.startTime,
-        endTime: formData?.endTime,
+        eventDate: formattedDate, // Use formatted date
+        startTime: formData?.startTime || "",
+        endTime: formData?.endTime || "",
       };
 
-      console.log("Payload:", payload);
+      console.log("Payload being sent:", payload);
+
       const response = await addEvent(token, payload);
       console.log("Response:", response);
+
       if (response?.data) {
         setOpen(false);
       } else {
-        console.error("Failed to create event:", response.message);
+        console.error("Failed to create event:", response?.message);
+        // Show error to user
+        setErrors({ submit: response?.message || "Failed to create event" });
       }
     } catch (error) {
       console.error("Failed to save:", error);
+      setErrors({ submit: "An unexpected error occurred" });
     } finally {
       setSaving(false);
     }
@@ -114,6 +131,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
       () => chars[Math.floor(Math.random() * chars.length)]
     ).join("");
   }
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
@@ -124,10 +142,16 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
     if (!formData?.startTime?.trim())
       newErrors.startTime = "Start time is required";
     if (!formData?.endTime?.trim()) newErrors.endTime = "End time is required";
+
+    // Validate date format
+    if (formData?.date && !formatDateForAPI(formData.date)) {
+      newErrors.date = "Please enter a valid date";
+    }
+
     if (
       formData?.startTime &&
       formData?.endTime &&
-      formData.startTime > formData.endTime
+      formData.startTime >= formData.endTime
     ) {
       newErrors.endTime = "End time must be after start time";
     }
@@ -155,7 +179,8 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
           <Alert variant="destructive" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
-              Please fix the errors in the form to continue.
+              {errors.submit ||
+                "Please fix the errors in the form to continue."}
             </AlertDescription>
           </Alert>
         )}
@@ -178,6 +203,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
               Description
@@ -197,15 +223,16 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">
-              Date
+              Registration Date
             </Label>
             <div className="col-span-3">
               <Input
                 id="date"
                 type="date"
-                value={formatDate(formData?.date || "")}
+                value={formData?.date || ""}
                 onChange={(e) => handleChange("date", e.target.value)}
                 className={errors.date ? "border-red-500" : ""}
               />
@@ -214,6 +241,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="startTime" className="text-right">
               Start Time

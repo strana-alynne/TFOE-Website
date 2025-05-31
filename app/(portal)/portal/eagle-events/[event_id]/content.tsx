@@ -23,15 +23,14 @@ import { EditEvent } from "@/components/edit-event-modal";
 // Define the Member type
 interface EventDetailsProps {
   id: string;
-  imageUrl: string;
-  name: string;
-  date: string;
-  starttime: string;
-  endtime: string;
-  attendedCount: number;
-  happeningNow: boolean;
-  attendanceCode: string;
-  participants: { id: string; name: string; feedback: string }[];
+  eventTitle: string;
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+  eventAttendees: number;
+  eventCode: string;
+  eventDetails: string;
+  participants?: { id: string; name: string; feedback: string }[];
 }
 
 interface EventID {
@@ -57,10 +56,10 @@ export default function EventDetails({ id }: EventID) {
       if (!token) return;
 
       try {
-        console.log("Fetching event details...", id);
+        console.log("id", id);
         const response = await getEventDetail(token, id);
-        console.log(response);
-        setEventDetail(response.data);
+        console.log(`Response ni ${id} `, response);
+        setEventDetail(response.data.data);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
@@ -93,18 +92,13 @@ export default function EventDetails({ id }: EventID) {
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
             <BreadcrumbItem>
-              <BreadcrumbPage>{eventdetail?.name}</BreadcrumbPage>
+              <BreadcrumbPage>{eventdetail?.eventTitle}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </header>
 
       <Card className="m-4 mb-0">
-        <img
-          src={eventdetail?.imageUrl}
-          alt={eventdetail?.name}
-          className="h-48 w-full object-cover"
-        />
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Event Information</CardTitle>
           <Button
@@ -128,7 +122,7 @@ export default function EventDetails({ id }: EventID) {
         <CardContent>
           {eventdetail ? (
             <div className="mb-4">
-              <h2 className="text-xl font-bold">{eventdetail.name}</h2>
+              <h2 className="text-xl font-bold">{eventdetail.eventTitle}</h2>
               <p className="text-muted-foreground flex items-center gap-2">
                 <span>
                   <IdCard />
@@ -142,38 +136,48 @@ export default function EventDetails({ id }: EventID) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-muted-foreground">DATE</p>
-              <h2 className="text-md font-bold">{eventdetail?.date}</h2>
+              <h2 className="text-md font-bold">{eventdetail?.eventDate}</h2>
             </div>
           </div>
           <div className="col-span-2">
             <p className="text-muted-foreground">Time</p>
             <h2 className="text-md font-bold">
-              {eventdetail?.starttime}-{eventdetail?.endtime}
+              {eventdetail?.startTime}-{eventdetail?.endTime}
             </h2>
           </div>
           <div>
             <p className="text-muted-foreground">ATTENDANCE CODE</p>
-            <h2 className="text-md font-bold">{eventdetail?.attendanceCode}</h2>
+            <h2 className="text-md font-bold">{eventdetail?.eventCode}</h2>
           </div>
         </CardContent>
       </Card>
 
       <div className="px-4 py-8 pb-0 w-full">
         <h2 className="text-2xl font-semibold leading-none tracking-tight">
-          Participants ({eventdetail?.participants.length})
+          Participants
         </h2>{" "}
         <ParticipantsTable participants={eventdetail?.participants || []} />
       </div>
       <div className="px-4 py-0 w-full">
         <h2 className="text-2xl pb-4 font-semibold leading-none tracking-tight">
-          Feedback ({eventdetail?.participants.length})
+          Feedback
         </h2>{" "}
         <FeedbackTable participants={eventdetail?.participants || []} />
       </div>
       <EditEvent
         open={editOpen}
         setOpen={setEditOpen}
-        event={selectedMember}
+        event={
+          selectedMember
+            ? {
+                ...selectedMember,
+                name: selectedMember.eventTitle,
+                date: selectedMember.eventDate,
+                starttime: selectedMember.startTime,
+                endtime: selectedMember.endTime,
+              }
+            : null
+        }
         onUpdated={() => window.location.reload()} // or a better way to refetch
       />
     </SidebarInset>

@@ -25,7 +25,7 @@ interface Member {
   firstName: string;
   middleName?: string;
   lastName: string;
-  nameExtensions?: string;
+  nameExtension?: string;
   status: string;
   birthDate: string;
   profession: string;
@@ -114,11 +114,9 @@ export default function Profile() {
 
       try {
         const response = await getDetails(token);
-        console.log("Member details:", response.data.birthDate);
-        console.log("Calculated Age:", calculateAge(response.data.birthDate));
+        console.log("Member details fetched:", response.data);
         setMember(response.data);
         setLoading(false);
-        console.log(calculateAge(member?.birthDate || ""));
       } catch (error) {
         console.error("Failed to fetch member details:", error);
         setError(
@@ -145,11 +143,11 @@ export default function Profile() {
         firstName: updatedMember.firstName,
         middleName: updatedMember.middleName,
         lastName: updatedMember.lastName,
-        // Convert "none" to empty string for nameExtensions
-        nameExtensions:
-          updatedMember.nameExtensions === "none"
+        // Convert "none" to empty string for nameExtension
+        nameExtension:
+          updatedMember.nameExtension === "none"
             ? ""
-            : updatedMember.nameExtensions,
+            : updatedMember.nameExtension,
         birthDate: updatedMember.birthDate,
         profession: updatedMember.profession,
         address: updatedMember.address,
@@ -230,7 +228,7 @@ export default function Profile() {
   }
 
   const fullName =
-    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtensions || ""}`.trim();
+    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtension || ""}`.trim();
 
   return (
     <SidebarInset className="w-full">
@@ -319,7 +317,7 @@ export default function Profile() {
               <p className="text-muted-foreground">STATUS</p>
               <Badge
                 className={
-                  member.status === "Active" ? "bg-green-500" : "bg-red-500"
+                  member.status === "ACTIVE" ? "bg-green-500" : "bg-red-500"
                 }
               >
                 {member.status}

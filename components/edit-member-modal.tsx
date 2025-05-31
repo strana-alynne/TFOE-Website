@@ -26,7 +26,7 @@ interface Member {
   firstName: string;
   middleName?: string;
   lastName: string;
-  nameExtensions?: string;
+  nameExtension?: string;
   status: string;
   birthDate: string;
   profession: string;
@@ -90,6 +90,10 @@ export function EditMemberModal({
       newErrors.profession = "Profession is required";
     if (!formData.contact.trim())
       newErrors.contact = "Contact information is required";
+    else if (formData.contact.length !== 11)
+      newErrors.contact = "Contact number must be exactly 11 digits";
+    else if (!/^\d+$/.test(formData.contact))
+      newErrors.contact = "Contact number must contain only numbers";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -135,15 +139,6 @@ export function EditMemberModal({
             Make changes to your profile here. Click save when you're done.
           </DialogDescription>
         </DialogHeader>
-
-        {Object.keys(errors).length > 0 && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Please fix the errors in the form to continue.
-            </AlertDescription>
-          </Alert>
-        )}
 
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -195,9 +190,9 @@ export function EditMemberModal({
             </Label>
             <div className="col-span-3">
               <Select
-                value={formData.nameExtensions || "none"}
+                value={formData.nameExtension || "none"}
                 onValueChange={(value) =>
-                  handleChange("nameExtensions", value === "none" ? "" : value)
+                  handleChange("nameExtension", value === "none" ? "" : value)
                 }
               >
                 <SelectTrigger className="w-full">

@@ -26,7 +26,7 @@ export default function MembersTable() {
         }
       );
 
-      console.log("Response status:", response.status);
+      console.log("Response status:", response);
 
       if (!response.ok) {
         const errorBody = await response.text(); // read raw response body

@@ -30,15 +30,17 @@ import { AddEvent } from "@/components/add-event-modal";
 
 interface Event {
   id: string;
-  description: string;
-  name: string;
-  date: string;
-  starttime: string;
-  endtime: string;
-  attendedCount: number;
-  happeningNow: boolean;
-  attendanceCode: string;
-  participants: { id: string; name: string }[];
+  eventCode: string;
+  eventTitle: string;
+  eventAttendees: number;
+  eventDetails: string;
+  eventDate: string;
+  // Optional fields that might not be in your API response
+  startTime?: string;
+  endTime?: string;
+  happeningNow?: boolean;
+  attendanceCode?: string;
+  participants?: { id: string; name: string }[];
 }
 
 export default function Page() {
@@ -50,11 +52,17 @@ export default function Page() {
   useEffect(() => {
     const fetchDetails = async () => {
       const token = localStorage.getItem("access_token");
+      console.log("Fetching event details with token:", token);
       if (!token) return;
 
       try {
         const response = await getDetails(token);
-        const events = Array.isArray(response.data) ? response.data : [];
+
+        console.log("Response status:", response);
+        const events = Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+        console.log("Fetched events:", events);
         setEvent(events);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
@@ -154,12 +162,16 @@ export default function Page() {
               <AdminEvent
                 key={e.id}
                 id={e.id}
-                name={e.name}
-                description={e.description}
-                date={e.date}
-                time={`${e.starttime} - ${e.endtime}`}
-                attendedCount={e.participants.length}
-                attendanceCode={e.attendanceCode}
+                name={e.eventTitle} // ← Changed from e.name
+                description={e.eventDetails} // ← Changed from e.description
+                date={e.eventDate} // ← Changed from e.date
+                time={
+                  e.startTime && e.endTime
+                    ? `${e.startTime} - ${e.endTime}`
+                    : "Time TBD"
+                }
+                attendedCount={e.eventAttendees} // ← Changed from e.participants.length
+                attendanceCode={e.attendanceCode || e.eventCode} // ← Use eventCode as fallback
                 imageUrl={""}
               />
             ))}

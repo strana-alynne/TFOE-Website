@@ -22,7 +22,7 @@ const signupSchema = z
     profession: z.string().optional(), // <-- ADD THIS
     countryCode: z.string().optional(), // <-- AND THIS
     dateJoined: z.string().optional().default(Date().toString()),
-    dateOfBirth: z.string().optional(),
+    dateOfBirth: z.string().min(1, { message: "Date of birth is required" }),
     // Fix: Handle string boolean conversion
     otpVerified: z.union([
       z.boolean(),
@@ -186,7 +186,7 @@ export async function register(prevState: any, formData: FormData) {
         email: result.data.email,
         contact: result.data.contact,
         status: "ACTIVE",
-        age: result.data.dateOfBirth ? calculateAge(result.data.dateOfBirth) : 0,
+        birthDate: result.data.dateOfBirth,
         absences: 0,
         contribution: 0,
         position: "",
@@ -234,7 +234,7 @@ export async function register(prevState: any, formData: FormData) {
     }
     return {
       success: true,
-      redirectTo: "/portal-member",
+      redirectTo: "/login",
       token: loginResult.token, // Pass along the token from login
     };
 

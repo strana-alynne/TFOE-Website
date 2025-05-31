@@ -114,9 +114,11 @@ export default function Profile() {
 
       try {
         const response = await getDetails(token);
-        console.log("Member details:", response.data);
+        console.log("Member details:", response.data.birthDate);
+        console.log("Calculated Age:", calculateAge(response.data.birthDate));
         setMember(response.data);
         setLoading(false);
+        console.log(calculateAge(member?.birthDate || ""));
       } catch (error) {
         console.error("Failed to fetch member details:", error);
         setError(
@@ -301,13 +303,17 @@ export default function Profile() {
           ) : (
             <p className="text-red-500">Member not found</p>
           )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-muted-foreground">AGE</p>
               <h2 className="text-md font-bold">
                 {" "}
-                {calculateAge(member.birthDate) || "N/A"}
+                {member?.birthDate ? calculateAge(member.birthDate) : "N/A"}
               </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">Birthday</p>
+              <h2 className="text-md font-bold"> {member?.birthDate}</h2>
             </div>
             <div>
               <p className="text-muted-foreground">STATUS</p>

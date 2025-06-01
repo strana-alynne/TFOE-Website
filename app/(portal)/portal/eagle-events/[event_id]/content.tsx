@@ -11,15 +11,15 @@ import {
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Edit } from "@mui/icons-material";
+import { Delete, Edit, Token } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getEventDetail } from "../actions";
+import { getEventDetail, deleteEvent } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
 import { EditEvent } from "@/components/edit-event-modal";
-
+import { DeleteEventModal } from "@/components/delete-modal";
 // Define the Member type
 interface EventDetailsProps {
   id: string;
@@ -46,6 +46,8 @@ export default function EventDetails({ id }: EventID) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false); // Add delete modal state
+  const [isDeleting, setIsDeleting] = useState(false); // Add deleting state
   const [selectedMember, setSelectedMember] =
     useState<EventDetailsProps | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
@@ -111,6 +113,50 @@ export default function EventDetails({ id }: EventID) {
   const handleEditClick = () => {
     setSelectedMember(eventdetail);
     setEditOpen(true);
+  };
+
+  // Actual delete function called after confirmation
+  const handleConfirmDelete = async () => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+
+    if (!token) {
+      toast({
+        title: "Error",
+        description: "No access token found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deleteEvent(token, id);
+
+      toast({
+        title: "Success",
+        description: "Event deleted successfully!",
+        variant: "default",
+      });
+
+      // Close the modal
+      setDeleteOpen(false);
+
+      // You might want to redirect to the events list page here
+      window.location.href = "/portal/eagle-events";
+    } catch (error) {
+      console.error("Failed to delete event:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete event",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleEditClose = () => {
@@ -206,19 +252,34 @@ export default function EventDetails({ id }: EventID) {
       <Card className="m-4 mb-0">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Event Information</CardTitle>
-          <Button
-            variant="outline"
-            disabled={updateLoading || loading}
-            onClick={handleEditClick}
-          >
-            {updateLoading || loading ? (
-              <>Loading...</>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" /> Edit Event
-              </>
-            )}
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              disabled={updateLoading || loading}
+              onClick={handleEditClick}
+            >
+              {updateLoading || loading ? (
+                <>Loading...</>
+              ) : (
+                <>
+                  <Edit className="mr-2 h-4 w-4" /> Edit Event
+                </>
+              )}
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={updateLoading || loading}
+              onClick={handleConfirmDelete}
+            >
+              {updateLoading || loading ? (
+                <>Loading...</>
+              ) : (
+                <>
+                  <Delete className="mr-2 h-4 w-4" /> Delete Event
+                </>
+              )}
+            </Button>
+          </div>
         </CardHeader>
 
         <CardContent>
@@ -295,6 +356,13 @@ export default function EventDetails({ id }: EventID) {
         setOpen={handleEditClose}
         event={selectedMember}
         onUpdated={handleEventUpdated} // Use the improved callback
+      />
+      <DeleteEventModal
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        eventTitle={eventdetail?.eventTitle || ""}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
       />
     </SidebarInset>
   );

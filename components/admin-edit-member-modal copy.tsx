@@ -26,7 +26,7 @@ interface Member {
   firstName: string;
   middleName?: string;
   lastName: string;
-  nameExtensions?: string;
+  nameExtension?: string; // Changed from nameExtensions to nameExtension
   status: string;
   birthDate: string;
   profession: string;
@@ -35,8 +35,8 @@ interface Member {
   address?: string;
   dateJoined: string;
   position: string;
-  contribution: string;
-  absences: string;
+  contribution: string | number;
+  absences: string | number;
   feedback?: string;
 }
 
@@ -44,7 +44,7 @@ interface AdminEditMemberModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   member: Member | null;
-  onSave: (updatedMember: Member) => void;
+  onSave: (updatedMember: Member) => Promise<boolean>; // Changed to Promise<boolean>
 }
 
 export function AdminEditMemberModal({
@@ -56,18 +56,21 @@ export function AdminEditMemberModal({
   const [formData, setFormData] = useState<Member | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>("");
 
   // Reset form data when the modal opens with a new member
   useEffect(() => {
     if (member && open) {
       setFormData({ ...member });
       setErrors({});
+      setSaveError("");
     }
   }, [member, open]);
 
   // Return early if no member is provided
   if (!formData) return null;
 
+  // Updated handleChange function in AdminEditMemberModal
   const handleChange = (field: keyof Member, value: string) => {
     // Clear the error for this field when the user makes changes
     setErrors((prev) => {
@@ -76,53 +79,124 @@ export function AdminEditMemberModal({
       return newErrors;
     });
 
+    // Clear save error when user makes changes
+    setSaveError("");
+
     setFormData((prev) => {
       if (!prev) return null;
+
+      // Special handling for date fields
+      if (field === "birthDate" || field === "dateJoined") {
+        // Ensure date is in proper format
+        const formattedValue = value ? new Date(value).toISOString() : value;
+        return { ...prev, [field]: formattedValue };
+      }
+
       return { ...prev, [field]: value };
     });
   };
 
+  // Updated validation function
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
     // Required fields validation
-    if (!formData.firstName.trim())
+    if (!formData.firstName?.trim()) {
       newErrors.firstName = "First name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-    if (!formData.birthDate) newErrors.birthDate = "Birth date is required";
-    if (!formData.profession.trim())
+    }
+    if (!formData.lastName?.trim()) {
+      newErrors.lastName = "Last name is required";
+    }
+    if (!formData.birthDate) {
+      newErrors.birthDate = "Birth date is required";
+    } else {
+      // Validate date format
+      const date = new Date(formData.birthDate);
+      if (isNaN(date.getTime())) {
+        newErrors.birthDate = "Please enter a valid birth date";
+      }
+    }
+    if (!formData.profession?.trim()) {
       newErrors.profession = "Profession is required";
-    if (!formData.contact.trim())
+    }
+    if (!formData.contact?.trim()) {
       newErrors.contact = "Contact information is required";
-    if (!formData.status || formData.status.trim() === "")
+    }
+    if (!formData.status || formData.status.trim() === "") {
       newErrors.status = "Status is required";
+    }
+
+    // Email validation (if provided)
+    if (formData.email && formData.email.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email.trim())) {
+        newErrors.email = "Please enter a valid email address";
+      }
+    }
+
+    // Contact validation
+    if (formData.contact && formData.contact.trim().length < 10) {
+      newErrors.contact = "Contact number should be at least 10 digits";
+    }
+
+    // Status validation
+    const validStatuses = ["ACTIVE", "INACTIVE", "PENDING"];
+    if (
+      formData.status &&
+      !validStatuses.includes(formData.status.toUpperCase())
+    ) {
+      newErrors.status = "Please select a valid status";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-
   const handleSave = async () => {
     if (!validateForm()) return;
 
     try {
       setSaving(true);
+      setSaveError("");
+
       if (formData) {
-        await onSave(formData);
-        setOpen(false);
+        console.log("Saving member data:", formData);
+        const success = await onSave(formData);
+
+        if (success) {
+          console.log("Save successful, closing modal");
+          setOpen(false);
+        } else {
+          setSaveError("Failed to save changes. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Error saving member:", error);
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again."
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  // Format birthdate for the date input (YYYY-MM-DD)
+  // Updated formatDate function
   const formatDate = (dateString: string) => {
     try {
+      if (!dateString) return "";
       const date = new Date(dateString);
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        console.error("Invalid date:", dateString);
+        return "";
+      }
+
+      // Return in YYYY-MM-DD format for date input
       return date.toISOString().split("T")[0];
     } catch (e) {
+      console.error("Date formatting error:", e);
       return "";
     }
   };
@@ -134,11 +208,12 @@ export function AdminEditMemberModal({
         if (!isSaving) setOpen(isOpen);
       }}
     >
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
           <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
+            Make changes to the member profile here. Click save when you're
+            done.
           </DialogDescription>
         </DialogHeader>
 
@@ -148,6 +223,13 @@ export function AdminEditMemberModal({
             <AlertDescription>
               Please fix the errors in the form to continue.
             </AlertDescription>
+          </Alert>
+        )}
+
+        {saveError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{saveError}</AlertDescription>
           </Alert>
         )}
 
@@ -168,6 +250,7 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="middlename" className="text-right">
               Middle Name
@@ -179,6 +262,7 @@ export function AdminEditMemberModal({
               className="col-span-3"
             />
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="lastname" className="text-right">
               Last Name*
@@ -195,15 +279,16 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="suffix" className="text-right">
               Suffix
             </Label>
             <div className="col-span-3">
               <Select
-                value={formData.nameExtensions || "none"}
+                value={formData.nameExtension || "none"}
                 onValueChange={(value) =>
-                  handleChange("nameExtensions", value === "none" ? "" : value)
+                  handleChange("nameExtension", value === "none" ? "" : value)
                 }
               >
                 <SelectTrigger className="w-full">
@@ -223,6 +308,7 @@ export function AdminEditMemberModal({
               </Select>
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
               Status*
@@ -239,9 +325,9 @@ export function AdminEditMemberModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="ACTIVE">Active</SelectItem>
+                    <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -268,6 +354,7 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="profession" className="text-right">
               Profession*
@@ -284,6 +371,7 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="address" className="text-right">
               Address
@@ -295,6 +383,7 @@ export function AdminEditMemberModal({
               className="col-span-3"
             />
           </div>
+
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="contact" className="text-right">
               Contact Information*
@@ -305,9 +394,29 @@ export function AdminEditMemberModal({
                 value={formData.contact}
                 onChange={(e) => handleChange("contact", e.target.value)}
                 className={errors.contact ? "border-red-500" : ""}
+                placeholder="e.g., +63 912 345 6789"
               />
               {errors.contact && (
                 <p className="text-red-500 text-xs mt-1">{errors.contact}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="email" className="text-right">
+              Email
+            </Label>
+            <div className="col-span-3">
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+                className={errors.email ? "border-red-500" : ""}
+                placeholder="example@email.com"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
             </div>
           </div>

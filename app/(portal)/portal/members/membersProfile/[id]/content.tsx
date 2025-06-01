@@ -20,13 +20,13 @@ import { AdminEditMemberModal } from "@/components/admin-edit-member-modal copy"
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 
-// Define the Member type
+// Updated Member interface to match API response
 interface Member {
   id: string;
   firstName: string;
   middleName?: string;
   lastName: string;
-  nameExtensions?: string;
+  nameExtension?: string; // Changed from nameExtensions to nameExtension
   status: string;
   birthDate: string;
   profession: string;
@@ -35,8 +35,8 @@ interface Member {
   address?: string;
   dateJoined: string;
   position: string;
-  contribution: string;
-  absences: string;
+  contribution: string | number; // Can be string or number
+  absences: string | number; // Can be string or number
   feedback?: string;
 }
 
@@ -114,13 +114,26 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
   useEffect(() => {
     const fetchDetails = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
+      // Use a fallback token for testing if localStorage is not available
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("access_token")
+          : null;
+
+      if (!token) {
+        setError("No access token found");
+        setLoading(false);
+        return;
+      }
 
       try {
+        console.log("Fetching member details for ID:", memberId);
         const response = await getDetails(token, memberId);
-        console.log(response);
-        setMember(response.data);
+        console.log("Member details response:", response);
+
+        // Extract the member data from the nested structure
+        const memberData = response.data?.data || response.data;
+        setMember(memberData);
         setLoading(false);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
@@ -136,69 +149,167 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
     fetchDetails();
   }, [memberId]);
 
-  const handleSave = async (updatedMember: Partial<Member>) => {
+  // Updated handleSave function with proper data formatting and validation
+  const handleSave = async (updatedMember: Member): Promise<boolean> => {
     try {
       setUpdateLoading(true);
-      const token = localStorage.getItem("access_token");
-      if (!token) return false;
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("access_token")
+          : null;
 
-      // Only update the fields that are editable
-      const memberUpdate = {
-        ...member,
-        firstName: updatedMember.firstName,
-        middleName: updatedMember.middleName,
-        lastName: updatedMember.lastName,
-        // Convert "none" to empty string for nameExtensions
-        nameExtensions:
-          updatedMember.nameExtensions === "none"
-            ? ""
-            : updatedMember.nameExtensions,
-        status: updatedMember.status,
-        birthDate: updatedMember.birthDate,
-        profession: updatedMember.profession,
-        address: updatedMember.address,
-        contact: updatedMember.contact,
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          content: "No access token found. Please log in again.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      console.log("Updating member with data:", updatedMember);
+
+      // Format the date properly (ensure it's in ISO format)
+      const formatDateForAPI = (dateString: string) => {
+        try {
+          const date = new Date(dateString);
+          // Return ISO date string (YYYY-MM-DD format)
+          return date.toISOString().split("T")[0];
+        } catch (error) {
+          console.error("Date formatting error:", error);
+          return dateString; // fallback to original
+        }
       };
 
-      // Use the specific member ID in the URL for the PUT request
+      // Prepare the update payload with all required fields and proper formatting
+      const memberUpdate = {
+        firstName: updatedMember.firstName?.trim() || "",
+        middleName: updatedMember.middleName?.trim() || "",
+        lastName: updatedMember.lastName?.trim() || "",
+        nameExtension: updatedMember.nameExtension?.trim() || "",
+        address: updatedMember.address?.trim() || "",
+        email: updatedMember.email?.trim() || "",
+        contact: updatedMember.contact?.trim() || "",
+        status: updatedMember.status || "ACTIVE",
+        birthDate: formatDateForAPI(updatedMember.birthDate),
+        profession: updatedMember.profession?.trim() || "",
+        // Include these fields even if they're not being edited
+        absences:
+          typeof updatedMember.absences === "string"
+            ? parseInt(updatedMember.absences) || 0
+            : updatedMember.absences || 0,
+        contribution:
+          typeof updatedMember.contribution === "string"
+            ? parseInt(updatedMember.contribution) || 0
+            : updatedMember.contribution || 0,
+        position: updatedMember.position?.trim() || "",
+        feedback: updatedMember.feedback?.trim() || "",
+        dateJoined: formatDateForAPI(updatedMember.dateJoined),
+      };
+
+      console.log("Sending update payload:", memberUpdate);
+
+      // Validate required fields before sending
+      const requiredFields = [
+        "firstName",
+        "lastName",
+        "birthDate",
+        "status",
+      ] as const;
+      const missingFields = requiredFields.filter(
+        (field) => !memberUpdate[field as keyof typeof memberUpdate]
+      );
+
+      if (missingFields.length > 0) {
+        throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
+      }
+
+      // Validate email format if provided
+      if (memberUpdate.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(memberUpdate.email)) {
+          throw new Error("Invalid email format");
+        }
+      }
+
+      // Use the user_id parameter as mentioned
       const response = await axios.put(
         `https://tfoe-backend.onrender.com/admin/member/${updatedMember.id}`,
+        memberUpdate,
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(memberUpdate)
-        },
+        }
       );
 
-      if (response.data) {
-        setMember(response.data.data);
+      console.log("Update response:", response);
+
+      if (response.status === 200 || response.status === 201) {
+        const updatedData = response.data?.data || updatedMember;
+        setMember(updatedData);
+
         toast({
           title: "Profile Updated",
           content: "Member profile has been updated successfully.",
         });
+
+        console.log("Profile updated successfully");
+        return true;
       } else {
-        console.log("No response data, using local update:", memberUpdate);
-        // Still update the local state if the server didn't return data
-        setMember(memberUpdate as Member);
+        console.log("Unexpected response status:", response);
       }
-      console.log("Profile updated successfully");
-      return true;
     } catch (error) {
       console.error("Error updating member:", error);
-      setError("Failed to update profile. Please try again.");
+
+      let errorMessage = "Failed to update profile. Please try again.";
+
+      if (axios.isAxiosError(error)) {
+        // Handle 422 specifically - validation errors
+        if (error.response?.status === 422) {
+          const validationErrors =
+            error.response?.data?.errors || error.response?.data?.message;
+          if (validationErrors) {
+            if (Array.isArray(validationErrors)) {
+              errorMessage = `Validation errors: ${validationErrors.join(", ")}`;
+            } else if (typeof validationErrors === "object") {
+              const errorMessages = Object.values(validationErrors)
+                .flat()
+                .join(", ");
+              errorMessage = `Validation errors: ${errorMessages}`;
+            } else {
+              errorMessage = `Validation error: ${validationErrors}`;
+            }
+          } else {
+            errorMessage = "Invalid data format. Please check all fields.";
+          }
+        } else if (error.response?.status === 401) {
+          errorMessage = "Authentication failed. Please log in again.";
+        } else if (error.response?.status === 403) {
+          errorMessage = "You don't have permission to update this profile.";
+        } else if (error.response?.status === 404) {
+          errorMessage = "Member not found.";
+        } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        }
+
+        // Log the full error response for debugging
+        console.error("API Error Response:", error.response?.data);
+      }
+
+      setError(errorMessage);
       toast({
         title: "Update Failed",
-        content: "There was a problem updating the member profile.",
+        content: errorMessage,
         variant: "destructive",
       });
+
       return false;
     } finally {
       setUpdateLoading(false);
     }
   };
-
   if (loading) {
     return (
       <SidebarInset className="w-full">
@@ -233,8 +344,10 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
     );
   }
 
+  // Fixed fullName construction to use nameExtension instead of nameExtensions
   const fullName =
-    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtensions || ""}`.trim();
+    `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtension || ""}`.trim();
+
   return (
     <SidebarInset className="w-full">
       <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full">
@@ -301,7 +414,6 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
             <div>
               <p className="text-muted-foreground">AGE</p>
               <h2 className="text-md font-bold">
-                {" "}
                 {calculateAge(member.birthDate) || "N/A"}
               </h2>
             </div>
@@ -309,9 +421,9 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
               <p className="text-muted-foreground">STATUS</p>
               <Badge
                 className={
-                  member.status === "Active"
+                  member.status === "ACTIVE" || member.status === "Active"
                     ? "bg-green-500"
-                    : member.status === "Pending"
+                    : member.status === "PENDING" || member.status === "Pending"
                       ? "bg-gray-500"
                       : "bg-red-500"
                 }
@@ -354,19 +466,22 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
             </div>
             <div>
               <p className="text-muted-foreground">POSITION</p>
-              <h2 className="text-md font-bold">{member.position}</h2>
+              <h2 className="text-md font-bold">{member.position || "N/A"}</h2>
             </div>
             <div>
               <p className="text-muted-foreground">CONTRIBUTION</p>
-              <h2 className="text-md font-bold">{member.contribution}</h2>
+              <h2 className="text-md font-bold">
+                {member.contribution || "0"}
+              </h2>
             </div>
             <div>
               <p className="text-muted-foreground">ABSENCES</p>
-              <h2 className="text-md font-bold">{member.absences}</h2>
+              <h2 className="text-md font-bold">{member.absences || "0"}</h2>
             </div>
           </div>
         </CardContent>
       </Card>
+
       <Card className="m-4 p-4">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Certificates and Trainings</CardTitle>

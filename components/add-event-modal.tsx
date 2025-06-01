@@ -28,9 +28,10 @@ interface Event {
 interface AddEventProps {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onEventAdded?: () => void; // New callback prop
 }
 
-export function AddEvent({ open, setOpen }: AddEventProps) {
+export function AddEvent({ open, setOpen, onEventAdded }: AddEventProps) {
   const [formData, setFormData] = useState<Event | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSaving, setSaving] = useState(false);
@@ -101,7 +102,6 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
         return;
       }
 
-      // Create clean payload object
       const payload = {
         eventCode: generateEventCode(),
         eventTitle: formData?.name?.trim() || "",
@@ -133,6 +133,7 @@ export function AddEvent({ open, setOpen }: AddEventProps) {
       // Check if the response indicates success
       if (response && !response.error && response.data) {
         console.log("Event created successfully");
+        onEventAdded?.();
         setOpen(false);
       } else {
         console.error("Failed to create event:", response);

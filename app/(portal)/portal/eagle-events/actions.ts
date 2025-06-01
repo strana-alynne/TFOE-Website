@@ -1,6 +1,5 @@
 "use server";
 
-import { AnyAaaaRecord } from "node:dns";
 
 export async function getDetails(token: any) {
   try {
@@ -48,6 +47,7 @@ export async function getEventDetail(token: any, eventId: any) {
       }
 
     const data = await response.json();
+    console.log("Response data:", data);
 
     return { data: data };
   } catch (error) {
@@ -57,6 +57,39 @@ export async function getEventDetail(token: any, eventId: any) {
     };
   }
 }
+
+export async function deleteEvent(token: string, eventId: string) {
+  try {
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to delete event. Status:", response.status);
+      return { error: `Failed with status ${response.status}` };
+    }
+
+    const data = await response.json();
+    console.log("Event deleted successfully:", data);
+
+    return { data };
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    return {
+      error: error instanceof Error ? error.message : "Failed to delete event",
+    };
+  }
+}
+
+
+
 
 export async function addEvent(token: string, eventData: any) {
   try {

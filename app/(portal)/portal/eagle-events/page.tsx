@@ -49,35 +49,48 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
 
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("access_token");
+    console.log("Fetching event details with token:", token);
+    if (!token) return;
+
+    try {
+      setLoading(true);
+      const response = await getDetails(token);
+
+      console.log("Response status:", response);
+      const events = Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+      console.log("Fetched events:", events);
+      setEvent(events);
+    } catch (error) {
+      console.error("Failed to fetch member details:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch member details"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchDetails = async () => {
-      const token = localStorage.getItem("access_token");
-      console.log("Fetching event details with token:", token);
-      if (!token) return;
-
-      try {
-        const response = await getDetails(token);
-
-        console.log("Response status:", response);
-        const events = Array.isArray(response.data.data)
-          ? response.data.data
-          : [];
-        console.log("Fetched events:", events);
-        setEvent(events);
-      } catch (error) {
-        console.error("Failed to fetch member details:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch member details"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDetails();
   }, []);
+
+  // Callback function to refresh events after adding
+  const handleEventAdded = () => {
+    fetchDetails(); // Refetch all events
+    setOpen(false); // Close the modal
+  };
+
+  // Alternative: Callback to add the new event directly to state
+  const handleEventAddedOptimistic = (newEvent: Event) => {
+    setEvent((prevEvents) => [...prevEvents, newEvent]);
+    setOpen(false);
+  };
 
   function setEditOpen(open: boolean): void {
     throw new Error("Function not implemented.");
@@ -162,16 +175,16 @@ export default function Page() {
               <AdminEvent
                 key={e.id}
                 id={e.id}
-                name={e.eventTitle} // ← Changed from e.name
-                description={e.eventDetails} // ← Changed from e.description
-                date={e.eventDate} // ← Changed from e.date
+                name={e.eventTitle}
+                description={e.eventDetails}
+                date={e.eventDate}
                 time={
                   e.startTime && e.endTime
                     ? `${e.startTime} - ${e.endTime}`
                     : "Time TBD"
                 }
-                attendedCount={e.eventAttendees} // ← Changed from e.participants.length
-                attendanceCode={e.attendanceCode || e.eventCode} // ← Use eventCode as fallback
+                attendedCount={e.eventAttendees}
+                attendanceCode={e.attendanceCode || e.eventCode}
                 imageUrl={""}
               />
             ))}
@@ -179,7 +192,11 @@ export default function Page() {
         )}
       </div>
 
-      <AddEvent open={open} setOpen={setOpen} />
+      <AddEvent
+        open={open}
+        setOpen={setOpen}
+        onEventAdded={handleEventAdded} // Pass the callback
+      />
     </SidebarInset>
   );
 }

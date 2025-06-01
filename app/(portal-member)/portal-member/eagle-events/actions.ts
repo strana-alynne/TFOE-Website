@@ -1,6 +1,6 @@
 "use server";
 
-export async function getDetails(token: string) {
+export async function getDetails(token: any) {
   try {
     const response = await fetch(
       `https://tfoe-backend.onrender.com/user/events`,
@@ -14,10 +14,12 @@ export async function getDetails(token: string) {
     );
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+     console.log("Response status:", response);
     }
 
     const data = await response.json();
+
+    console.log("Response data:", data);
 
     return { data: data };
   } catch (error) {
@@ -27,11 +29,12 @@ export async function getDetails(token: string) {
     };
   }
 }
-
-export async function getEventDetail(token: string, eventId: string) {
+export async function getEventDetail(token: any, eventId: string) {
   try {
+    console.log("Fetching event details with token:", token);
+    console.log("Fetching event details for eventId:", eventId);
     const response = await fetch(
-      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      `https://tfoe-backend.onrender.com/user/event/${eventId}`,
       {
         method: "GET",
         headers: {
@@ -42,10 +45,11 @@ export async function getEventDetail(token: string, eventId: string) {
     );
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+      console.log("Response status:", response);
     }
 
     const data = await response.json();
+    console.log("Response data:", data);
 
     return { data: data };
   } catch (error) {
@@ -55,38 +59,79 @@ export async function getEventDetail(token: string, eventId: string) {
     };
   }
 }
-export async function addFeedback(
-token: string, memberid: string, attendanceCode: string, feedback: string
-) {
+// Get user details
+export async function getUserDetails(token: string) {
   try {
-    const body = {
-      feedbackContent: feedback,
-      feedbackSenderId: memberid,
-      feedbackDate: Date.now(),
-    };
-    const response = await fetch(
-      `https://tfoe-backend.onrender.com/member/feedback`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
+    const response = await fetch('https://tfoe-backend.onrender.com/member/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
-    );
+    });
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+      console.log("Response status:", response);
     }
 
-    const data = await response.json();
-
-    return { data: data };
+    return await response.json();
   } catch (error) {
-    console.error("Error fetching details:", error);
-    return {
-      message: error instanceof Error ? error.message : "Failed to fetch data!",
-    };
+    console.error('Error fetching user details:', error);
+    throw error;
+  }
+}
+
+// Mark attendance
+export async function markAttendance(token: string, eventId: string, attendanceData: {
+  eventCode: string;
+  memberId: string;
+  memberName: string;
+}) {
+  try {
+    const response = await fetch(`https://tfoe-backend.onrender.com/member/event/${eventId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(attendanceData),
+    });
+
+    if (!response.ok) {
+    console.log("Response Attendance:", response);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.log('Error marking attendance:', error);
+    throw error;
+  }
+}
+
+// Submit feedback
+export async function submitFeedback(token: string, feedbackData: {
+  feedbackContent: string;
+  feedbackSenderId: string;
+  eventId: string;
+  feedbackDate: string;
+}) {
+  try {
+    const response = await fetch('https://tfoe-backend.onrender.com/member/feedback', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(feedbackData),
+    });
+
+    if (!response.ok) {
+      console.log("Response status:", response);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    throw error;
   }
 }

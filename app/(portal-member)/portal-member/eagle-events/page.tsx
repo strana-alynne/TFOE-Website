@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
@@ -21,72 +20,70 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MemberEvent } from "@/components/member-event";
+import { AdminEvent } from "@/components/admin-event";
+import { Button } from "@/components/ui/button";
+import { Add } from "@mui/icons-material";
+import { AddEvent } from "@/components/add-event-modal";
 import { getDetails } from "./actions";
+import { MemberEvent } from "@/components/member-event";
 
 interface Event {
   id: string;
-  imageUrl: string;
-  name: string;
-  date: string;
-  starttime: string;
-  endtime: string;
-  attended: string;
-  attendanceCode: string;
-  happeningNow: boolean;
+  eventCode: string;
+  eventTitle: string;
+  eventAttendees: number;
+  eventDetails: string;
+  eventDate: string;
+  // Optional fields that might not be in your API response
+  startTime?: string;
+  endTime?: string;
+  happeningNow?: boolean;
+  attendanceCode?: string;
+  participants?: { id: string; name: string }[];
 }
 
 export default function Page() {
   const [event, setEvent] = useState<Event[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFilter, setSelectedFilter] = useState("all");
+  const [open, setOpen] = useState(false);
 
-  const filteredEvents = Array.isArray(event)
-    ? event.filter((e) => {
-        const matchesSearch = e.name
-          .toLowerCase()
-          .includes(searchQuery.toLowerCase());
+  const fetchDetails = async () => {
+    const token = localStorage.getItem("access_token");
+    console.log("Fetching event details with token:", token);
+    if (!token) return;
 
-        const now = new Date();
-        const eventDate = new Date(e.date);
+    try {
+      setLoading(true);
+      const response = await getDetails(token);
 
-        let matchesFilter = true;
-
-        if (selectedFilter === "Attended") {
-          matchesFilter = e.attended === "Attended";
-        } else if (selectedFilter === "Missed") {
-          matchesFilter = e.attended === "Missed";
-        } else if (selectedFilter === "Upcoming") {
-          matchesFilter = e.attended === "n/a" && eventDate >= now;
-        }
-
-        return matchesSearch && matchesFilter;
-      })
-    : [];
+      console.log("Response rawr:", response);
+      const events = Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+      console.log("Fetched events:", events);
+      setEvent(events);
+    } catch (error) {
+      console.error("Failed to fetch member details:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch member details"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) return;
-
-      try {
-        const response = await getDetails(token);
-        const events = Array.isArray(response.data) ? response.data : [];
-        setEvent(events);
-        console.log(response.data);
-      } catch (error) {
-        console.error("Failed to fetch member details:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch member details"
-        );
-      }
-    };
-
     fetchDetails();
   }, []);
+
+  // Callback function to refresh events after adding
+  const handleEventAdded = () => {
+    fetchDetails(); // Refetch all events
+    setOpen(false); // Close the modal
+  };
 
   return (
     <SidebarInset className="w-full">
@@ -104,9 +101,6 @@ export default function Page() {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Rawr</BreadcrumbPage>
-            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
       </header>
@@ -127,17 +121,12 @@ export default function Page() {
               type="search"
               placeholder="Search events..."
               className="w-full rounded-lg bg-background pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
           {/* Select Dropdown */}
           <div className="relative w-full sm:w-auto min-w-[150px]">
-            <Select
-              onValueChange={(value) => setSelectedFilter(value)}
-              defaultValue="all"
-            >
+            <Select>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a filter" />
               </SelectTrigger>
@@ -145,36 +134,43 @@ export default function Page() {
                 <SelectGroup>
                   <SelectLabel>Filters</SelectLabel>
                   <SelectItem value="all">All Events</SelectItem>
-                  <SelectItem value="Attended">Attended Events</SelectItem>
+                  <SelectItem value="attended">Attended Events</SelectItem>
                   <SelectItem value="upcoming">Upcoming Events</SelectItem>
-                  <SelectItem value="Missed">Missed Events</SelectItem>
+                  <SelectItem value="missed">Missed Events</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
         </div>
       </div>
-
-      <div className="p-4 w-full h-full flex items-center justify-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full h-full">
-          {filteredEvents.length === 0 ? (
-            <div className="col-span-full text-center text-muted-foreground">
-              No events yet.
-            </div>
-          ) : (
-            filteredEvents.map((e) => (
+      <div className="p-4 w-full min-h-[200px] flex items-center justify-center">
+        {loading ? (
+          <p className="text-muted-foreground">Loading events...</p>
+        ) : error ? (
+          <p className="text-destructive">{error}</p>
+        ) : event.length === 0 ? (
+          <p className="text-muted-foreground">No events added yet.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
+            {event.map((e) => (
               <MemberEvent
                 key={e.id}
                 id={e.id}
-                imageUrl={e.imageUrl}
-                name={e.name}
-                date={e.date}
-                time={`${e.starttime} - ${e.endtime}`}
-                attended={e.attended}
+                name={e.eventTitle}
+                description={e.eventDetails}
+                date={e.eventDate}
+                time={
+                  e.startTime && e.endTime
+                    ? `${e.startTime} - ${e.endTime}`
+                    : "Time TBD"
+                }
+                attendanceCode={e.attendanceCode || e.eventCode}
+                imageUrl={""}
+                attended={""}
               />
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </SidebarInset>
   );

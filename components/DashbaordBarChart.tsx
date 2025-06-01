@@ -17,53 +17,93 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { month: "Jan - March", desktop: 186 },
-  { month: "April - June", desktop: 305 },
-  { month: "July - September", desktop: 237 },
-  { month: "October - December", desktop: 73 },
-];
+
+interface DashboardBarChartProps {
+  quarterlyData: Record<string, number> | null;
+}
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  value: {
+    label: "Sales",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
-export default function DashboardBarChart() {
+export default function DashboardBarChart({
+  quarterlyData,
+}: DashboardBarChartProps) {
+  // Transform the quarterly data into chart format, handling null/undefined
+  const chartData = quarterlyData
+    ? Object.entries(quarterlyData)
+        .filter(([_, value]) => value !== null && value !== undefined)
+        .map(([quarter, value]) => ({
+          quarter,
+          value: value || 0,
+        }))
+    : [];
+
+  // Default quarters with 0 values when no data is available
+  const defaultChartData = [
+    { quarter: "Q1", value: 0 },
+    { quarter: "Q2", value: 0 },
+    { quarter: "Q3", value: 0 },
+    { quarter: "Q4", value: 0 },
+  ];
+
+  const displayData = chartData.length > 0 ? chartData : defaultChartData;
+  const hasRealData =
+    chartData.length > 0 && chartData.some((item) => item.value > 0);
+
+  // Calculate total and trend
+  const total = displayData.reduce((acc, curr) => acc + (curr.value || 0), 0);
+
   return (
     <Card className="w-full h-full">
       <CardHeader>
-        <CardTitle>Quarterly Sale Deployment</CardTitle>
+        <CardTitle>Quarterly Sales Development</CardTitle>
         <CardDescription>2025</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig}>
-          <BarChart accessibilityLayer data={chartData}>
+          <BarChart accessibilityLayer data={displayData}>
             <CartesianGrid vertical={false} />
             <XAxis
-              dataKey="month"
+              dataKey="quarter"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
               content={<ChartTooltipContent hideLabel />}
             />
-            <Bar dataKey="desktop" fill="var(--color-desktop)" radius={8} />
+            <Bar dataKey="value" fill="var(--color-value)" radius={8} />
           </BarChart>
         </ChartContainer>
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Total saler for every quarter
-        </div>
+        {hasRealData ? (
+          <>
+            <div className="flex gap-2 font-medium leading-none">
+              Total sales: ₱{total.toLocaleString()}{" "}
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div className="leading-none text-muted-foreground">
+              Total sales for all quarters
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex gap-2 font-medium leading-none text-muted-foreground">
+              No sales data available
+            </div>
+            <div className="leading-none text-muted-foreground">
+              {quarterlyData === null
+                ? "Data is being collected"
+                : "Quarterly sales will appear here when data is available"}
+            </div>
+          </>
+        )}
       </CardFooter>
     </Card>
   );

@@ -20,14 +20,34 @@ import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
 import { EditEvent } from "@/components/edit-event-modal";
 import { DeleteEventModal } from "@/components/delete-modal";
-// Define the Member type
+
+// Updated interfaces to match your actual data structure
+interface EventAttendee {
+  eventCode: string;
+  memberId: string;
+  memberName: string;
+}
+
 interface EventDetailsProps {
   id: string;
   eventTitle: string;
   eventDate: string;
   startTime: string;
   endTime: string;
-  eventAttendees: number;
+  eventAttendees: EventAttendee[]; // Changed from number to array
+  eventCode: string;
+  eventDetails: string;
+  participants?: { id: string; name: string; feedback: string }[];
+}
+
+// Interface for EditEvent component (matches the original structure)
+interface EditEventDetailsProps {
+  id: string;
+  eventTitle: string;
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+  eventAttendees: number; // Keep as number for EditEvent
   eventCode: string;
   eventDetails: string;
   participants?: { id: string; name: string; feedback: string }[];
@@ -46,10 +66,10 @@ export default function EventDetails({ id }: EventID) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false); // Add delete modal state
-  const [isDeleting, setIsDeleting] = useState(false); // Add deleting state
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [selectedMember, setSelectedMember] =
-    useState<EventDetailsProps | null>(null);
+    useState<EditEventDetailsProps | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
 
   // Create a memoized function to fetch event details
@@ -71,7 +91,21 @@ export default function EventDetails({ id }: EventID) {
       console.log(`Response for ${id}:`, response);
 
       if (response?.data?.data) {
-        setEventDetail(response.data.data);
+        // Transform the data to match your interface if needed
+        const eventData = response.data.data;
+
+        // If participants don't exist, create them from eventAttendees
+        if (!eventData.participants && eventData.eventAttendees) {
+          eventData.participants = eventData.eventAttendees.map(
+            (attendee: EventAttendee, index: number) => ({
+              id: attendee.memberId,
+              name: attendee.memberName,
+              feedback: "", // Default empty feedback
+            })
+          );
+        }
+
+        setEventDetail(eventData);
         setError(null);
       } else {
         setError("No event data received");
@@ -95,27 +129,31 @@ export default function EventDetails({ id }: EventID) {
   const handleEventUpdated = useCallback(async () => {
     console.log("Event updated successfully, refetching data...");
 
-    // Show success toast
     toast({
       title: "Success",
       description: "Event updated successfully!",
       variant: "default",
     });
 
-    // Refetch the event details to get updated data
     await fetchEventDetails();
-
-    // Close the edit modal
     setEditOpen(false);
     setSelectedMember(null);
   }, [fetchEventDetails, toast]);
 
   const handleEditClick = () => {
-    setSelectedMember(eventdetail);
+    if (eventdetail) {
+      // Transform the data to match EditEvent component's expected structure
+      const transformedEvent: EditEventDetailsProps = {
+        ...eventdetail,
+        eventAttendees: Array.isArray(eventdetail.eventAttendees)
+          ? eventdetail.eventAttendees.length
+          : 0,
+      };
+      setSelectedMember(transformedEvent);
+    }
     setEditOpen(true);
   };
 
-  // Actual delete function called after confirmation
   const handleConfirmDelete = async () => {
     const token =
       typeof window !== "undefined"
@@ -141,10 +179,7 @@ export default function EventDetails({ id }: EventID) {
         variant: "default",
       });
 
-      // Close the modal
       setDeleteOpen(false);
-
-      // You might want to redirect to the events list page here
       window.location.href = "/portal/eagle-events";
     } catch (error) {
       console.error("Failed to delete event:", error);
@@ -269,7 +304,7 @@ export default function EventDetails({ id }: EventID) {
             <Button
               variant="destructive"
               disabled={updateLoading || loading}
-              onClick={handleConfirmDelete}
+              onClick={() => setDeleteOpen(true)} // Fixed: Open modal instead of direct delete
             >
               {updateLoading || loading ? (
                 <>Loading...</>
@@ -329,9 +364,11 @@ export default function EventDetails({ id }: EventID) {
           )}
 
           <div className="mt-4">
-            <p className="text-muted-foreground">EXPECTED ATTENDEES</p>
+            <p className="text-muted-foreground">REGISTERED ATTENDEES</p>
             <h2 className="text-md font-bold">
-              {eventdetail?.eventAttendees || 0}
+              {Array.isArray(eventdetail?.eventAttendees)
+                ? eventdetail.eventAttendees.length
+                : 0}
             </h2>
           </div>
         </CardContent>
@@ -339,7 +376,10 @@ export default function EventDetails({ id }: EventID) {
 
       <div className="px-4 py-8 pb-0 w-full">
         <h2 className="text-2xl font-semibold leading-none tracking-tight">
-          Participants
+          Participants{" "}
+          {eventdetail?.eventAttendees
+            ? `(${eventdetail.eventAttendees.length})`
+            : ""}
         </h2>
         <ParticipantsTable participants={eventdetail?.participants || []} />
       </div>
@@ -355,7 +395,7 @@ export default function EventDetails({ id }: EventID) {
         open={editOpen}
         setOpen={handleEditClose}
         event={selectedMember}
-        onUpdated={handleEventUpdated} // Use the improved callback
+        onUpdated={handleEventUpdated}
       />
       <DeleteEventModal
         open={deleteOpen}

@@ -16,20 +16,27 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+
+interface DashboardLineGraphProps {
+  annualContribution: number | null;
+}
+
+// Default chart data - you might want to replace this with actual monthly data from your API
 const chartData = [
-  { date: "January", desktop: 222, mobile: 150 },
-  { date: "February", desktop: 97, mobile: 180 },
-  { date: "March", desktop: 300, mobile: 120 },
-  { date: "April", desktop: 242, mobile: 260 },
-  { date: "May", desktop: 373, mobile: 290 },
-  { date: "June", desktop: 301, mobile: 340 },
-  { date: "July", desktop: 245, mobile: 180 },
-  { date: "August", desktop: 409, mobile: 320 },
-  { date: "September", desktop: 59, mobile: 110 },
-  { date: "October", desktop: 261, mobile: 190 },
-  { date: "November", desktop: 327, mobile: 350 },
-  { date: "December", desktop: 292, mobile: 210 },
+  { date: "January", contribution: 0 },
+  { date: "February", contribution: 0 },
+  { date: "March", contribution: 0 },
+  { date: "April", contribution: 0 },
+  { date: "May", contribution: 0 },
+  { date: "June", contribution: 0 },
+  { date: "July", contribution: 0 },
+  { date: "August", contribution: 0 },
+  { date: "September", contribution: 0 },
+  { date: "October", contribution: 0 },
+  { date: "November", contribution: 0 },
+  { date: "December", contribution: 0 },
 ];
+
 const monthMap: { [key: string]: string } = {
   January: "2024-01-01",
   February: "2024-02-01",
@@ -44,39 +51,56 @@ const monthMap: { [key: string]: string } = {
   November: "2024-11-01",
   December: "2024-12-01",
 };
+
 const chartConfig = {
   views: {
-    label: "Total Sales",
+    label: "Total Contributions",
   },
-  desktop: {
-    label: "Desktop",
+  contribution: {
+    label: "Contribution",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
-export function DashboardLineGraph() {
+export function DashboardLineGraph({
+  annualContribution,
+}: DashboardLineGraphProps) {
   const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("desktop");
+    React.useState<keyof typeof chartConfig>("contribution");
+
+  // Handle null/undefined annual contribution
+  const safeAnnualContribution = annualContribution ?? 0;
+  const hasContributionData =
+    annualContribution !== null && annualContribution > 0;
+
+  // For now, we'll distribute the annual contribution evenly across months
+  // You might want to modify this to use actual monthly data from your API
+  const monthlyAverage = hasContributionData ? safeAnnualContribution / 12 : 0;
+  const chartDataWithContribution = chartData.map((month) => ({
+    ...month,
+    contribution: Math.round(monthlyAverage),
+  }));
 
   const total = React.useMemo(
     () => ({
-      desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
-      mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
+      contribution: safeAnnualContribution,
     }),
-    []
+    [safeAnnualContribution]
   );
 
   return (
     <Card className="w-full h-full">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Annual Sales Developement</CardTitle>
+          <CardTitle>Annual Contribution Development</CardTitle>
           <CardDescription>
-            Showing total sales for the year 2024
+            {hasContributionData
+              ? "Showing total contributions for the year 2024"
+              : "No contribution data available for 2024"}
           </CardDescription>
         </div>
         <div className="flex">
-          {["desktop"].map((key) => {
+          {["contribution"].map((key) => {
             const chart = key as keyof typeof chartConfig;
             return (
               <button
@@ -86,10 +110,17 @@ export function DashboardLineGraph() {
                 onClick={() => setActiveChart(chart)}
               >
                 <span className="text-xs text-muted-foreground">
-                  Total Sales
+                  {hasContributionData
+                    ? "Total Contributions"
+                    : "No Contributions Yet"}
                 </span>
                 <span className="text-lg font-bold leading-none sm:text-3xl">
                   ₱ {total[key as keyof typeof total].toLocaleString()}
+                  {!hasContributionData && (
+                    <span className="text-sm text-muted-foreground ml-2">
+                      (No data)
+                    </span>
+                  )}
                 </span>
               </button>
             );
@@ -103,7 +134,7 @@ export function DashboardLineGraph() {
         >
           <LineChart
             accessibilityLayer
-            data={chartData}
+            data={chartDataWithContribution}
             margin={{
               left: 12,
               right: 12,

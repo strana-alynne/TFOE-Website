@@ -1,9 +1,9 @@
 "use server";
 
-export async function getDetails(token: string, id: string) {
+export async function getStats(token: string) {
   try {
     const response = await fetch(
-      `https://tfoe-backend.onrender.com/admin/member/${id}`,
+      `https://tfoe-backend.onrender.com/admin/dashboard`,
       {
         method: "GET",
         headers: {

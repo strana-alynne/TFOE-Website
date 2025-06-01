@@ -28,16 +28,19 @@ import { Button } from "@/components/ui/button";
 import { Add } from "@mui/icons-material";
 import { AddEvent } from "@/components/add-event-modal";
 
+// Updated Event interface to match your actual backend data
 interface Event {
   id: string;
   eventCode: string;
   eventTitle: string;
-  eventAttendees: number;
+  eventAttendees: Array<
+    string | { eventCode: string; memberId: string; memberName: string }
+  >; // Mixed array
   eventDetails: string;
   eventDate: string;
-  // Optional fields that might not be in your API response
-  startTime?: string;
-  endTime?: string;
+  startTime: string;
+  endTime: string;
+  // Optional fields
   happeningNow?: boolean;
   attendanceCode?: string;
   participants?: { id: string; name: string }[];
@@ -85,16 +88,6 @@ export default function Page() {
     fetchDetails(); // Refetch all events
     setOpen(false); // Close the modal
   };
-
-  // Alternative: Callback to add the new event directly to state
-  const handleEventAddedOptimistic = (newEvent: Event) => {
-    setEvent((prevEvents) => [...prevEvents, newEvent]);
-    setOpen(false);
-  };
-
-  function setEditOpen(open: boolean): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <SidebarInset className="w-full">
@@ -183,7 +176,7 @@ export default function Page() {
                     ? `${e.startTime} - ${e.endTime}`
                     : "Time TBD"
                 }
-                attendedCount={e.eventAttendees}
+                attendedCount={e.eventAttendees} // Pass the raw data, let AdminEvent handle it
                 attendanceCode={e.attendanceCode || e.eventCode}
                 imageUrl={""}
               />

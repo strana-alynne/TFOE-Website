@@ -136,7 +136,7 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
             Verification Code
           </DialogTitle>
           <DialogDescription className="text-center">
-            We have sent a verification code to your device
+            We have sent a verification code to your registered email.
           </DialogDescription>
         </DialogHeader>
 

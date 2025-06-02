@@ -35,14 +35,11 @@ const data = {
         // { title: "Email Announcents", url: "#" },
       ],
     },
-    // {
-    //   title: "Reports",
-    //   url: "#",
-    //   items: [
-    //     { title: "Financial Report Summary", url: "#" },
-    //     { title: "Member Status", url: "#", isActive: true },
-    //   ],
-    // },
+    {
+      title: "Contribution Management",
+      url: "#",
+      items: [{ title: "Contributions", url: "/portal/contributions" }],
+    },
     // {
     //   title: "Documents",
     //   url: "#",
@@ -72,9 +69,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [state, router]);
 
   const handleLogout = () => {
+    console.log("Logging out...");
     startTransition(() => {
       logoutAction();
     });
+    console.log("Logout action dispatched");
   };
 
   // Helper function to check if a path is active

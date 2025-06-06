@@ -14,7 +14,7 @@ export async function getStats(token: string) {
     );
 
     if (!response.ok) {
-      throw new Error(`Request failed: ${response.status}`);
+      console.log("Response status:", response);
     }
 
     // Get the raw response body as text

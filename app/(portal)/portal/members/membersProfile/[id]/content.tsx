@@ -12,24 +12,19 @@ import {
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Add, Download, Edit, UploadFile } from "@mui/icons-material";
+import { Download, Edit, UploadFile } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { getContribution, getDetails } from "./actions";
+import { getDetails } from "./actions";
 import { AdminEditMemberModal } from "@/components/admin-edit-member-modal copy";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { AddContributionModal } from "@/components/add-contributions-modal";
+import { AdminEditPositionModal } from "@/components/edit-position-member";
+import { EditEducationModal } from "@/components/edit-educ-modal";
+import { EditSkillsModal } from "@/components/edit-skills-modal";
+import { EditBusinessModal } from "@/components/edit-biz-modal";
 
-// Updated Member interface to match API response
+// Updated Member interface to match the extended API response
 interface Member {
   id: string;
   firstName: string;
@@ -47,14 +42,28 @@ interface Member {
   contribution: string | number;
   absences: string | number;
   feedback?: string;
-}
-
-// Contribution interface
-interface Contribution {
-  id: string;
-  contribution: number;
-  user_id: string;
-  created_at: string;
+  // Additional fields from the extended API response
+  businessName?: string;
+  businessTelephone?: string;
+  businessFax?: string;
+  businessAddress?: string;
+  elementary?: string;
+  dateGraduateElementary?: string;
+  highschool?: string;
+  dateGraduateHighschool?: string;
+  college?: string;
+  dateGraduateCollege?: string;
+  course?: string;
+  hobbies?: string[];
+  skills?: string[];
+  telephone?: string;
+  birthPlace?: string;
+  civilStatus?: string;
+  height?: number;
+  weight?: number;
+  citizenship?: string;
+  religion?: string;
+  bloodType?: string;
 }
 
 interface DownloadableItem {
@@ -109,30 +118,6 @@ const DownloadableItem = ({ imagePath, title, date }: DownloadableItem) => (
   </div>
 );
 
-// Format date function
-const formatDate = (dateString: string) => {
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch (error) {
-    return dateString;
-  }
-};
-
-// Format currency function
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "PHP",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
 export default function MembersProfile({ memberId }: MembersProfileProps) {
   const { toast } = useToast();
   const [member, setMember] = useState<Member | null>(null);
@@ -141,84 +126,12 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
-  const [contributionModalOpen, setContributionModalOpen] = useState(false);
-  const [contributions, setContributions] = useState<Contribution[]>([]);
-  const [contributionsLoading, setContributionsLoading] = useState(true);
+  const [editPositionOpen, setEditPositionOpen] = useState(false);
+  const [editEducationOpen, setEditEducationOpen] = useState(false);
+  const [editBusinessOpen, setEditBusinessOpen] = useState(false);
+  const [editSkillsOpen, setEditSkillsOpen] = useState(false);
+  const [editMembershipOpen, setEditMembershipOpen] = useState(false);
 
-  // Filter contributions for the current member
-  const memberContributions = contributions.filter(
-    (contribution) => contribution.user_id === memberId
-  );
-
-  // Calculate total contributions
-  const totalContributions = memberContributions.reduce(
-    (sum, contribution) => sum + contribution.contribution,
-    0
-  );
-
-  const handleContributionAdded = async () => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("access_token")
-        : null;
-
-    if (!token) {
-      toast({
-        title: "Authentication Error",
-        content: "No access token found. Please log in again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log("Refreshing member data and contributions...");
-
-      // Set loading states
-      setContributionsLoading(true);
-
-      // Fetch both member details and contributions in parallel
-      const [memberResponse, contributionResponse] = await Promise.all([
-        getDetails(token, memberId),
-        getContribution(token, memberId),
-      ]);
-
-      // Update member data
-      const memberData = memberResponse.data?.data || memberResponse.data;
-      if (memberData) {
-        setMember(memberData);
-        console.log("Member data updated:", memberData);
-      }
-
-      // Update contributions data
-      const contributionData =
-        contributionResponse.data?.data || contributionResponse.data;
-
-      if (Array.isArray(contributionData)) {
-        setContributions(contributionData);
-        console.log("Contributions updated:", contributionData);
-      } else {
-        console.error("Contributions data is not an array:", contributionData);
-        setContributions([]);
-      }
-
-      // Show success message
-      toast({
-        title: "Data Refreshed",
-        content: "Member data updated with new contribution.",
-      });
-    } catch (error) {
-      console.error("Failed to refresh member data:", error);
-
-      toast({
-        title: "Refresh Failed",
-        content: "Failed to refresh data. Please reload the page.",
-        variant: "destructive",
-      });
-    } finally {
-      setContributionsLoading(false);
-    }
-  };
   const calculateAge = (birthDateString: string) => {
     const today = new Date();
     const birthDate = new Date(birthDateString);
@@ -232,6 +145,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
   useEffect(() => {
     const fetchDetails = async () => {
+      // Use a fallback token for testing if localStorage is not available
       const token =
         typeof window !== "undefined"
           ? localStorage.getItem("access_token")
@@ -245,33 +159,13 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
       try {
         console.log("Fetching member details for ID:", memberId);
-
-        // Fetch member details
         const response = await getDetails(token, memberId);
         console.log("Member details response:", response);
+
+        // Extract the member data from the nested structure
         const memberData = response.data?.data || response.data;
         setMember(memberData);
-
-        // Fetch contributions
-        setContributionsLoading(true);
-        const contributionResponse = await getContribution(token, memberId);
-        console.log("Contributions response:", contributionResponse);
-
-        const contributionData =
-          contributionResponse.data?.data || contributionResponse.data;
-
-        if (Array.isArray(contributionData)) {
-          setContributions(contributionData);
-        } else {
-          console.error(
-            "Contributions data is not an array:",
-            contributionData
-          );
-          setContributions([]);
-        }
-
         setLoading(false);
-        setContributionsLoading(false);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
         setError(
@@ -280,7 +174,6 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
             : "Failed to fetch member details"
         );
         setLoading(false);
-        setContributionsLoading(false);
       }
     };
 
@@ -288,7 +181,10 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
   }, [memberId]);
 
   // Updated handleSave function with proper data formatting and validation
-  const handleSave = async (updatedMember: Member): Promise<boolean> => {
+  const handleSave = async (
+    updatedMember: Member,
+    modalType?: string
+  ): Promise<boolean> => {
     try {
       setUpdateLoading(true);
       const token =
@@ -311,14 +207,15 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
       const formatDateForAPI = (dateString: string) => {
         try {
           const date = new Date(dateString);
+          // Return ISO date string (YYYY-MM-DD format)
           return date.toISOString().split("T")[0];
         } catch (error) {
           console.error("Date formatting error:", error);
-          return dateString;
+          return dateString; // fallback to original
         }
       };
 
-      // Prepare the update payload
+      // Updated memberUpdate payload in the handleSave function
       const memberUpdate = {
         firstName: updatedMember.firstName?.trim() || "",
         middleName: updatedMember.middleName?.trim() || "",
@@ -326,10 +223,11 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         nameExtension: updatedMember.nameExtension?.trim() || "",
         address: updatedMember.address?.trim() || "",
         email: updatedMember.email?.trim() || "",
-        contact: updatedMember.contact?.trim() || "",
+        cellphone: updatedMember.contact?.trim() || "",
         status: updatedMember.status || "ACTIVE",
         birthDate: formatDateForAPI(updatedMember.birthDate),
         profession: updatedMember.profession?.trim() || "",
+        // Include these fields even if they're not being edited
         absences:
           typeof updatedMember.absences === "string"
             ? parseInt(updatedMember.absences) || 0
@@ -341,11 +239,45 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         position: updatedMember.position?.trim() || "",
         feedback: updatedMember.feedback?.trim() || "",
         dateJoined: formatDateForAPI(updatedMember.dateJoined),
+        // Additional fields from extended API
+        businessName: updatedMember.businessName?.trim() || "",
+        businessTelephone: updatedMember.businessTelephone?.trim() || "",
+        businessFax: updatedMember.businessFax?.trim() || "",
+        businessAddress: updatedMember.businessAddress?.trim() || "",
+        elementary: updatedMember.elementary?.trim() || "",
+        dateGraduateElementary: updatedMember.dateGraduateElementary
+          ? formatDateForAPI(updatedMember.dateGraduateElementary)
+          : "",
+        highschool: updatedMember.highschool?.trim() || "",
+        dateGraduateHighschool: updatedMember.dateGraduateHighschool
+          ? formatDateForAPI(updatedMember.dateGraduateHighschool)
+          : "",
+        college: updatedMember.college?.trim() || "",
+        dateGraduateCollege: updatedMember.dateGraduateCollege
+          ? formatDateForAPI(updatedMember.dateGraduateCollege)
+          : "",
+        course: updatedMember.course?.trim() || "",
+        hobbies: updatedMember.hobbies || [],
+        skills: updatedMember.skills || [],
+        telephone: updatedMember.telephone?.trim() || "",
+        birthPlace: updatedMember.birthPlace?.trim() || "",
+        civilStatus: updatedMember.civilStatus?.trim() || "",
+        height:
+          typeof updatedMember.height === "string"
+            ? parseInt(updatedMember.height) || 0
+            : updatedMember.height || 0,
+        weight:
+          typeof updatedMember.weight === "string"
+            ? parseInt(updatedMember.weight) || 0
+            : updatedMember.weight || 0,
+        citizenship: updatedMember.citizenship?.trim() || "",
+        religion: updatedMember.religion?.trim() || "",
+        bloodType: updatedMember.bloodType?.trim() || "",
       };
 
       console.log("Sending update payload:", memberUpdate);
 
-      // Validate required fields
+      // Validate required fields before sending
       const requiredFields = [
         "firstName",
         "lastName",
@@ -368,6 +300,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         }
       }
 
+      // Use the user_id parameter as mentioned
       const response = await axios.put(
         `https://tfoe-backend.onrender.com/admin/member/${updatedMember.id}`,
         memberUpdate,
@@ -381,20 +314,34 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
       console.log("Update response:", response);
 
-      if (response.status === 200 || response.status === 201) {
+      if (response.status === 200 || response.status === 202) {
         const updatedData = response.data?.data || updatedMember;
         setMember(updatedData);
+        switch (modalType) {
+          case "education":
+            setEditEducationOpen(false);
+            break;
+          case "business":
+            setEditBusinessOpen(false);
+            break;
+          case "skills":
+            setEditSkillsOpen(false);
+            break;
+          case "membership":
+            setEditMembershipOpen(false);
+            break;
+          default:
+            setEditOpen(false);
+        }
 
         toast({
           title: "Profile Updated",
-          content: "Member profile has been updated successfully.",
+          content: `${modalType ? modalType.charAt(0).toUpperCase() + modalType.slice(1) : "Profile"} information has been updated successfully.`,
         });
 
-        console.log("Profile updated successfully");
         return true;
       } else {
         console.log("Unexpected response status:", response);
-        return false;
       }
     } catch (error) {
       console.error("Error updating member:", error);
@@ -402,6 +349,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
       let errorMessage = "Failed to update profile. Please try again.";
 
       if (axios.isAxiosError(error)) {
+        // Handle 422 specifically - validation errors
         if (error.response?.status === 422) {
           const validationErrors =
             error.response?.data?.errors || error.response?.data?.message;
@@ -429,6 +377,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
           errorMessage = error.response.data.message;
         }
 
+        // Log the full error response for debugging
         console.error("API Error Response:", error.response?.data);
       }
 
@@ -443,8 +392,9 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
     } finally {
       setUpdateLoading(false);
     }
+    // Ensure a boolean is always returned
+    return false;
   };
-
   if (loading) {
     return (
       <SidebarInset className="w-full">
@@ -479,6 +429,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
     );
   }
 
+  // Fixed fullName construction to use nameExtension instead of nameExtensions
   const fullName =
     `${member.firstName || ""} ${member.middleName || ""} ${member.lastName || ""} ${member.nameExtension || ""}`.trim();
 
@@ -504,14 +455,14 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
           </BreadcrumbList>
         </Breadcrumb>
       </header>
-
+      {/* Display member details */}
       <div className="p-4 pb-0">
         <h1 className="font-bold">Member Profile</h1>
       </div>
 
       <Card className="m-4 p-4">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Member Information</CardTitle>
+          <CardTitle>Personal Information</CardTitle>
           <Button
             variant="outline"
             disabled={updateLoading}
@@ -566,8 +517,54 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
               </Badge>
             </div>
             <div>
+              <p className="text-muted-foreground">BIRTH DATE</p>
+              <h2 className="text-md font-bold">
+                {new Date(member.birthDate).toLocaleDateString()}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">BIRTH PLACE</p>
+              <h2 className="text-md font-bold">
+                {member.birthPlace || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">CIVIL STATUS</p>
+              <h2 className="text-md font-bold">
+                {member.civilStatus || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">CITIZENSHIP</p>
+              <h2 className="text-md font-bold">
+                {member.citizenship || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">RELIGION</p>
+              <h2 className="text-md font-bold">{member.religion || "N/A"}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">BLOOD TYPE</p>
+              <h2 className="text-md font-bold">{member.bloodType || "N/A"}</h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">HEIGHT</p>
+              <h2 className="text-md font-bold">
+                {member.height ? `${member.height} cm` : "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">WEIGHT</p>
+              <h2 className="text-md font-bold">
+                {member.weight ? `${member.weight} kg` : "N/A"}
+              </h2>
+            </div>
+            <div>
               <p className="text-muted-foreground">PROFESSION</p>
-              <h2 className="text-md font-bold">{member.profession}</h2>
+              <h2 className="text-md font-bold">
+                {member.profession || "N/A"}
+              </h2>
             </div>
             <div className="col-span-2">
               <p className="text-muted-foreground">ADDRESS</p>
@@ -578,8 +575,183 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
               <h2 className="text-md font-bold">{member.contact}</h2>
             </div>
             <div>
+              <p className="text-muted-foreground">TELEPHONE</p>
+              <h2 className="text-md font-bold">{member.telephone || "N/A"}</h2>
+            </div>
+            <div>
               <p className="text-muted-foreground">EMAIL</p>
               <h2 className="text-md font-bold">{member.email}</h2>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Educational Background Card - Add this new card */}
+      <Card className="m-4 p-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Educational Background</CardTitle>
+          <Button
+            variant="outline"
+            disabled={updateLoading}
+            onClick={() => {
+              setSelectedMember(member);
+              setEditEducationOpen(true);
+            }}
+          >
+            {updateLoading ? (
+              <>Loading...</>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" /> Edit Education
+              </>
+            )}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <p className="text-muted-foreground">ELEMENTARY</p>
+              <h2 className="text-md font-bold">
+                {member.elementary || "N/A"}
+              </h2>
+              {member.dateGraduateElementary && (
+                <p className="text-sm text-muted-foreground">
+                  Graduated:{" "}
+                  {new Date(member.dateGraduateElementary).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">HIGH SCHOOL</p>
+              <h2 className="text-md font-bold">
+                {member.highschool || "N/A"}
+              </h2>
+              {member.dateGraduateHighschool && (
+                <p className="text-sm text-muted-foreground">
+                  Graduated:{" "}
+                  {new Date(member.dateGraduateHighschool).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">COLLEGE</p>
+              <h2 className="text-md font-bold">{member.college || "N/A"}</h2>
+              {member.dateGraduateCollege && (
+                <p className="text-sm text-muted-foreground">
+                  Graduated:{" "}
+                  {new Date(member.dateGraduateCollege).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="text-muted-foreground">COURSE</p>
+              <h2 className="text-md font-bold">{member.course || "N/A"}</h2>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Business Information Card - Add this new card */}
+      <Card className="m-4 p-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Business Information</CardTitle>
+          <Button
+            variant="outline"
+            disabled={updateLoading}
+            onClick={() => {
+              setSelectedMember(member);
+              setEditBusinessOpen(true);
+            }}
+          >
+            {updateLoading ? (
+              <>Loading...</>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" /> Edit Business
+              </>
+            )}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <p className="text-muted-foreground">BUSINESS NAME</p>
+              <h2 className="text-md font-bold">
+                {member.businessName || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">BUSINESS TELEPHONE</p>
+              <h2 className="text-md font-bold">
+                {member.businessTelephone || "N/A"}
+              </h2>
+            </div>
+            <div>
+              <p className="text-muted-foreground">BUSINESS FAX</p>
+              <h2 className="text-md font-bold">
+                {member.businessFax || "N/A"}
+              </h2>
+            </div>
+            <div className="col-span-2">
+              <p className="text-muted-foreground">BUSINESS ADDRESS</p>
+              <h2 className="text-md font-bold">
+                {member.businessAddress || "N/A"}
+              </h2>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Skills and Hobbies Card - Add this new card */}
+      <Card className="m-4 p-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Skills & Hobbies</CardTitle>
+          <Button
+            variant="outline"
+            disabled={updateLoading}
+            onClick={() => {
+              setSelectedMember(member);
+              setEditSkillsOpen(true);
+            }}
+          >
+            {updateLoading ? (
+              <>Loading...</>
+            ) : (
+              <>
+                <Edit className="mr-2 h-4 w-4" /> Edit Skills
+              </>
+            )}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <p className="text-muted-foreground">SKILLS</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {member.skills && member.skills.length > 0 ? (
+                  member.skills.map((skill, index) => (
+                    <Badge key={index} variant="secondary">
+                      {skill}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-md font-bold">No skills listed</span>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="text-muted-foreground">HOBBIES</p>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {member.hobbies && member.hobbies.length > 0 ? (
+                  member.hobbies.map((hobby, index) => (
+                    <Badge key={index} variant="outline">
+                      {hobby}
+                    </Badge>
+                  ))
+                ) : (
+                  <span className="text-md font-bold">No hobbies listed</span>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -598,14 +770,29 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
                 {new Date(member.dateJoined).toLocaleDateString()}
               </h2>
             </div>
-            <div>
-              <p className="text-muted-foreground">POSITION</p>
-              <h2 className="text-md font-bold">{member.position || "N/A"}</h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-muted-foreground">POSITION</p>
+                <h2 className="text-md font-bold">
+                  {member.position || "N/A"}
+                </h2>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={updateLoading}
+                onClick={() => {
+                  setSelectedMember(member);
+                  setEditPositionOpen(true);
+                }}
+              >
+                <Edit className="mr-2 h-4 w-4" /> Edit
+              </Button>
             </div>
             <div>
-              <p className="text-muted-foreground">TOTAL CONTRIBUTIONS</p>
+              <p className="text-muted-foreground">CONTRIBUTION</p>
               <h2 className="text-md font-bold">
-                {formatCurrency(totalContributions)}
+                {member.contribution || "0"}
               </h2>
             </div>
             <div>
@@ -618,59 +805,27 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
       <Card className="m-4 p-4">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Contributions History</CardTitle>
-          <Button
-            variant="outline"
-            onClick={() => setContributionModalOpen(true)}
-          >
-            <Add className="mr-2 h-4 w-4" /> Add Contribution
+          <CardTitle>Certificates and Trainings</CardTitle>
+          <Button variant="outline">
+            <UploadFile className="mr-2 h-4 w-4" /> Upload Certificate
           </Button>
         </CardHeader>
         <CardContent>
-          {contributionsLoading ? (
-            <div className="text-center py-4">
-              <p className="text-muted-foreground">Loading contributions...</p>
-            </div>
-          ) : memberContributions.length > 0 ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead className="text-right">ID</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {memberContributions
-                    .sort(
-                      (a, b) =>
-                        new Date(b.created_at).getTime() -
-                        new Date(a.created_at).getTime()
-                    )
-                    .map((contribution) => (
-                      <TableRow key={contribution.id}>
-                        <TableCell>
-                          {formatDate(contribution.created_at)}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(contribution.contribution)}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground">
-                          {contribution.id.slice(-8)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">
-                No contributions found for this member.
-              </p>
-            </div>
-          )}
+          <DownloadableItem
+            imagePath="/cert-03.jpg"
+            title="Certificate of Appreciation"
+            date="January 2024"
+          />
+          <DownloadableItem
+            imagePath="/cert-01.png"
+            title="Leadership Training Certificate"
+            date="February 2024"
+          />
+          <DownloadableItem
+            imagePath="/cert-02.jpg"
+            title="Community Service Award"
+            date="March 2024"
+          />
         </CardContent>
       </Card>
 
@@ -682,11 +837,36 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         onSave={handleSave}
       />
 
-      <AddContributionModal
-        open={contributionModalOpen}
-        setOpen={setContributionModalOpen}
-        memberId={memberId}
-        onContributionAdded={handleContributionAdded}
+      {/* Edit Position Modal */}
+      <AdminEditPositionModal
+        open={editPositionOpen}
+        setOpen={setEditPositionOpen}
+        member={selectedMember}
+        onSave={handleSave}
+      />
+
+      {/* Edit Education Modal */}
+      <EditEducationModal
+        open={editEducationOpen}
+        setOpen={setEditEducationOpen}
+        member={selectedMember}
+        onSave={handleSave}
+      />
+
+      {/* Edit Business Modal */}
+      <EditBusinessModal
+        open={editBusinessOpen}
+        setOpen={setEditBusinessOpen}
+        member={selectedMember}
+        onSave={handleSave}
+      />
+
+      {/* Edit Skills Modal */}
+      <EditSkillsModal
+        open={editSkillsOpen}
+        setOpen={setEditSkillsOpen}
+        member={selectedMember}
+        onSave={handleSave}
       />
     </SidebarInset>
   );

@@ -26,7 +26,7 @@ interface Member {
   firstName: string;
   middleName?: string;
   lastName: string;
-  nameExtension?: string; // Changed from nameExtensions to nameExtension
+  nameExtension?: string;
   status: string;
   birthDate: string;
   profession: string;
@@ -38,6 +38,15 @@ interface Member {
   contribution: string | number;
   absences: string | number;
   feedback?: string;
+  // Add these new fields:
+  birthPlace?: string;
+  civilStatus?: string;
+  height?: number;
+  weight?: number;
+  citizenship?: string;
+  religion?: string;
+  bloodType?: string;
+  telephone?: string;
 }
 
 interface AdminEditMemberModalProps {
@@ -72,14 +81,12 @@ export function AdminEditMemberModal({
 
   // Updated handleChange function in AdminEditMemberModal
   const handleChange = (field: keyof Member, value: string) => {
-    // Clear the error for this field when the user makes changes
     setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[field];
       return newErrors;
     });
 
-    // Clear save error when user makes changes
     setSaveError("");
 
     setFormData((prev) => {
@@ -87,9 +94,14 @@ export function AdminEditMemberModal({
 
       // Special handling for date fields
       if (field === "birthDate" || field === "dateJoined") {
-        // Ensure date is in proper format
         const formattedValue = value ? new Date(value).toISOString() : value;
         return { ...prev, [field]: formattedValue };
+      }
+
+      // Special handling for numeric fields
+      if (field === "height" || field === "weight") {
+        const numericValue = value ? parseInt(value) : undefined;
+        return { ...prev, [field]: numericValue };
       }
 
       return { ...prev, [field]: value };
@@ -151,6 +163,7 @@ export function AdminEditMemberModal({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSave = async () => {
     if (!validateForm()) return;
 
@@ -250,7 +263,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="middlename" className="text-right">
               Middle Name
@@ -262,7 +274,6 @@ export function AdminEditMemberModal({
               className="col-span-3"
             />
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="lastname" className="text-right">
               Last Name*
@@ -279,7 +290,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="suffix" className="text-right">
               Suffix
@@ -308,7 +318,6 @@ export function AdminEditMemberModal({
               </Select>
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="status" className="text-right">
               Status*
@@ -336,7 +345,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="birthdate" className="text-right">
               Birthdate*
@@ -354,7 +362,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="profession" className="text-right">
               Profession*
@@ -371,7 +378,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="address" className="text-right">
               Address
@@ -383,7 +389,6 @@ export function AdminEditMemberModal({
               className="col-span-3"
             />
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="contact" className="text-right">
               Contact Information*
@@ -401,7 +406,6 @@ export function AdminEditMemberModal({
               )}
             </div>
           </div>
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
               Email
@@ -419,6 +423,130 @@ export function AdminEditMemberModal({
                 <p className="text-red-500 text-xs mt-1">{errors.email}</p>
               )}
             </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="birthplace" className="text-right">
+              Birth Place
+            </Label>
+            <Input
+              id="birthplace"
+              value={formData.birthPlace || ""}
+              onChange={(e) => handleChange("birthPlace", e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="civilstatus" className="text-right">
+              Civil Status
+            </Label>
+            <div className="col-span-3">
+              <Select
+                value={formData.civilStatus || ""}
+                onValueChange={(value) => handleChange("civilStatus", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select civil status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="Single">Single</SelectItem>
+                    <SelectItem value="Married">Married</SelectItem>
+                    <SelectItem value="Divorced">Divorced</SelectItem>
+                    <SelectItem value="Widowed">Widowed</SelectItem>
+                    <SelectItem value="Separated">Separated</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="citizenship" className="text-right">
+              Citizenship
+            </Label>
+            <Input
+              id="citizenship"
+              value={formData.citizenship || ""}
+              onChange={(e) => handleChange("citizenship", e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="religion" className="text-right">
+              Religion
+            </Label>
+            <Input
+              id="religion"
+              value={formData.religion || ""}
+              onChange={(e) => handleChange("religion", e.target.value)}
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="bloodtype" className="text-right">
+              Blood Type
+            </Label>
+            <div className="col-span-3">
+              <Select
+                value={formData.bloodType || ""}
+                onValueChange={(value) => handleChange("bloodType", value)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select blood type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="none">Unknown</SelectItem>
+                    <SelectItem value="A+">A+</SelectItem>
+                    <SelectItem value="A-">A-</SelectItem>
+                    <SelectItem value="B+">B+</SelectItem>
+                    <SelectItem value="B-">B-</SelectItem>
+                    <SelectItem value="AB+">AB+</SelectItem>
+                    <SelectItem value="AB-">AB-</SelectItem>
+                    <SelectItem value="O+">O+</SelectItem>
+                    <SelectItem value="O-">O-</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="height" className="text-right">
+              Height (cm)
+            </Label>
+            <Input
+              id="height"
+              type="number"
+              value={formData.height || ""}
+              onChange={(e) => handleChange("height", e.target.value)}
+              className="col-span-3"
+              placeholder="e.g., 170"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="weight" className="text-right">
+              Weight (kg)
+            </Label>
+            <Input
+              id="weight"
+              type="number"
+              value={formData.weight || ""}
+              onChange={(e) => handleChange("weight", e.target.value)}
+              className="col-span-3"
+              placeholder="e.g., 70"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="telephone" className="text-right">
+              Telephone
+            </Label>
+            <Input
+              id="telephone"
+              value={formData.telephone || ""}
+              onChange={(e) => handleChange("telephone", e.target.value)}
+              className="col-span-3"
+              placeholder="e.g., (02) 123-4567"
+            />
           </div>
         </div>
 

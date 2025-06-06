@@ -31,7 +31,7 @@ interface Member {
   birthDate: string;
   profession: string;
   email: string;
-  contact: string;
+  cellphone: string;
   address?: string;
   dateJoined: string;
   position: string;
@@ -88,11 +88,11 @@ export function EditMemberModal({
     if (!formData.birthDate) newErrors.birthDate = "Birth date is required";
     if (!formData.profession.trim())
       newErrors.profession = "Profession is required";
-    if (!formData.contact.trim())
+    if (!formData.cellphone.trim())
       newErrors.contact = "Contact information is required";
-    else if (formData.contact.length !== 11)
+    else if (formData.cellphone.length !== 11)
       newErrors.contact = "Contact number must be exactly 11 digits";
-    else if (!/^\d+$/.test(formData.contact))
+    else if (!/^\d+$/.test(formData.cellphone))
       newErrors.contact = "Contact number must contain only numbers";
 
     setErrors(newErrors);
@@ -263,8 +263,8 @@ export function EditMemberModal({
             <div className="col-span-3">
               <Input
                 id="contact"
-                value={formData.contact}
-                onChange={(e) => handleChange("contact", e.target.value)}
+                value={formData.cellphone}
+                onChange={(e) => handleChange("cellphone", e.target.value)}
                 className={errors.contact ? "border-red-500" : ""}
               />
               {errors.contact && (

@@ -22,8 +22,24 @@ import { logout } from "@/app/login/actions";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 
+// Define types for navigation items
+type NavItem = {
+  title: string;
+  url: string;
+  openInNewTab?: boolean;
+};
+
+type NavGroup = {
+  title: string;
+  url: string;
+  items: NavItem[];
+};
+
 // This is sample data.
-const data = {
+const data: {
+  versions: string[];
+  navMain: NavGroup[];
+} = {
   versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     {
@@ -40,18 +56,17 @@ const data = {
       url: "#",
       items: [{ title: "Contributions", url: "/portal/contributions" }],
     },
-    // {
-    //   title: "Documents",
-    //   url: "#",
-    //   items: [
-    //     { title: "GMM Notice", url: "#" },
-    //     { title: "Minutes of the Meeting", url: "#" },
-    //   ],
-    // },
+    {
+      title: "Geneology",
+      url: "#",
+      items: [{ title: "Organizational Chart", url: "/portal/genealogy" }],
+    },
     {
       title: "Content Management System",
       url: "#",
-      items: [{ title: "TFOE Admin CMS", url: "/admin-cms" }],
+      items: [
+        { title: "TFOE Admin CMS", url: "/admin-cms", openInNewTab: true },
+      ],
     },
   ],
 };
@@ -118,7 +133,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       asChild
                       isActive={isPathActive(subItem.url)}
                     >
-                      <Link href={subItem.url}>{subItem.title}</Link>
+                      {subItem.openInNewTab ? (
+                        <Link
+                          href={subItem.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {subItem.title}
+                        </Link>
+                      ) : (
+                        <Link href={subItem.url}>{subItem.title}</Link>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}

@@ -124,7 +124,7 @@ export default function LoginForm({
             </form>
             <div className="text-center mt-6 md:mt-12">
               <Link
-                href="/signup"
+                href="/preregistration"
                 className="text-primary hover:underline text-sm md:text-base"
               >
                 Not a member yet?{" "}

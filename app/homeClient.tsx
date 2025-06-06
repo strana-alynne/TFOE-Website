@@ -1,18 +1,10 @@
 "use client";
-import { Key, useState } from "react";
+import { Key } from "react";
 import Card_Component from "@/components/card-component";
-import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import ReusableCarousel from "@/components/ReusableCarousel";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowBack,
-  ArrowForward,
-  CreditCard,
-  Download,
-  Gite,
-} from "@mui/icons-material";
-import GroupsIcon from "@mui/icons-material/Groups";
+import { ArrowForward, CreditCard, Download } from "@mui/icons-material";
 import { PortableText } from "next-sanity";
 import Link from "next/link";
 

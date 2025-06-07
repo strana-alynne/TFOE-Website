@@ -88,9 +88,6 @@ export async function deleteEvent(token: string, eventId: string) {
   }
 }
 
-
-
-
 export async function addEvent(token: string, eventData: any) {
   try {
     const response = await fetch(
@@ -188,6 +185,35 @@ export async function updateEvent(token: string, eventData: any, eventId: any) {
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to update event!",
+    };
+  }
+}
+
+export async function getFeedback(token: any, eventId: any) {
+  try {
+     const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      console.log("Response status:", response);
+      }
+
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    return { data: data };
+  } catch (error) {
+    console.log("Error fetching event details:", error);
+    return {
+      message: error instanceof Error ? error.message : "Failed to fetch data!",
     };
   }
 }

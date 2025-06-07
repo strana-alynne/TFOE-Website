@@ -803,7 +803,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         </CardContent>
       </Card>
 
-      <Card className="m-4 p-4">
+      {/* <Card className="m-4 p-4">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Certificates and Trainings</CardTitle>
           <Button variant="outline">
@@ -827,7 +827,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
             date="March 2024"
           />
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Edit Modal */}
       <AdminEditMemberModal

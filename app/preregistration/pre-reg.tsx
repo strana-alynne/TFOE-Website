@@ -155,9 +155,9 @@ export default function PreRegForm({
       </div>
 
       {/* Right Side - Signup Section */}
-      <div className="relative w-full md:w-1/2 flex flex-col items-center justify-center px-4 md:px-8 py-6">
+      <div className="relative w-full md:w-1/2 flex flex-col items-center justify-center px-4 md:px-8 py-6 min-h-screen">
         {/* Back Button */}
-        <div className="absolute left-4 top-4">
+        <div className="absolute left-4 top-4 z-10">
           <Link
             href="/"
             className="flex items-center text-yellow-400 hover:underline"
@@ -168,204 +168,211 @@ export default function PreRegForm({
         </div>
 
         {/* Signup Form */}
-        {!isSubmitted ? (
-          <Card className="w-full max-w-xl p-4 md:p-6 space-y-4 md:space-y-6 bg-white/95 mt-16 md:mt-0 mb-8">
-            <CardHeader>
-              <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold">
-                Join the Eagles Community
-              </h1>
-              <p className="text-muted-foreground text-sm md:text-base">
-                Create your account in just a few steps.
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <form
-                id="signupForm"
-                onSubmit={handleFormSubmit}
-                className="space-y-4"
-              >
-                {/* Personal Information Section */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">
-                    Personal Information
-                  </h2>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {/* First Name */}
-                    <div className="relative">
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        type="text"
-                        placeholder="First Name"
-                        className="w-full rounded-lg bg-background"
-                      />
-                      {validationErrors?.firstName && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validationErrors.firstName[0]}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Last Name */}
-                    <div className="relative">
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        type="text"
-                        placeholder="Last Name"
-                        className="w-full rounded-lg bg-background"
-                      />
-                      {validationErrors?.lastName && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validationErrors.lastName[0]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Email */}
-                  <div className="relative">
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="Email Address"
-                      className="w-full rounded-lg bg-background"
-                    />
-                    {validationErrors?.email && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {validationErrors.email[0]}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Contact Number */}
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="col-span-1">
-                      <Select
-                        name="countryCode"
-                        defaultValue={Object.keys(myCountryCodesObject)[0]}
-                      >
-                        <SelectTrigger className="w-full rounded-lg bg-background">
-                          <SelectValue placeholder="Select country" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(myCountryCodesObject).map(
-                            ([code, label]) => (
-                              <SelectItem key={code} value={code}>
-                                {label}
-                              </SelectItem>
-                            )
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="col-span-2 relative">
-                      <Input
-                        id="contact"
-                        name="contact"
-                        type="text"
-                        placeholder="Contact Number"
-                        className="w-full rounded-lg bg-background"
-                      />
-                      {validationErrors?.contact && (
-                        <p className="text-red-500 text-xs mt-1">
-                          {validationErrors.contact[0]}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Interest Statement Section */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold">Interest Statement</h2>
-
-                  {/* Interest Text Area */}
-                  <div className="relative">
-                    <Textarea
-                      id="interest"
-                      name="interest"
-                      placeholder="State your interest in joining our organization"
-                      className="w-full rounded-lg bg-background min-h-[100px] resize-none"
-                      maxLength={500}
-                    />
-                    {validationErrors?.interest && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {validationErrors.interest[0]}
-                      </p>
-                    )}
-                    <p className="text-gray-500 text-xs mt-1">
-                      Maximum 500 characters
-                    </p>
-                  </div>
-                </div>
-
-                {/* Error display for form-level errors */}
-                {validationErrors?._form && (
-                  <div className="bg-red-50 p-2 rounded border border-red-200">
-                    <p className="text-red-500 text-sm">
-                      {validationErrors._form[0]}
-                    </p>
-                  </div>
-                )}
-
-                <SubmitButton />
-              </form>
-              <div className="text-center">
-                <Link
-                  href="/login"
-                  className="text-primary hover:underline text-sm md:text-base"
+        <div className="w-full flex flex-col items-center justify-center flex-1 py-16">
+          {!isSubmitted ? (
+            <Card className="w-full max-w-xl p-4 md:p-6 space-y-4 md:space-y-6 bg-white/95">
+              <CardHeader>
+                <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold">
+                  Join the Eagles Community
+                </h1>
+                <p className="text-muted-foreground text-sm md:text-base">
+                  Create your account in just a few steps.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <form
+                  id="signupForm"
+                  onSubmit={handleFormSubmit}
+                  className="space-y-4"
                 >
-                  Already a Member?{" "}
-                  <span className="text-yellow-500 font-bold"> Login Here</span>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ) : (
-          <Card className="w-full max-w-xl p-4 md:p-6 space-y-4 md:space-y-6 bg-white/95 mt-16 md:mt-0 mb-8">
-            <CardHeader>
-              <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-center">
-                Application Submitted
-              </h1>
-            </CardHeader>
-            <CardContent className="space-y-6 text-center">
-              <div className="flex justify-center mb-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg
-                    className="w-8 h-8 text-green-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+                  {/* Personal Information Section */}
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold">
+                      Personal Information
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* First Name */}
+                      <div className="relative">
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          type="text"
+                          placeholder="First Name"
+                          className="w-full rounded-lg bg-background"
+                        />
+                        {validationErrors?.firstName && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {validationErrors.firstName[0]}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Last Name */}
+                      <div className="relative">
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          type="text"
+                          placeholder="Last Name"
+                          className="w-full rounded-lg bg-background"
+                        />
+                        {validationErrors?.lastName && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {validationErrors.lastName[0]}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="Email Address"
+                        className="w-full rounded-lg bg-background"
+                      />
+                      {validationErrors?.email && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {validationErrors.email[0]}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Contact Number */}
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-1">
+                        <Select
+                          name="countryCode"
+                          defaultValue={Object.keys(myCountryCodesObject)[0]}
+                        >
+                          <SelectTrigger className="w-full rounded-lg bg-background">
+                            <SelectValue placeholder="Select country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(myCountryCodesObject).map(
+                              ([code, label]) => (
+                                <SelectItem key={code} value={code}>
+                                  {label}
+                                </SelectItem>
+                              )
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-2 relative">
+                        <Input
+                          id="contact"
+                          name="contact"
+                          type="text"
+                          placeholder="Contact Number"
+                          className="w-full rounded-lg bg-background"
+                        />
+                        {validationErrors?.contact && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {validationErrors.contact[0]}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Interest Statement Section */}
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold">
+                      Interest Statement
+                    </h2>
+
+                    {/* Interest Text Area */}
+                    <div className="relative">
+                      <Textarea
+                        id="interest"
+                        name="interest"
+                        placeholder="State your interest in joining our organization"
+                        className="w-full rounded-lg bg-background min-h-[100px] resize-none"
+                        maxLength={500}
+                      />
+                      {validationErrors?.interest && (
+                        <p className="text-red-500 text-xs mt-1">
+                          {validationErrors.interest[0]}
+                        </p>
+                      )}
+                      <p className="text-gray-500 text-xs mt-1">
+                        Maximum 500 characters
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Error display for form-level errors */}
+                  {validationErrors?._form && (
+                    <div className="bg-red-50 p-2 rounded border border-red-200">
+                      <p className="text-red-500 text-sm">
+                        {validationErrors._form[0]}
+                      </p>
+                    </div>
+                  )}
+
+                  <SubmitButton />
+                </form>
+                <div className="text-center">
+                  <Link
+                    href="/login"
+                    className="text-primary hover:underline text-sm md:text-base"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
+                    Already a Member?{" "}
+                    <span className="text-yellow-500 font-bold">
+                      {" "}
+                      Login Here
+                    </span>
+                  </Link>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="w-full max-w-xl p-4 md:p-6 space-y-4 md:space-y-6 bg-white/95">
+              <CardHeader>
+                <h1 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-center">
+                  Application Submitted
+                </h1>
+              </CardHeader>
+              <CardContent className="space-y-6 text-center">
+                <div className="flex justify-center mb-6">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg
+                      className="w-8 h-8 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+                </div>
 
-              <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-                This is to confirm that we received your intent. Admin will
-                review your application and contact you for the next steps.
-              </p>
+                <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
+                  This is to confirm that we received your intent. Admin will
+                  review your application and contact you for the next steps.
+                </p>
 
-              <Button
-                asChild
-                className="bg-yellow-600 w-full mt-6"
-                variant="default"
-              >
-                <Link href="/">Go to Home</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                <Button
+                  asChild
+                  className="bg-yellow-600 w-full mt-6"
+                  variant="default"
+                >
+                  <Link href="/">Go to Home</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

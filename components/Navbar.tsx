@@ -96,7 +96,7 @@ const Navbar = () => {
               asChild
               className="bg-yellow-500 hover:bg-yellow-600 text-white"
             >
-              <Link href={"/signup"}>Join Us!</Link>
+              <Link href={"/preregistration"}>Join Us!</Link>
             </Button>
           </div>
         </div>

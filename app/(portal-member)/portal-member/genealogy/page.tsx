@@ -43,6 +43,16 @@ export default function Genealogy() {
             <div className="flex justify-center">
               <div className="space-y-4 mb-4 w-full max-w-md">
                 <OfficialCard
+                  title="National President"
+                  name="Jonathan L. Sampan"
+                  eagle={true}
+                />
+                <OfficialCard
+                  title="Governor"
+                  name="Jonathan L. Sampan"
+                  eagle={true}
+                />
+                <OfficialCard
                   title="Club President"
                   name="Jonathan L. Sampan"
                   eagle={true}

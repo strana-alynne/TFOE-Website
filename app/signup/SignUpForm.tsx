@@ -186,7 +186,6 @@ export default function SignUpPage({
         }
       } else {
         console.log("OTP verification failed: " + verificationResult.message);
-        alert("OTP verification failed: " + verificationResult.message);
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);

@@ -30,5 +30,15 @@ export const loginandsignupType = defineType({
       description: 'Upload an image that is exactly 1200x800 pixels.',
       validation: Rule => Rule.required(),
     }),
+    defineField({
+      name: 'PreRegImage',
+      title: 'Pre Registration Image',
+      type: 'image',
+      options: {
+        hotspot: true,
+      },
+      description: 'Upload an image that is exactly 1200x800 pixels.',
+      validation: Rule => Rule.required(),
+    }),
   ],
 })

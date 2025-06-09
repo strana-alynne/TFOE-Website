@@ -7,7 +7,8 @@ import { contactsType } from './ContactsType'
 import { certificateType } from './certificateType'
 import { logoType } from './logoType'
 import { membershipType } from './membershipType'
+import { orgType } from './organizationalChart'
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [ blogType, statisticsType, aboutType, loginandsignupType, contactsType, certificateType, logoType, membershipType],
+  types: [ blogType, statisticsType, aboutType, loginandsignupType, contactsType, certificateType, logoType, membershipType, orgType ],
 }

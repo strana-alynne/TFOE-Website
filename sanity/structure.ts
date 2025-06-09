@@ -8,6 +8,7 @@ import {
   SparkleIcon,
   MobileDeviceIcon,
   StarIcon,
+  SchemaIcon
 } from '@sanity/icons'
 
 export const structure: StructureResolver = (S) =>
@@ -71,6 +72,14 @@ export const structure: StructureResolver = (S) =>
             .schemaType('certificate')
             .documentId('certificate')
         ),
+      S.listItem()
+        .title('Organizational Chart')
+        .icon(SchemaIcon)
+        .child(
+          S.document()
+            .schemaType('organizationalchart')
+            .documentId('organizationalchart')
+        ),
 
       // Only the blog is a non-singleton document type
       S.documentTypeListItem('blog').title('Blog').icon(DocumentIcon),
@@ -86,6 +95,7 @@ export const structure: StructureResolver = (S) =>
           'statistics',
           'membership', // fixed typo
           'certificate',
+          "organizationalchart"
         ].includes(listItem.getId() ?? '')
       ),
     ])

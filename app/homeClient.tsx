@@ -8,6 +8,18 @@ import { ArrowForward, CreditCard, Download } from "@mui/icons-material";
 import { PortableText } from "next-sanity";
 import Link from "next/link";
 
+import {
+  UsersIcon,
+  OfficeBuildingIcon,
+  BadgeCheckIcon,
+} from "@heroicons/react/outline";
+
+type Stat = {
+  label: string;
+  value: number | string;
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+};
+
 interface HomeClientProps {
   activities: Array<{
     _id: string;
@@ -70,98 +82,69 @@ export default function HomeClient({
       console.error("Invalid URL provided");
     }
   }
+
+  const stats: Stat[] = [
+    { label: "Members", value: statistics.Members, Icon: UsersIcon },
+    { label: "Branches", value: statistics.Branches, Icon: OfficeBuildingIcon },
+    { label: "Years", value: statistics.Years, Icon: BadgeCheckIcon },
+  ];
+
   return (
     <main className="max-w-full overflow-x-hidden">
       <Navbar />
-
       {/* Hero Section */}
       <section id="home">
         <ReusableCarousel slides={activities} />
       </section>
 
       {/* Stats Section */}
-      <section className="bg-yellow-600 px-4 sm:px-8 md:px-16 lg:px-32 py-5 grid grid-cols-1 sm:grid-cols-3 gap-4 place-items-center">
-        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="sm:h-12 sm:w-12 lg:h-16 lg:w-16 h-10 w-10"
-            fill="#FFFFFF"
-          >
-            <path d="M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm1.13 1.1c.37-.06.74-.1 1.13-.1.99 0 1.93.21 2.78.58.74.32 1.22 1.04 1.22 1.85V18h-4.5v-1.61c0-.83-.23-1.61-.63-2.29zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z" />
-          </svg>
-          <div>
-            <h2 className="text-2xl sm:text-3xl lg:text-5xl text-white font-bold">
-              {statistics.Members}
-            </h2>
-            <p className="text-base sm:text-xl lg:text-2xl text-white">
-              Members
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="54px"
-            height="54px"
-            viewBox="0 0 24 24"
-          >
-            <path
-              fill="#FFFFFF"
-              d="M4 19q-.825 0-1.412-.587T2 17v-6.175q0-.4.15-.762t.425-.638l2.85-2.85q.275-.275.638-.425T6.825 6H7V5q0-.425.288-.712T8 4t.713.288T9 5v1h8.175q.4 0 .763.15t.637.425l2.85 2.85q.275.275.425.638t.15.762V17q0 .825-.587 1.413T20 19zm12-2h4v-6.175l-2-2l-2 2zm-2 0v-5H4v5z"
-            />
-          </svg>
-          <div>
-            <h2 className="text-2xl sm:text-3xl lg:text-5xl text-white font-bold">
-              {statistics.Branches}
-            </h2>
-            <p className="text-base sm:text-xl lg:text-2xl text-white">
-              Branches
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center justify-center space-x-2 sm:space-x-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            height="48px"
-            viewBox="0 -960 960 960"
-            width="48px"
-            fill="#FFFFFF"
-            className="sm:h-16 sm:w-16 lg:h-20 lg:w-20"
-          >
-            <path d="M245.93-32.83V-384.2L117.22-591.91l181.63-294.31h362.3l181.63 294.31L714.07-384.2v351.37L480-111.26 245.93-32.83Zm90.46-785.02L196.78-591.91l139.61 225.69h287.22l139.61-225.69-139.61-225.94H336.39Zm102.33 374.7-128-127 46.35-46.35 81.65 81.65 163.74-164.5 46.58 45.11-210.32 211.09Z" />
-          </svg>
-          <div>
-            <h2 className="text-2xl sm:text-3xl lg:text-5xl text-white font-bold">
-              {statistics.Years}
-            </h2>
-            <p className="text-base sm:text-xl lg:text-2xl text-white">Years</p>
-          </div>
+      <section
+        aria-labelledby="stats-heading"
+        className="animate-gradient text-white py-12"
+      >
+        <h2 id="stats-heading" className="sr-only">
+          Organization Statistics
+        </h2>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+            {stats.map(({ label, value, Icon }) => (
+              <div
+                key={label}
+                className="flex flex-col items-center text-center"
+              >
+                <Icon
+                  className="h-12 w-12 sm:h-16 sm:w-16 lg:h-20 lg:w-20"
+                  aria-hidden="true"
+                />
+                <dd className="mt-4 text-4xl sm:text-5xl lg:text-6xl font-bold">
+                  {value}
+                </dd>
+                <dt className="mt-2 text-base sm:text-lg lg:text-xl uppercase tracking-wide">
+                  {label}
+                </dt>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
       {/* About Section */}
       <section
         id="about"
-        className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
+        className="flex flex-col md:flex-row items-center justify-evenly space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
       >
         <img
-          src={about.AboutImage?.asset?.url || "/image-2.png"}
-          alt="Eagle Members"
+          src="/logo.png"
+          alt="Eagle Logo"
           className="w-full md:w-1/2 max-w-md"
         />
         <div className="text-center md:text-left px-4 md:px-0">
           <div>
-            <img
-              src="/logo.png"
-              alt="Eagle Logo"
-              className="mx-auto md:mx-0 w-16 sm:w-24 md:w-32"
-            />
             <p className="text-yellow-500 text-sm sm:text-base md:text-lg font-bold mt-4">
               The Fraternal Order of Eagles (Philippine Eagles)
             </p>
           </div>
-          <div className="max-w-2xl my-4 sm:my-6 md:my-8 text-sm sm:text-base md:text-lg text-center md:text-left">
+          <div className="max-w-2xl my-4 sm:my-2 md:my-4 text-sm sm:text-base md:text-lg text-center md:text-left">
             <PortableText value={about.Description} />
           </div>
         </div>
@@ -169,7 +152,7 @@ export default function HomeClient({
       {/* About Certs */}
       <section
         id="Certs"
-        className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
+        className="flex flex-col md:flex-row items-center justify-evenly space-y-8 md:space-y-0 md:space-x-8 p-4 md:p-8 lg:p-16"
       >
         <div className="text-center md:text-left px-4 md:px-0">
           <div className="flex flex-col text-center md:text-left">
@@ -180,7 +163,7 @@ export default function HomeClient({
               {certificate.Title}
             </h2>
           </div>
-          <div className="max-w-2xl my-4 sm:my-6 md:my-8 text-sm sm:text-base md:text-lg text-center md:text-left">
+          <div className="max-w-2xl my-4 sm:my-2 md:my-4 text-sm sm:text-base md:text-lg text-center md:text-left">
             <PortableText value={certificate.Description} />
           </div>
         </div>
@@ -190,13 +173,12 @@ export default function HomeClient({
           className="w-full md:w-1/2 max-w-md"
         />
       </section>
-
       {/* Club Membership Section */}
       <section
         id="membership"
         className="space-y-8 py-8 sm:py-12 md:py-24 lg:py-36 px-4"
       >
-        <div className="flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center justify-center text-center gap-4">
           <p className="text-yellow-500 text-sm sm:text-base md:text-lg font-bold">
             Club Membership
           </p>
@@ -205,7 +187,7 @@ export default function HomeClient({
             BROTHERHOOD
           </h2>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+        <div className="flex flex-col md:flex-row items-center justify-center pace-y-4 md:space-y-0 md:space-x-8">
           <div className="bg-yellow-600 p-4 sm:p-6 rounded-xl space-y-4 sm:space-y-8 w-full md:w-[428px] md:h-[254px] max-w-md">
             <div className="flex flex-col items-center justify-center text-center">
               <p className="text-white text-xl sm:text-2xl md:text-3xl font-bold">
@@ -269,7 +251,6 @@ export default function HomeClient({
           </p>
         </div>
       </section>
-
       {/* Latest News Section */}
       <section
         id="blogs"
@@ -331,11 +312,10 @@ export default function HomeClient({
           </div>
         </div>
       </section>
-
       {/* Contact Us Section */}
       <section
         id="contact"
-        className="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-8 py-12 sm:py-16 md:py-20 px-4 text-center md:text-left"
+        className="flex flex-col md:flex-row items-center justify-center lg:gap-8 space-y-8 md:space-y-0 md:space-x-8 py-12 sm:py-16 md:py-20 px-4 text-center md:text-left"
       >
         <div className="flex flex-col">
           <p className="text-yellow-500 text-sm sm:text-base md:text-lg font-bold">

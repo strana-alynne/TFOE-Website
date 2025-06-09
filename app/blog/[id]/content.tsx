@@ -26,43 +26,43 @@ const BlogContent = ({
   const imageUrl = image ? urlFor(image).url() : null;
 
   return (
-    <main className="max-w-full overflow-x-hidden">
+    <main className='max-w-full overflow-x-hidden'>
       <NavbarBlog />
-      <section className="max-w-3xl mx-auto px-4 py-8 mt-[20vh]">
-        <div className="pb-8">
+      <section className='max-w-3xl mx-auto px-4 py-8 mt-[20vh]'>
+        <div className='pb-8'>
           <Link
             href={"/"}
-            className="hover:text-yellow-600 hover:text-decoration-line text-black flex items-center gap-2"
+            className='hover:text-yellow-600 hover:text-decoration-line text-black flex items-center gap-2'
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className='w-5 h-5' />
             Back to Home
           </Link>
         </div>
         {/* Header */}
-        <div className="mb-8">
-          <p className="text-yellow-500 text-sm sm:text-base md:text-lg font-bold">
+        <div className='mb-8'>
+          <p className='text-yellow-500 text-sm sm:text-base md:text-lg font-bold'>
             {category}
           </p>
-          <h1 className="text-4xl font-bold mb-4">{title}</h1>
-          {date && <p className="text-sm text-gray-500">Publihed on: {date}</p>}
+          <h1 className='text-4xl font-bold mb-4'>{title}</h1>
+          {date && <p className='text-sm text-gray-500'>Publihed on: {date}</p>}
         </div>
         {/* Featured Image */}
         {imageUrl && (
-          <div className="mb-8">
+          <div className='mb-8'>
             <Image
               src={imageUrl}
               alt={title}
               width={1200}
               height={400}
-              className="w-full rounded-lg object-cover h-[400px]"
+              className='w-full rounded-lg object-cover h-[400px]'
             />
-            <p className="text-sm text-gray-500 mt-2 text-center">
+            <p className='text-sm text-gray-500 mt-2 text-center'>
               Photo credit: Photographer Name
             </p>
           </div>
         )}
         {/* Article Content */}
-        <div className="prose prose-lg max-w-none">
+        <div className='prose prose-lg max-w-none'>
           <PortableText value={content} />
         </div>
       </section>

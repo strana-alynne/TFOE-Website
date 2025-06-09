@@ -41,8 +41,8 @@ const NavbarBlog = () => {
   };
 
   return (
-    <nav className="fixed w-full z-50 py-8 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <nav className='fixed w-full z-50 py-8 transition-all duration-300'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6'>
         <div
           className={` flex items-center justify-between h-16 rounded-full px-6
           ${
@@ -52,14 +52,14 @@ const NavbarBlog = () => {
           }`}
         >
           {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Logo" className="h-10 w-10" />
+          <div className='flex-shrink-0'>
+            <Link href='/' className='flex items-center'>
+              <img src='/logo.png' alt='Logo' className='h-10 w-10' />
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className='hidden md:flex items-center space-x-8'>
             {[
               { name: "Home", id: "home" },
               { name: "About Us", id: "about" },
@@ -83,9 +83,9 @@ const NavbarBlog = () => {
           </div>
 
           {/* Auth Buttons */}
-          <div className="flex items-center space-x-4">
+          <div className='flex items-center space-x-4'>
             <Button
-              variant="ghost"
+              variant='ghost'
               asChild
               className={` hover:bg-yellow-500 hover:text-black
                 ${isScrolled ? "text-[#CC9A02]" : "text-[#CC9A02]"}`}
@@ -94,7 +94,7 @@ const NavbarBlog = () => {
             </Button>
             <Button
               asChild
-              className="bg-yellow-500 hover:bg-yellow-600 text-black"
+              className='bg-yellow-500 hover:bg-yellow-600 text-black'
             >
               <Link href={"/pages/signup"}>Join Us!</Link>
             </Button>

@@ -35,7 +35,37 @@ export interface OrgData {
   publicinfomembers?: Array<{ name: string; image?: any }>;
 }
 
-export interface ProcessedOrgData extends Omit<OrgData, 'natlpresident' | 'governor' | 'clubpresident' | 'clubvicepresident' | 'assemblymen' | 'alternateassemblymen' | 'secretary' | 'assistantsecretary' | 'treasurer' | 'assistanttreasurer' | 'auditor' | 'assistantauditor' | 'clubdirectors' | 'waysandmeans' | 'waysandmeansmembers' | 'tribunalchair' | 'tribunalmembers' | 'oversightchair' | 'oversightmembers' | 'alalayagilachair' | 'alalayagilachairmembers' | 'protocolchair' | 'protocolmembers' | 'awardschair' | 'awardsmembers' | 'publicinfochair' | 'publicinfomembers'> {
+export interface ProcessedOrgData
+  extends Omit<
+    OrgData,
+    | "natlpresident"
+    | "governor"
+    | "clubpresident"
+    | "clubvicepresident"
+    | "assemblymen"
+    | "alternateassemblymen"
+    | "secretary"
+    | "assistantsecretary"
+    | "treasurer"
+    | "assistanttreasurer"
+    | "auditor"
+    | "assistantauditor"
+    | "clubdirectors"
+    | "waysandmeans"
+    | "waysandmeansmembers"
+    | "tribunalchair"
+    | "tribunalmembers"
+    | "oversightchair"
+    | "oversightmembers"
+    | "alalayagilachair"
+    | "alalayagilachairmembers"
+    | "protocolchair"
+    | "protocolmembers"
+    | "awardschair"
+    | "awardsmembers"
+    | "publicinfochair"
+    | "publicinfomembers"
+  > {
   natlpresident?: { name: string; imageUrl?: string };
   governor?: { name: string; imageUrl?: string };
   clubpresident?: { name: string; imageUrl?: string };
@@ -66,22 +96,26 @@ export interface ProcessedOrgData extends Omit<OrgData, 'natlpresident' | 'gover
 }
 
 function processImageUrl(image: any): string {
-  return image ? urlFor(image).url() : "/logo.png";
+  return image ? urlFor(image).url() : "/SRTEC-logo.png";
 }
 
-function processPersonWithImage(person: { name: string; image?: any } | undefined) {
+function processPersonWithImage(
+  person: { name: string; image?: any } | undefined
+) {
   if (!person) return undefined;
   return {
     name: person.name,
-    imageUrl: processImageUrl(person.image)
+    imageUrl: processImageUrl(person.image),
   };
 }
 
-function processArrayWithImages(array: Array<{ name: string; image?: any }> | undefined) {
+function processArrayWithImages(
+  array: Array<{ name: string; image?: any }> | undefined
+) {
   if (!array) return undefined;
-  return array.map(item => ({
+  return array.map((item) => ({
     name: item.name,
-    imageUrl: processImageUrl(item.image)
+    imageUrl: processImageUrl(item.image),
   }));
 }
 
@@ -89,7 +123,7 @@ export async function getOrganizationalChart(): Promise<ProcessedOrgData | null>
   try {
     const query = `*[_type == "organizationalchart"][0]`;
     const data: OrgData = await client.fetch(query);
-    
+
     if (!data) return null;
 
     // Process all the data and convert Sanity image references to URLs
@@ -115,7 +149,9 @@ export async function getOrganizationalChart(): Promise<ProcessedOrgData | null>
       oversightchair: processPersonWithImage(data.oversightchair),
       oversightmembers: processArrayWithImages(data.oversightmembers),
       alalayagilachair: processPersonWithImage(data.alalayagilachair),
-      alalayagilachairmembers: processArrayWithImages(data.alalayagilachairmembers),
+      alalayagilachairmembers: processArrayWithImages(
+        data.alalayagilachairmembers
+      ),
       protocolchair: processPersonWithImage(data.protocolchair),
       protocolmembers: processArrayWithImages(data.protocolmembers),
       awardschair: processPersonWithImage(data.awardschair),

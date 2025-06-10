@@ -24,7 +24,7 @@ export default async function Signup() {
   const { data: signup } = await sanityFetch({ query: SIGNUP_QUERY });
   const { data: logo } = await sanityFetch({ query: LOGO_QUERY });
 
-  const logoImage = logo?.[0]?.Logo?.asset?.url || "/fallback-logo.png";
+  const logoImage = logo?.[0]?.Logo?.asset?.url || "/fallback-SRTEC-logo.png";
   const SignUpImage =
     signup?.[0]?.SignUpImage?.asset?.url || "/fallback-bg.png";
 

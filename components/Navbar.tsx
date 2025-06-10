@@ -54,7 +54,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className='flex-shrink-0'>
             <Link href='/' className='flex items-center'>
-              <img src='/logo.png' alt='Logo' className='h-10 w-10' />
+              <img src='/SRTEC-logo.png' alt='Logo' className='h-10 w-10' />
             </Link>
           </div>
 

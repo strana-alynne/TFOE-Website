@@ -164,9 +164,7 @@ export default function Page() {
                     ? `${e.startTime} - ${e.endTime}`
                     : "Time TBD"
                 }
-                attendanceCode={e.attendanceCode || e.eventCode}
                 imageUrl={""}
-                attended={""}
               />
             ))}
           </div>

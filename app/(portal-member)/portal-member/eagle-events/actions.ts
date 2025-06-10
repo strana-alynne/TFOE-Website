@@ -81,11 +81,11 @@ export async function getUserDetails(token: string) {
   }
 }
 
-// Mark attendance
 export async function markAttendance(token: string, eventId: string, attendanceData: {
   eventCode: string;
   memberId: string;
   memberName: string;
+  attendanceType: string; // Add this field
 }) {
   try {
     const response = await fetch(`https://tfoe-backend.onrender.com/member/event/${eventId}`, {
@@ -98,7 +98,7 @@ export async function markAttendance(token: string, eventId: string, attendanceD
     });
 
     if (!response.ok) {
-    console.log("Response Attendance:", response);
+      console.log("Response Attendance:", response);
     }
 
     return await response.json();

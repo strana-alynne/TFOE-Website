@@ -123,12 +123,15 @@ export default function EventDetails({ id }: EventID) {
     ).length;
   };
 
+  // Updated EventDetails component - handleAttendanceSubmit function
   const handleAttendanceSubmit = async ({
     eventCode,
     feedback,
+    attendanceType,
   }: {
     eventCode: string;
     feedback: string;
+    attendanceType: string;
   }) => {
     setUpdateLoading(true);
     try {
@@ -158,6 +161,7 @@ export default function EventDetails({ id }: EventID) {
         memberId: userDetails.id,
         memberName:
           `${userDetails.firstName} ${userDetails.middleName} ${userDetails.lastName}`.trim(),
+        attendanceType: attendanceType, // Add the attendance type
       };
 
       console.log("Marking attendance with data:", attendanceData);
@@ -363,12 +367,6 @@ export default function EventDetails({ id }: EventID) {
             <>
               <div className="mb-4">
                 <h2 className="text-xl font-bold">{eventdetail.eventTitle}</h2>
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <span>
-                    <IdCard />
-                  </span>
-                  {eventdetail.eventCode}
-                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">

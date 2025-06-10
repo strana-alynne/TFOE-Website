@@ -14,12 +14,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
 interface AttendanceDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { eventCode: string; feedback: string }) => Promise<void>;
+  onSubmit: (data: {
+    eventCode: string;
+    feedback: string;
+    attendanceType: string;
+  }) => Promise<void>;
   loading: boolean;
 }
 
@@ -31,13 +42,19 @@ export default function AttendanceDialog({
 }: AttendanceDialogProps) {
   const [eventCode, setEventCode] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [attendanceType, setAttendanceType] = useState("");
   const [errors, setErrors] = useState<{
     eventCode?: string;
     feedback?: string;
+    attendanceType?: string;
   }>({});
 
   const validateForm = () => {
-    const newErrors: { eventCode?: string; feedback?: string } = {};
+    const newErrors: {
+      eventCode?: string;
+      feedback?: string;
+      attendanceType?: string;
+    } = {};
 
     if (!eventCode.trim()) {
       newErrors.eventCode = "Event code is required";
@@ -47,6 +64,10 @@ export default function AttendanceDialog({
       newErrors.feedback = "Feedback is required";
     } else if (feedback.trim().length < 10) {
       newErrors.feedback = "Feedback must be at least 10 characters long";
+    }
+
+    if (!attendanceType) {
+      newErrors.attendanceType = "Attendance type is required";
     }
 
     setErrors(newErrors);
@@ -64,11 +85,13 @@ export default function AttendanceDialog({
       await onSubmit({
         eventCode: eventCode.trim(),
         feedback: feedback.trim(),
+        attendanceType: attendanceType,
       });
 
       // Reset form on successful submission
       setEventCode("");
       setFeedback("");
+      setAttendanceType("");
       setErrors({});
     } catch (error) {
       // Error handling is done in the parent component
@@ -80,6 +103,7 @@ export default function AttendanceDialog({
     if (!loading) {
       setEventCode("");
       setFeedback("");
+      setAttendanceType("");
       setErrors({});
       onClose();
     }
@@ -91,8 +115,8 @@ export default function AttendanceDialog({
         <DialogHeader>
           <DialogTitle>Mark Attendance</DialogTitle>
           <DialogDescription>
-            Enter the event code and provide your feedback to mark your
-            attendance.
+            Enter the event code, select your attendance type, and provide your
+            feedback to mark your attendance.
           </DialogDescription>
         </DialogHeader>
 
@@ -114,6 +138,36 @@ export default function AttendanceDialog({
                 {errors.eventCode && (
                   <p className="text-sm text-red-500 mt-1">
                     {errors.eventCode}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="attendanceType" className="text-right">
+                Attendance Type *
+              </Label>
+              <div className="col-span-3">
+                <Select
+                  value={attendanceType}
+                  onValueChange={setAttendanceType}
+                  disabled={loading}
+                >
+                  <SelectTrigger
+                    className={errors.attendanceType ? "border-red-500" : ""}
+                  >
+                    <SelectValue placeholder="Select attendance type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Face-to-face">Face-to-face</SelectItem>
+                    <SelectItem value="Online Meeting">
+                      Online Meeting
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.attendanceType && (
+                  <p className="text-sm text-red-500 mt-1">
+                    {errors.attendanceType}
                   </p>
                 )}
               </div>

@@ -17,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar, // Add this import
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/actions";
 import { useActionState } from "react";
@@ -75,6 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [state, logoutAction] = useActionState(logout, undefined);
   const router = useRouter();
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar(); // Add this hook
 
   useEffect(() => {
     if (state?.success && state?.redirectTo) {
@@ -99,6 +101,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return pathname === url || pathname.startsWith(url + "/");
   };
 
+  // Helper function to handle navigation clicks
+  const handleNavClick = () => {
+    setOpenMobile(false); // Close sidebar on mobile after navigation
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -114,7 +121,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isPathActive("/portal")}>
-                  <Link href="/portal">Dashboard</Link>
+                  <Link href="/portal" onClick={handleNavClick}>
+                    Dashboard
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -138,11 +147,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           href={subItem.url}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={handleNavClick}
                         >
                           {subItem.title}
                         </Link>
                       ) : (
-                        <Link href={subItem.url}>{subItem.title}</Link>
+                        <Link href={subItem.url} onClick={handleNavClick}>
+                          {subItem.title}
+                        </Link>
                       )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>

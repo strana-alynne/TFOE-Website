@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar, // Add this import
 } from "@/components/ui/sidebar";
 import { logout } from "@/app/login/actions";
 import { useActionState } from "react";
@@ -37,6 +38,7 @@ export function AppSidebarMember({
   const [state, logoutAction] = useActionState(logout, undefined);
   const router = useRouter();
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar(); // Add this hook
 
   useEffect(() => {
     if (state?.success && state?.redirectTo) {
@@ -59,6 +61,11 @@ export function AppSidebarMember({
     return pathname === url || pathname.startsWith(url + "/");
   };
 
+  // Helper function to handle navigation clicks
+  const handleNavClick = () => {
+    setOpenMobile(false); // Close sidebar on mobile after navigation
+  };
+
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -74,7 +81,9 @@ export function AppSidebarMember({
                   asChild
                   isActive={isPathActive("/portal-member")}
                 >
-                  <Link href="/portal-member">Dashboard</Link>
+                  <Link href="/portal-member" onClick={handleNavClick}>
+                    Dashboard
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -88,7 +97,9 @@ export function AppSidebarMember({
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild isActive={isPathActive(item.url)}>
-                    <Link href={item.url}>{item.title}</Link>
+                    <Link href={item.url} onClick={handleNavClick}>
+                      {item.title}
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

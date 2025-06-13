@@ -120,23 +120,24 @@ const columns: ColumnDef<ContributionData>[] = [
     },
   },
   {
-    accessorKey: "user_id",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          User ID
+          Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => (
-      <div className="text-muted-foreground font-mono">
-        {row.getValue("user_id")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string | null;
+      return (
+        <div className="text-muted-foreground font-mono">{name ?? "-"}</div>
+      );
+    },
   },
   {
     accessorKey: "id",
@@ -168,8 +169,6 @@ const columns: ColumnDef<ContributionData>[] = [
             >
               Copy transaction ID
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View details</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -291,15 +290,12 @@ export default function Page() {
             <div className="w-full">
               <div className="flex items-center py-4">
                 <Input
-                  placeholder="Filter by user ID..."
+                  placeholder="Filter by Name..."
                   value={
-                    (table.getColumn("user_id")?.getFilterValue() as string) ??
-                    ""
+                    (table.getColumn("name")?.getFilterValue() as string) ?? ""
                   }
                   onChange={(event) =>
-                    table
-                      .getColumn("user_id")
-                      ?.setFilterValue(event.target.value)
+                    table.getColumn("name")?.setFilterValue(event.target.value)
                   }
                   className="max-w-sm"
                 />

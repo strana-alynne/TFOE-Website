@@ -20,7 +20,8 @@ import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
 import { EditEvent } from "@/components/edit-event-modal";
 import { DeleteEventModal } from "@/components/delete-modal";
-
+import { Switch } from "@/components/ui/switch";
+import { updateEvent } from "../actions";
 // Updated interfaces to match your actual data structure
 interface EventAttendee {
   eventCode: string;
@@ -38,6 +39,7 @@ interface EventDetailsProps {
   eventCode: string;
   eventDetails: string;
   participants?: { id: string; name: string; feedback: string }[];
+  eventStatus: "OPEN" | "CLOSED";
 }
 
 // Interface for EditEvent component (matches the original structure)
@@ -51,6 +53,7 @@ interface EditEventDetailsProps {
   eventCode: string;
   eventDetails: string;
   participants?: { id: string; name: string; feedback: string }[];
+  eventStatus: "OPEN" | "CLOSED";
 }
 
 interface EventID {
@@ -71,6 +74,7 @@ export default function EventDetails({ id }: EventID) {
   const [selectedMember, setSelectedMember] =
     useState<EditEventDetailsProps | null>(null);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   // Create a memoized function to fetch event details
   const fetchEventDetails = useCallback(async () => {
@@ -148,10 +152,57 @@ export default function EventDetails({ id }: EventID) {
         eventAttendees: Array.isArray(eventdetail.eventAttendees)
           ? eventdetail.eventAttendees.length
           : 0,
+        eventStatus: eventdetail.eventStatus,
       };
       setSelectedMember(transformedEvent);
     }
     setEditOpen(true);
+  };
+
+  const handleStatusChange = async (newStatus: "OPEN" | "CLOSED") => {
+    if (!eventdetail) return;
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      toast({
+        title: "Error",
+        description: "No access token found",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUpdatingStatus(true);
+    try {
+      // Use your existing updateEvent function
+      const eventData = { eventStatus: newStatus };
+      const result = await updateEvent(token, eventData, eventdetail.id);
+
+      if (result.success) {
+        setEventDetail((prev) =>
+          prev ? { ...prev, eventStatus: newStatus } : null
+        );
+        toast({
+          title: "Success",
+          description: `Event status updated to ${newStatus}`,
+          variant: "default",
+        });
+      } else {
+        throw new Error(result.message || "Failed to update status");
+      }
+    } catch (error) {
+      console.error("Failed to update event status:", error);
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update event status",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -354,6 +405,27 @@ export default function EventDetails({ id }: EventID) {
             <h2 className="text-md font-bold">
               {eventdetail?.eventCode || "N/A"}
             </h2>
+          </div>
+
+          <div className="mt-4">
+            <p className="text-muted-foreground">STATUS</p>
+            <div className="flex items-center space-x-2 mt-1">
+              <Switch
+                checked={eventdetail?.eventStatus === "OPEN"}
+                onCheckedChange={(checked) =>
+                  handleStatusChange(checked ? "OPEN" : "CLOSED")
+                }
+                disabled={updatingStatus}
+              />
+              <span className="text-sm font-medium">
+                {eventdetail?.eventStatus === "OPEN" ? "Open" : "Closed"}
+              </span>
+              {updatingStatus && (
+                <span className="text-sm text-muted-foreground">
+                  Updating...
+                </span>
+              )}
+            </div>
           </div>
 
           {eventdetail?.eventDetails && (

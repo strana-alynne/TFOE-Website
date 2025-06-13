@@ -97,18 +97,16 @@ export function AddContributionModal({
           content: "Contribution added successfully.",
         });
 
-        // Reset form first
         resetForm();
 
-        // Close modal
-        setOpen(false);
+        // FIRST set loading to false
+        setLoading(false);
 
-        // Trigger data refresh after modal closes
+        // THEN close the modal
+        setOpen(false);
+        // Trigger data refresh after a short delay
         if (onContributionAdded) {
-          // Use setTimeout to ensure modal state updates first
-          setTimeout(() => {
-            onContributionAdded();
-          }, 50);
+          onContributionAdded();
         }
       }
     } catch (error) {
@@ -137,7 +135,6 @@ export function AddContributionModal({
       setLoading(false);
     }
   };
-
   const handleClose = () => {
     if (!loading) {
       resetForm();
@@ -148,11 +145,11 @@ export function AddContributionModal({
   // Handle modal open/close changes
   const handleOpenChange = (newOpen: boolean) => {
     if (!loading) {
+      setOpen(newOpen);
       if (!newOpen) {
-        // Modal is closing, reset form
+        // Reset form when modal closes
         resetForm();
       }
-      setOpen(newOpen);
     }
   };
 

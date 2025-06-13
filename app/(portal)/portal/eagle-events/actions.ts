@@ -128,9 +128,9 @@ export async function addEvent(token: string, eventData: any) {
 }
 export async function updateEvent(token: string, eventData: any, eventId: any) {
   try {
-    console.log('updateEvent - Sending request to:', `https://tfoe-backend.onrender.com/admin/event/${eventId}`);
-    console.log('updateEvent - Payload:', eventData);
     
+    console.log("updateEvent - Token:", token);
+    console.log("updateEvent - Event Data:", eventData);
     const response = await fetch(
       `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
       {

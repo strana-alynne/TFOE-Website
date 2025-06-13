@@ -145,6 +145,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
     return age;
   };
 
+  // MembersProfile.tsx
   const refreshMemberData = async () => {
     const token =
       typeof window !== "undefined"
@@ -155,8 +156,11 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
 
     try {
       const response = await getDetails(token, memberId);
+      // Ensure we're getting the correct data structure
       const memberData = response.data?.data || response.data;
-      setMember(memberData);
+      if (memberData) {
+        setMember(memberData); // Update member state
+      }
     } catch (error) {
       console.error("Failed to refresh member data:", error);
     }

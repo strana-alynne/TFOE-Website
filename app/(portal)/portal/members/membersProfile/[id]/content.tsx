@@ -12,7 +12,8 @@ import {
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Download, Edit, UploadFile } from "@mui/icons-material";
+import { Download, Edit } from "@mui/icons-material";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getDetails } from "./actions";
@@ -460,374 +461,391 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         <h1 className="font-bold">Member Profile</h1>
       </div>
 
-      <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Personal Information</CardTitle>
-          <Button
-            variant="outline"
-            disabled={updateLoading}
-            onClick={() => {
-              setSelectedMember(member);
-              setEditOpen(true);
-            }}
-          >
-            {updateLoading ? (
-              <>Loading...</>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" /> Edit Profile
-              </>
-            )}
-          </Button>
-        </CardHeader>
+      <div className="m-4">
+        <Tabs defaultValue="personal" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="personal">Personal</TabsTrigger>
+            <TabsTrigger value="education">Education</TabsTrigger>
+            <TabsTrigger value="business">Business</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="membership">Membership</TabsTrigger>
+          </TabsList>
 
-        <CardContent>
-          {member ? (
-            <div className="mb-4">
-              <h2 className="text-xl font-bold">{fullName}</h2>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <span>
-                  <IdCard />
-                </span>
-                {memberId}
-              </p>
-            </div>
-          ) : (
-            <p className="text-red-500">Member not found</p>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-muted-foreground">AGE</p>
-              <h2 className="text-md font-bold">
-                {calculateAge(member.birthDate) || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">STATUS</p>
-              <Badge
-                className={
-                  member.status === "ACTIVE" || member.status === "Active"
-                    ? "bg-green-500"
-                    : member.status === "PENDING" || member.status === "Pending"
-                      ? "bg-gray-500"
-                      : "bg-red-500"
-                }
-              >
-                {member.status}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-muted-foreground">BIRTH DATE</p>
-              <h2 className="text-md font-bold">
-                {new Date(member.birthDate).toLocaleDateString()}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">BIRTH PLACE</p>
-              <h2 className="text-md font-bold">
-                {member.birthPlace || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">CIVIL STATUS</p>
-              <h2 className="text-md font-bold">
-                {member.civilStatus || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">CITIZENSHIP</p>
-              <h2 className="text-md font-bold">
-                {member.citizenship || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">RELIGION</p>
-              <h2 className="text-md font-bold">{member.religion || "N/A"}</h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">BLOOD TYPE</p>
-              <h2 className="text-md font-bold">{member.bloodType || "N/A"}</h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">HEIGHT</p>
-              <h2 className="text-md font-bold">
-                {member.height ? `${member.height} cm` : "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">WEIGHT</p>
-              <h2 className="text-md font-bold">
-                {member.weight ? `${member.weight} kg` : "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">PROFESSION</p>
-              <h2 className="text-md font-bold">
-                {member.profession || "N/A"}
-              </h2>
-            </div>
-            <div className="col-span-2">
-              <p className="text-muted-foreground">ADDRESS</p>
-              <h2 className="text-md font-bold">{member.address || "N/A"}</h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">CONTACT INFORMATION</p>
-              <h2 className="text-md font-bold">{member.contact}</h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">TELEPHONE</p>
-              <h2 className="text-md font-bold">{member.telephone || "N/A"}</h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">EMAIL</p>
-              <h2 className="text-md font-bold">{member.email}</h2>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <TabsContent value="personal" className="mt-4">
+            <Card className="p-4">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Personal Information</CardTitle>
+                <Button
+                  variant="outline"
+                  disabled={updateLoading}
+                  onClick={() => {
+                    setSelectedMember(member);
+                    setEditOpen(true);
+                  }}
+                >
+                  {updateLoading ? (
+                    <>Loading...</>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" /> Edit Profile
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
 
-      {/* Educational Background Card - Add this new card */}
-      <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Educational Background</CardTitle>
-          <Button
-            variant="outline"
-            disabled={updateLoading}
-            onClick={() => {
-              setSelectedMember(member);
-              setEditEducationOpen(true);
-            }}
-          >
-            {updateLoading ? (
-              <>Loading...</>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" /> Edit Education
-              </>
-            )}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <p className="text-muted-foreground">ELEMENTARY</p>
-              <h2 className="text-md font-bold">
-                {member.elementary || "N/A"}
-              </h2>
-              {member.dateGraduateElementary && (
-                <p className="text-sm text-muted-foreground">
-                  Graduated:{" "}
-                  {new Date(member.dateGraduateElementary).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-            <div>
-              <p className="text-muted-foreground">HIGH SCHOOL</p>
-              <h2 className="text-md font-bold">
-                {member.highschool || "N/A"}
-              </h2>
-              {member.dateGraduateHighschool && (
-                <p className="text-sm text-muted-foreground">
-                  Graduated:{" "}
-                  {new Date(member.dateGraduateHighschool).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-            <div>
-              <p className="text-muted-foreground">COLLEGE</p>
-              <h2 className="text-md font-bold">{member.college || "N/A"}</h2>
-              {member.dateGraduateCollege && (
-                <p className="text-sm text-muted-foreground">
-                  Graduated:{" "}
-                  {new Date(member.dateGraduateCollege).toLocaleDateString()}
-                </p>
-              )}
-            </div>
-            <div>
-              <p className="text-muted-foreground">COURSE</p>
-              <h2 className="text-md font-bold">{member.course || "N/A"}</h2>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Business Information Card - Add this new card */}
-      <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Business Information</CardTitle>
-          <Button
-            variant="outline"
-            disabled={updateLoading}
-            onClick={() => {
-              setSelectedMember(member);
-              setEditBusinessOpen(true);
-            }}
-          >
-            {updateLoading ? (
-              <>Loading...</>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" /> Edit Business
-              </>
-            )}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-muted-foreground">BUSINESS NAME</p>
-              <h2 className="text-md font-bold">
-                {member.businessName || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">BUSINESS TELEPHONE</p>
-              <h2 className="text-md font-bold">
-                {member.businessTelephone || "N/A"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">BUSINESS FAX</p>
-              <h2 className="text-md font-bold">
-                {member.businessFax || "N/A"}
-              </h2>
-            </div>
-            <div className="col-span-2">
-              <p className="text-muted-foreground">BUSINESS ADDRESS</p>
-              <h2 className="text-md font-bold">
-                {member.businessAddress || "N/A"}
-              </h2>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Skills and Hobbies Card - Add this new card */}
-      <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Skills & Hobbies</CardTitle>
-          <Button
-            variant="outline"
-            disabled={updateLoading}
-            onClick={() => {
-              setSelectedMember(member);
-              setEditSkillsOpen(true);
-            }}
-          >
-            {updateLoading ? (
-              <>Loading...</>
-            ) : (
-              <>
-                <Edit className="mr-2 h-4 w-4" /> Edit Skills
-              </>
-            )}
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 gap-4">
-            <div>
-              <p className="text-muted-foreground">SKILLS</p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {member.skills && member.skills.length > 0 ? (
-                  member.skills.map((skill, index) => (
-                    <Badge key={index} variant="secondary">
-                      {skill}
-                    </Badge>
-                  ))
+              <CardContent>
+                {member ? (
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold">{fullName}</h2>
+                    <p className="text-muted-foreground flex items-center gap-2">
+                      <span>
+                        <IdCard />
+                      </span>
+                      {memberId}
+                    </p>
+                  </div>
                 ) : (
-                  <span className="text-md font-bold">No skills listed</span>
+                  <p className="text-red-500">Member not found</p>
                 )}
-              </div>
-            </div>
-            <div>
-              <p className="text-muted-foreground">HOBBIES</p>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {member.hobbies && member.hobbies.length > 0 ? (
-                  member.hobbies.map((hobby, index) => (
-                    <Badge key={index} variant="outline">
-                      {hobby}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-muted-foreground">AGE</p>
+                    <h2 className="text-md font-bold">
+                      {calculateAge(member.birthDate) || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">STATUS</p>
+                    <Badge
+                      className={
+                        member.status === "ACTIVE" || member.status === "Active"
+                          ? "bg-green-500"
+                          : member.status === "PENDING" ||
+                              member.status === "Pending"
+                            ? "bg-gray-500"
+                            : "bg-red-500"
+                      }
+                    >
+                      {member.status}
                     </Badge>
-                  ))
-                ) : (
-                  <span className="text-md font-bold">No hobbies listed</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">BIRTH DATE</p>
+                    <h2 className="text-md font-bold">
+                      {new Date(member.birthDate).toLocaleDateString()}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">BIRTH PLACE</p>
+                    <h2 className="text-md font-bold">
+                      {member.birthPlace || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">CIVIL STATUS</p>
+                    <h2 className="text-md font-bold">
+                      {member.civilStatus || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">CITIZENSHIP</p>
+                    <h2 className="text-md font-bold">
+                      {member.citizenship || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">RELIGION</p>
+                    <h2 className="text-md font-bold">
+                      {member.religion || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">BLOOD TYPE</p>
+                    <h2 className="text-md font-bold">
+                      {member.bloodType || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">HEIGHT</p>
+                    <h2 className="text-md font-bold">
+                      {member.height ? `${member.height} cm` : "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">WEIGHT</p>
+                    <h2 className="text-md font-bold">
+                      {member.weight ? `${member.weight} kg` : "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">PROFESSION</p>
+                    <h2 className="text-md font-bold">
+                      {member.profession || "N/A"}
+                    </h2>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">ADDRESS</p>
+                    <h2 className="text-md font-bold">
+                      {member.address || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">CONTACT INFORMATION</p>
+                    <h2 className="text-md font-bold">{member.contact}</h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">TELEPHONE</p>
+                    <h2 className="text-md font-bold">
+                      {member.telephone || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">EMAIL</p>
+                    <h2 className="text-md font-bold">{member.email}</h2>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-      <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Membership Details</CardTitle>
-        </CardHeader>
+          <TabsContent value="education" className="mt-4">
+            <Card className="p-4">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Educational Background</CardTitle>
+                <Button
+                  variant="outline"
+                  disabled={updateLoading}
+                  onClick={() => {
+                    setSelectedMember(member);
+                    setEditEducationOpen(true);
+                  }}
+                >
+                  {updateLoading ? (
+                    <>Loading...</>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" /> Edit Education
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <p className="text-muted-foreground">ELEMENTARY</p>
+                    <h2 className="text-md font-bold">
+                      {member.elementary || "N/A"}
+                    </h2>
+                    {member.dateGraduateElementary && (
+                      <p className="text-sm text-muted-foreground">
+                        Graduated:{" "}
+                        {new Date(
+                          member.dateGraduateElementary
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">HIGH SCHOOL</p>
+                    <h2 className="text-md font-bold">
+                      {member.highschool || "N/A"}
+                    </h2>
+                    {member.dateGraduateHighschool && (
+                      <p className="text-sm text-muted-foreground">
+                        Graduated:{" "}
+                        {new Date(
+                          member.dateGraduateHighschool
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">COLLEGE</p>
+                    <h2 className="text-md font-bold">
+                      {member.college || "N/A"}
+                    </h2>
+                    {member.dateGraduateCollege && (
+                      <p className="text-sm text-muted-foreground">
+                        Graduated:{" "}
+                        {new Date(
+                          member.dateGraduateCollege
+                        ).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">COURSE</p>
+                    <h2 className="text-md font-bold">
+                      {member.course || "N/A"}
+                    </h2>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <p className="text-muted-foreground">DATE JOINED</p>
-              <h2 className="text-md font-bold">
-                {new Date(member.dateJoined).toLocaleDateString()}
-              </h2>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground">POSITION</p>
-                <h2 className="text-md font-bold">
-                  {member.position || "N/A"}
-                </h2>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={updateLoading}
-                onClick={() => {
-                  setSelectedMember(member);
-                  setEditPositionOpen(true);
-                }}
-              >
-                <Edit className="mr-2 h-4 w-4" /> Edit
-              </Button>
-            </div>
-            <div>
-              <p className="text-muted-foreground">CONTRIBUTION</p>
-              <h2 className="text-md font-bold">
-                {member.contribution || "0"}
-              </h2>
-            </div>
-            <div>
-              <p className="text-muted-foreground">ABSENCES</p>
-              <h2 className="text-md font-bold">{member.absences || "0"}</h2>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          <TabsContent value="business" className="mt-4">
+            <Card className="p-4">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Business Information</CardTitle>
+                <Button
+                  variant="outline"
+                  disabled={updateLoading}
+                  onClick={() => {
+                    setSelectedMember(member);
+                    setEditBusinessOpen(true);
+                  }}
+                >
+                  {updateLoading ? (
+                    <>Loading...</>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" /> Edit Business
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-muted-foreground">BUSINESS NAME</p>
+                    <h2 className="text-md font-bold">
+                      {member.businessName || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">BUSINESS TELEPHONE</p>
+                    <h2 className="text-md font-bold">
+                      {member.businessTelephone || "N/A"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">BUSINESS FAX</p>
+                    <h2 className="text-md font-bold">
+                      {member.businessFax || "N/A"}
+                    </h2>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-muted-foreground">BUSINESS ADDRESS</p>
+                    <h2 className="text-md font-bold">
+                      {member.businessAddress || "N/A"}
+                    </h2>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-      {/* <Card className="m-4 p-4">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Certificates and Trainings</CardTitle>
-          <Button variant="outline">
-            <UploadFile className="mr-2 h-4 w-4" /> Upload Certificate
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <DownloadableItem
-            imagePath="/cert-03.jpg"
-            title="Certificate of Appreciation"
-            date="January 2024"
-          />
-          <DownloadableItem
-            imagePath="/cert-01.png"
-            title="Leadership Training Certificate"
-            date="February 2024"
-          />
-          <DownloadableItem
-            imagePath="/cert-02.jpg"
-            title="Community Service Award"
-            date="March 2024"
-          />
-        </CardContent>
-      </Card> */}
+          <TabsContent value="skills" className="mt-4">
+            <Card className="p-4">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Skills & Hobbies</CardTitle>
+                <Button
+                  variant="outline"
+                  disabled={updateLoading}
+                  onClick={() => {
+                    setSelectedMember(member);
+                    setEditSkillsOpen(true);
+                  }}
+                >
+                  {updateLoading ? (
+                    <>Loading...</>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" /> Edit Skills
+                    </>
+                  )}
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <p className="text-muted-foreground">SKILLS</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {member.skills && member.skills.length > 0 ? (
+                        member.skills.map((skill, index) => (
+                          <Badge key={index} variant="secondary">
+                            {skill}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-md font-bold">
+                          No skills listed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">HOBBIES</p>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {member.hobbies && member.hobbies.length > 0 ? (
+                        member.hobbies.map((hobby, index) => (
+                          <Badge key={index} variant="outline">
+                            {hobby}
+                          </Badge>
+                        ))
+                      ) : (
+                        <span className="text-md font-bold">
+                          No hobbies listed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="membership" className="mt-4">
+            <Card className="p-4">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Membership Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-muted-foreground">DATE JOINED</p>
+                    <h2 className="text-md font-bold">
+                      {new Date(member.dateJoined).toLocaleDateString()}
+                    </h2>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground">POSITION</p>
+                      <h2 className="text-md font-bold">
+                        {member.position || "N/A"}
+                      </h2>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={updateLoading}
+                      onClick={() => {
+                        setSelectedMember(member);
+                        setEditPositionOpen(true);
+                      }}
+                    >
+                      <Edit className="mr-2 h-4 w-4" /> Edit
+                    </Button>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">CONTRIBUTION</p>
+                    <h2 className="text-md font-bold">
+                      {member.contribution || "0"}
+                    </h2>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">ABSENCES</p>
+                    <h2 className="text-md font-bold">
+                      {member.absences || "0"}
+                    </h2>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Edit Modal */}
       <AdminEditMemberModal

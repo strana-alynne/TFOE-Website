@@ -12,7 +12,7 @@ import {
 import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { Download, Edit } from "@mui/icons-material";
+import { Download, Edit, Add } from "@mui/icons-material";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import { AdminEditPositionModal } from "@/components/edit-position-member";
 import { EditEducationModal } from "@/components/edit-educ-modal";
 import { EditSkillsModal } from "@/components/edit-skills-modal";
 import { EditBusinessModal } from "@/components/edit-biz-modal";
-
+import { AddContributionModal } from "@/components/add-contributions-modal";
 // Updated Member interface to match the extended API response
 interface Member {
   id: string;
@@ -132,6 +132,7 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
   const [editBusinessOpen, setEditBusinessOpen] = useState(false);
   const [editSkillsOpen, setEditSkillsOpen] = useState(false);
   const [editMembershipOpen, setEditMembershipOpen] = useState(false);
+  const [addContributionOpen, setAddContributionOpen] = useState(false);
 
   const calculateAge = (birthDateString: string) => {
     const today = new Date();
@@ -142,6 +143,23 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
       age--;
     }
     return age;
+  };
+
+  const refreshMemberData = async () => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("access_token")
+        : null;
+
+    if (!token) return;
+
+    try {
+      const response = await getDetails(token, memberId);
+      const memberData = response.data?.data || response.data;
+      setMember(memberData);
+    } catch (error) {
+      console.error("Failed to refresh member data:", error);
+    }
   };
 
   useEffect(() => {
@@ -828,11 +846,21 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
                       <Edit className="mr-2 h-4 w-4" /> Edit
                     </Button>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">CONTRIBUTION</p>
-                    <h2 className="text-md font-bold">
-                      {member.contribution || "0"}
-                    </h2>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground">CONTRIBUTION</p>
+                      <h2 className="text-md font-bold">
+                        {member.contribution || "0"}
+                      </h2>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={updateLoading}
+                      onClick={() => setAddContributionOpen(true)}
+                    >
+                      <Add className="mr-2 h-4 w-4" /> Add
+                    </Button>
                   </div>
                   <div>
                     <p className="text-muted-foreground">ABSENCES</p>
@@ -885,6 +913,14 @@ export default function MembersProfile({ memberId }: MembersProfileProps) {
         setOpen={setEditSkillsOpen}
         member={selectedMember}
         onSave={handleSave}
+      />
+
+      <AddContributionModal
+        open={addContributionOpen}
+        setOpen={setAddContributionOpen}
+        memberId={memberId}
+        memberName={fullName} // Add this line - uses the fullName variable already defined
+        onContributionAdded={refreshMemberData}
       />
     </SidebarInset>
   );

@@ -17,12 +17,14 @@ interface AddContributionModalProps {
   open: boolean;
   setOpen: (open: boolean) => void;
   memberId: string;
+  memberName: string;
   onContributionAdded?: () => void;
 }
 
 interface ContributionPayload {
   contribution: number;
   user_id: string;
+  name: string;
   created_at: string;
 }
 
@@ -30,6 +32,7 @@ export function AddContributionModal({
   open,
   setOpen,
   memberId,
+  memberName,
   onContributionAdded,
 }: AddContributionModalProps) {
   const { toast } = useToast();
@@ -71,6 +74,7 @@ export function AddContributionModal({
       const payload: ContributionPayload = {
         contribution: parseFloat(contribution),
         user_id: memberId,
+        name: memberName,
         created_at: new Date().toISOString(),
       };
 

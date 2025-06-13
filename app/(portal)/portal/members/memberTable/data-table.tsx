@@ -42,27 +42,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
-  // DEBUG: Log the data being passed to the table
-  React.useEffect(() => {
-    console.log("=== DATATABLE DEBUG ===");
-    console.log("Raw data received:", data);
-    console.log("Data length:", data?.length);
-    console.log("Data type:", typeof data);
-    console.log("Is data an array?", Array.isArray(data));
-
-    if (data && data.length > 0) {
-      console.log(
-        "First non-null item:",
-        data.find((item) => item !== null)
-      );
-      console.log("Sample data structure:", JSON.stringify(data[0], null, 2));
-    }
-
-    console.log("Columns received:", columns);
-    console.log("Number of columns:", columns?.length);
-    console.log("========================");
-  }, [data, columns]);
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data: data || [], // Ensure data is never undefined
@@ -73,23 +53,30 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchValue = filterValue.toLowerCase();
+      const rowData = row.original as any;
+
+      // Search in firstName, middleName, and lastName
+      const firstName = (rowData.firstName || "").toLowerCase();
+      const middleName = (rowData.middleName || "").toLowerCase();
+      const lastName = (rowData.lastName || "").toLowerCase();
+      const fullName = `${firstName} ${middleName} ${lastName}`.trim();
+
+      return (
+        firstName.includes(searchValue) ||
+        middleName.includes(searchValue) ||
+        lastName.includes(searchValue) ||
+        fullName.includes(searchValue)
+      );
+    },
     state: {
       sorting,
       columnFilters,
+      globalFilter,
     },
   });
-
-  // DEBUG: Log table state
-  React.useEffect(() => {
-    console.log("=== TABLE STATE DEBUG ===");
-    console.log("Table row count:", table.getRowModel().rows?.length);
-    console.log("Table rows:", table.getRowModel().rows);
-    console.log(
-      "Filtered row count:",
-      table.getFilteredRowModel().rows?.length
-    );
-    console.log("===========================");
-  }, [table.getRowModel().rows]);
 
   const handleRowClick = (row: TData, event: React.MouseEvent) => {
     if ((event.target as HTMLElement).closest('[data-delete-button="true"]')) {
@@ -111,11 +98,9 @@ export function DataTable<TData, TValue>({
     <>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter emails..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search by name..."
+          value={globalFilter ?? ""}
+          onChange={(event) => setGlobalFilter(event.target.value)}
           className="max-w-sm"
         />
       </div>

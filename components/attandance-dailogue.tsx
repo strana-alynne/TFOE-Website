@@ -43,6 +43,7 @@ export default function AttendanceDialog({
   const [eventCode, setEventCode] = useState("");
   const [feedback, setFeedback] = useState("");
   const [attendanceType, setAttendanceType] = useState("");
+  const [eventCodeError, setEventCodeError] = useState("");
   const [errors, setErrors] = useState<{
     eventCode?: string;
     feedback?: string;
@@ -81,6 +82,9 @@ export default function AttendanceDialog({
       return;
     }
 
+    // Clear any previous event code errors
+    setEventCodeError("");
+
     try {
       await onSubmit({
         eventCode: eventCode.trim(),
@@ -93,8 +97,16 @@ export default function AttendanceDialog({
       setFeedback("");
       setAttendanceType("");
       setErrors({});
+      setEventCodeError("");
     } catch (error) {
-      // Error handling is done in the parent component
+      // Handle specific event code error
+      if (
+        error instanceof Error &&
+        error.message.includes("Incorrect event code")
+      ) {
+        setEventCodeError("Incorrect event code. Please check and try again.");
+      }
+      // Other errors will be handled by the parent component's toast
       console.error("Submission error:", error);
     }
   };
@@ -130,14 +142,26 @@ export default function AttendanceDialog({
                 <Input
                   id="eventCode"
                   value={eventCode}
-                  onChange={(e) => setEventCode(e.target.value)}
+                  onChange={(e) => {
+                    setEventCode(e.target.value);
+                    // Clear any previous event code error when user types
+                    if (eventCodeError) {
+                      setEventCodeError("");
+                    }
+                    // Clear validation error
+                    if (errors.eventCode) {
+                      setErrors((prev) => ({ ...prev, eventCode: undefined }));
+                    }
+                  }}
                   placeholder="Enter event code"
                   disabled={loading}
-                  className={errors.eventCode ? "border-red-500" : ""}
+                  className={
+                    errors.eventCode || eventCodeError ? "border-red-500" : ""
+                  }
                 />
-                {errors.eventCode && (
+                {(errors.eventCode || eventCodeError) && (
                   <p className="text-sm text-red-500 mt-1">
-                    {errors.eventCode}
+                    {errors.eventCode || eventCodeError}
                   </p>
                 )}
               </div>

@@ -121,7 +121,6 @@ export default function EventDetails({ id }: EventID) {
     ).length;
   };
 
-  // Updated EventDetails component - handleAttendanceSubmit function
   const handleAttendanceSubmit = async ({
     eventCode,
     feedback,
@@ -140,7 +139,6 @@ export default function EventDetails({ id }: EventID) {
           description: "Access token is missing.",
           variant: "destructive",
         });
-        setUpdateLoading(false);
         return;
       }
 
@@ -150,7 +148,6 @@ export default function EventDetails({ id }: EventID) {
           description: "User details not available.",
           variant: "destructive",
         });
-        setUpdateLoading(false);
         return;
       }
 
@@ -159,11 +156,13 @@ export default function EventDetails({ id }: EventID) {
         memberId: userDetails.id,
         memberName:
           `${userDetails.firstName} ${userDetails.middleName} ${userDetails.lastName}`.trim(),
-        attendanceType: attendanceType, // Add the attendance type
+        attendanceType: attendanceType,
       };
 
+      // Mark attendance first
       await markAttendance(token, id, attendanceData);
 
+      // If attendance is successful, submit feedback
       const feedbackData = {
         feedbackContent: feedback,
         feedbackSenderId: userDetails.id,
@@ -189,6 +188,8 @@ export default function EventDetails({ id }: EventID) {
       }
     } catch (error) {
       console.error("Attendance submission error:", error);
+
+      // Show specific error message
       toast({
         title: "Error",
         description:
@@ -197,6 +198,9 @@ export default function EventDetails({ id }: EventID) {
             : "Failed to submit attendance.",
         variant: "destructive",
       });
+
+      // Don't close the dialog so user can retry with correct code
+      // The dialog will remain open for retry
     } finally {
       setUpdateLoading(false);
     }
@@ -217,6 +221,7 @@ export default function EventDetails({ id }: EventID) {
           getEventDetail(token, id),
           getUserDetails(token),
         ]);
+        console.log("Event response:", eventResponse);
 
         setEventDetail(eventResponse.data.data);
         setUserDetails(userResponse.data);

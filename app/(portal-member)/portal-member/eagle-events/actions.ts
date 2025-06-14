@@ -82,7 +82,7 @@ export async function markAttendance(token: string, eventId: string, attendanceD
   eventCode: string;
   memberId: string;
   memberName: string;
-  attendanceType: string; // Add this field
+  attendanceType: string;
 }) {
   try {
     const response = await fetch(`https://tfoe-backend.onrender.com/member/event/${eventId}`, {
@@ -94,18 +94,31 @@ export async function markAttendance(token: string, eventId: string, attendanceD
       body: JSON.stringify(attendanceData),
     });
 
-    console.log("Attendance Data:", response);
+    const data = await response.json();
+    
     if (!response.ok) {
-      console.log("Response Attendance:", response);
+      // Handle specific error cases
+      if (data.detail === "Incorrect event code.") {
+        throw new Error("Incorrect event code. Please check and try again.");
+      }
+      if (data.detail) {
+        throw new Error(data.detail);
+      }
+      if (data.message) {
+        throw new Error(data.message);
+      }
+      throw new Error(`Request failed with status ${response.status}`);
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
-    console.log('Error marking attendance:', error);
-    throw error;
+    // Re-throw the error so it can be caught by the calling function
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('An unexpected error occurred while marking attendance');
   }
 }
-
 // Submit feedback
 export async function submitFeedback(token: string, feedbackData: {
   feedbackContent: string;

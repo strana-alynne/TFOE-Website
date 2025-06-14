@@ -16,20 +16,31 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { date: "January", desktop: 222, mobile: 150 },
-  { date: "February", desktop: 97, mobile: 180 },
-  { date: "March", desktop: 300, mobile: 120 },
-  { date: "April", desktop: 242, mobile: 260 },
-  { date: "May", desktop: 373, mobile: 290 },
-  { date: "June", desktop: 301, mobile: 340 },
-  { date: "July", desktop: 245, mobile: 180 },
-  { date: "August", desktop: 409, mobile: 320 },
-  { date: "September", desktop: 59, mobile: 110 },
-  { date: "October", desktop: 261, mobile: 190 },
-  { date: "November", desktop: 327, mobile: 350 },
-  { date: "December", desktop: 292, mobile: 210 },
-];
+
+interface MemberLineGraphProps {
+  stats?: {
+    quarterly_totals: { [key: string]: number };
+    monthly_totals: { [key: string]: number };
+    annual_contribution: number;
+  };
+}
+
+// Month mapping
+const monthNames = {
+  "1": "January",
+  "2": "February",
+  "3": "March",
+  "4": "April",
+  "5": "May",
+  "6": "June",
+  "7": "July",
+  "8": "August",
+  "9": "September",
+  "10": "October",
+  "11": "November",
+  "12": "December",
+};
+
 const monthMap: { [key: string]: string } = {
   January: "2024-01-01",
   February: "2024-02-01",
@@ -44,6 +55,7 @@ const monthMap: { [key: string]: string } = {
   November: "2024-11-01",
   December: "2024-12-01",
 };
+
 const chartConfig = {
   views: {
     label: "Total Sales",
@@ -54,16 +66,50 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function MemberLineGraph() {
+export function MemberLineGraph({ stats }: MemberLineGraphProps) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("desktop");
+
+  // Transform API data to chart format
+  const chartData = React.useMemo(() => {
+    if (stats?.monthly_totals) {
+      // Create array for all 12 months, filling with 0 for missing months
+      const data = [];
+      for (let i = 1; i <= 12; i++) {
+        const monthName = monthNames[i.toString() as keyof typeof monthNames];
+        const value = stats.monthly_totals[i.toString()] || 0;
+        data.push({
+          date: monthName,
+          desktop: value,
+          mobile: 0, // You can add mobile data if available in your API
+        });
+      }
+      return data;
+    }
+
+    // Fallback to dummy data if no stats
+    return [
+      { date: "January", desktop: 0, mobile: 0 },
+      { date: "February", desktop: 0, mobile: 0 },
+      { date: "March", desktop: 0, mobile: 0 },
+      { date: "April", desktop: 0, mobile: 0 },
+      { date: "May", desktop: 0, mobile: 0 },
+      { date: "June", desktop: 0, mobile: 0 },
+      { date: "July", desktop: 0, mobile: 0 },
+      { date: "August", desktop: 0, mobile: 0 },
+      { date: "September", desktop: 0, mobile: 0 },
+      { date: "October", desktop: 0, mobile: 0 },
+      { date: "November", desktop: 0, mobile: 0 },
+      { date: "December", desktop: 0, mobile: 0 },
+    ];
+  }, [stats]);
 
   const total = React.useMemo(
     () => ({
       desktop: chartData.reduce((acc, curr) => acc + curr.desktop, 0),
       mobile: chartData.reduce((acc, curr) => acc + curr.mobile, 0),
     }),
-    []
+    [chartData]
   );
 
   return (

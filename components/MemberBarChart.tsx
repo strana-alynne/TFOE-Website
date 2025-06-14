@@ -17,21 +17,54 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-const chartData = [
-  { month: "Jan - March", desktop: 186 },
-  { month: "April - June", desktop: 305 },
-  { month: "July - September", desktop: 237 },
-  { month: "October - December", desktop: 73 },
-];
+
+interface MemberBarChartProps {
+  stats?: {
+    quarterly_totals: { [key: string]: number };
+    monthly_totals: { [key: string]: number };
+    annual_contribution: number;
+  };
+}
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Sales",
     color: "hsl(var(--chart-1))",
   },
 } satisfies ChartConfig;
 
-export default function MemberBarChart() {
+// Quarter mapping
+const quarterLabels = {
+  "1": "Jan - March",
+  "2": "April - June",
+  "3": "July - September",
+  "4": "October - December",
+};
+
+export default function MemberBarChart({ stats }: MemberBarChartProps) {
+  // Transform API data to chart format
+  const chartData = stats?.quarterly_totals
+    ? Object.entries(stats.quarterly_totals).map(([quarter, value]) => ({
+        month:
+          quarterLabels[quarter as keyof typeof quarterLabels] ||
+          `Quarter ${quarter}`,
+        desktop: value,
+      }))
+    : [
+        { month: "Jan - March", desktop: 0 },
+        { month: "April - June", desktop: 0 },
+        { month: "July - September", desktop: 0 },
+        { month: "October - December", desktop: 0 },
+      ];
+
+  // Calculate trend (simplified - you can enhance this logic)
+  const totalQuarterly = Object.values(stats?.quarterly_totals || {}).reduce(
+    (sum, val) => sum + val,
+    0
+  );
+  const avgQuarterly =
+    totalQuarterly / Object.keys(stats?.quarterly_totals || {}).length;
+
   return (
     <Card className="w-full h-full">
       <CardHeader>
@@ -59,10 +92,16 @@ export default function MemberBarChart() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          {stats?.annual_contribution ? (
+            <>Total Annual: ₱{stats.annual_contribution.toLocaleString()}</>
+          ) : (
+            <>
+              Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+            </>
+          )}
         </div>
         <div className="leading-none text-muted-foreground">
-          Total saler for every quarter
+          Total sales for every quarter
         </div>
       </CardFooter>
     </Card>

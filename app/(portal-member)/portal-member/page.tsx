@@ -12,16 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
-import { getDetails } from "./actions";
-
-// Define dummy data
-const dummyMember = {
-  _id: "user1",
-  firstName: "John",
-  lastName: "Smith",
-  email: "john.smith@example.com",
-  role: "member",
-};
+import { getDetails, getStats } from "./actions";
 
 type Member = {
   _id: string;
@@ -31,19 +22,38 @@ type Member = {
   role: string;
 };
 
+type Stats = {
+  quarterly_totals: { [key: string]: number };
+  monthly_totals: { [key: string]: number };
+  annual_contribution: number;
+};
+
 export default function Page() {
   const [member, setMember] = useState<Member | undefined>();
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDetails = async () => {
       const token = localStorage.getItem("access_token");
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const response = await getDetails(token);
-        setMember(response.data);
+        const [memberResponse, statsResponse] = await Promise.all([
+          getDetails(token),
+          getStats(token),
+        ]);
+        console.log("Member Response:", memberResponse);
+        console.log("Stats Response:", statsResponse);
+        setMember(memberResponse.data);
+        setStats(statsResponse.data);
       } catch (error) {
         console.error("Failed to fetch member details:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -65,19 +75,21 @@ export default function Page() {
       </header>
 
       <div className="p-4 w-full">
-        {member ? (
+        {loading ? (
+          <h2 className="text-2xl font-bold">Loading....</h2>
+        ) : member ? (
           <h2 className="text-2xl font-bold">Welcome {member.firstName}!</h2>
         ) : (
-          <h2 className="text-2xl font-bold">Loading....</h2>
+          <h2 className="text-2xl font-bold">Welcome!</h2>
         )}
       </div>
 
       <div className="p-4 w-full grid grid-cols-1 md:grid-cols-3 gap-4 h-full">
         <div className="h-full w-full">
-          <MemberBarChart />
+          <MemberBarChart stats={stats ?? undefined} />
         </div>
         <div className="md:col-span-2 h-full w-full">
-          <MemberLineGraph />
+          <MemberLineGraph stats={stats ?? undefined} />
         </div>
       </div>
     </SidebarInset>

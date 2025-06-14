@@ -1,5 +1,7 @@
 "use server";
 
+import { ConfigResolutionError } from "sanity";
+
 
 export async function getDetails(token: any) {
   try {
@@ -214,6 +216,46 @@ export async function getFeedback(token: any, eventId: any) {
     console.log("Error fetching event details:", error);
     return {
       message: error instanceof Error ? error.message : "Failed to fetch data!",
+    };
+  }
+}
+
+export async function closeEvent(token: string, eventId: string) {
+  try {
+    console.log("Closing event with ID:", eventId);
+    const response = await fetch(
+      `https://tfoe-backend.onrender.com/admin/event/${eventId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    console.log("Response status:", response.status);
+    
+    if (!response.ok) {
+      console.log("Response not ok:", response.status);
+      return { 
+        success: false,
+        error: `Failed with status ${response.status}` 
+      };
+    }
+
+    // DELETE requests often don't return JSON, so don't try to parse it
+    console.log("Event closed successfully");
+
+    return { 
+      success: true,
+      data: null // DELETE typically doesn't return data
+    };
+  } catch (error) {
+    console.log("Error closing event:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to close event",
     };
   }
 }

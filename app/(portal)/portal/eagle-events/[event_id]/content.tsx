@@ -14,14 +14,18 @@ import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Delete, Edit, Token } from "@mui/icons-material";
 import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getEventDetail, deleteEvent } from "../actions";
+import {
+  getEventDetail,
+  deleteEvent,
+  updateEvent,
+  closeEvent,
+} from "../actions";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/participants-table";
 import FeedbackTable from "./feedback/feedback-table";
 import { EditEvent } from "@/components/edit-event-modal";
 import { DeleteEventModal } from "@/components/delete-modal";
 import { Switch } from "@/components/ui/switch";
-import { updateEvent } from "../actions";
 // Updated interfaces to match your actual data structure
 interface EventAttendee {
   eventCode: string;
@@ -92,7 +96,6 @@ export default function EventDetails({ id }: EventID) {
       console.log("Fetching event details for id:", id);
       setLoading(true);
       const response = await getEventDetail(token, id);
-      console.log(`Response for ${id}:`, response);
 
       if (response?.data?.data) {
         // Transform the data to match your interface if needed
@@ -174,24 +177,28 @@ export default function EventDetails({ id }: EventID) {
 
     setUpdatingStatus(true);
     try {
-      // Use your existing updateEvent function
-      const eventData = { eventStatus: newStatus };
-      const result = await updateEvent(token, eventData, eventdetail.id);
+      console.log(
+        `Updating event status to ${newStatus} for event ID: ${eventdetail.id}`
+      );
+      if (newStatus === "CLOSED") {
+        const result = await closeEvent(token, eventdetail.id);
+        console.log("Close event result:", result);
 
-      if (result.success) {
-        setEventDetail((prev) =>
-          prev ? { ...prev, eventStatus: newStatus } : null
-        );
-        toast({
-          title: "Success",
-          description: `Event status updated to ${newStatus}`,
-          variant: "default",
-        });
-      } else {
-        throw new Error(result.message || "Failed to update status");
+        if (result.success) {
+          setEventDetail((prev) =>
+            prev ? { ...prev, eventStatus: newStatus } : null
+          );
+          toast({
+            title: "Success",
+            description: "Event closed successfully",
+            variant: "default",
+          });
+        } else {
+          throw new Error(result.error || "Failed to close event");
+        }
       }
     } catch (error) {
-      console.error("Failed to update event status:", error);
+      console.log("Failed to update event status:", error);
       toast({
         title: "Error",
         description:

@@ -19,7 +19,6 @@ export async function getDetails(token: any) {
 
     const data = await response.json();
 
-    console.log("Response data:", data);
 
     return { data: data };
   } catch (error) {
@@ -31,8 +30,6 @@ export async function getDetails(token: any) {
 }
 export async function getEventDetail(token: any, eventId: string) {
   try {
-    console.log("Fetching event details with token:", token);
-    console.log("Fetching event details for eventId:", eventId);
     const response = await fetch(
       `https://tfoe-backend.onrender.com/user/event/${eventId}`,
       {
@@ -97,6 +94,7 @@ export async function markAttendance(token: string, eventId: string, attendanceD
       body: JSON.stringify(attendanceData),
     });
 
+    console.log("Attendance Data:", response);
     if (!response.ok) {
       console.log("Response Attendance:", response);
     }

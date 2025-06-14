@@ -217,7 +217,7 @@ export default function Page() {
         const token = localStorage.getItem("access_token");
 
         const contributionsResponse = await fetch(
-          "https://tfoe-backend.onrender.com/member/contributions",
+          "https://tfoe-backend.onrender.com/member/contribution",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -289,16 +289,6 @@ export default function Page() {
           <CardContent>
             <div className="w-full">
               <div className="flex items-center py-4">
-                <Input
-                  placeholder="Filter by Name..."
-                  value={
-                    (table.getColumn("name")?.getFilterValue() as string) ?? ""
-                  }
-                  onChange={(event) =>
-                    table.getColumn("name")?.setFilterValue(event.target.value)
-                  }
-                  className="max-w-sm"
-                />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="ml-auto">

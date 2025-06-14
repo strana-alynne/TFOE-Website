@@ -14,7 +14,6 @@ import { Card, CardTitle, CardHeader, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Timer, CheckCircle } from "@mui/icons-material";
-import { IdCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   getEventDetail,
@@ -41,7 +40,6 @@ interface EventDetailsProps {
   eventAttendees: (string | AttendeeInfo)[]; // Updated to handle mixed array
   eventCode: string;
   eventDetails: string;
-  // Optional properties that might not be in API response
   happeningNow?: boolean;
   attendanceCode?: string;
   attended?: string;
@@ -164,11 +162,8 @@ export default function EventDetails({ id }: EventID) {
         attendanceType: attendanceType, // Add the attendance type
       };
 
-      console.log("Marking attendance with data:", attendanceData);
-
       await markAttendance(token, id, attendanceData);
 
-      // Step 2: Submit feedback
       const feedbackData = {
         feedbackContent: feedback,
         feedbackSenderId: userDetails.id,
@@ -176,7 +171,6 @@ export default function EventDetails({ id }: EventID) {
         feedbackDate: new Date().toISOString(),
       };
 
-      console.log("Submitting feedback with data:", feedbackData);
       await submitFeedback(token, feedbackData);
 
       toast({
@@ -211,7 +205,6 @@ export default function EventDetails({ id }: EventID) {
   useEffect(() => {
     const fetchData = async () => {
       const token = localStorage.getItem("access_token");
-      console.log("Fetching data with token:", token);
       if (!token) {
         setError("Access token is missing");
         setLoading(false);
@@ -225,15 +218,10 @@ export default function EventDetails({ id }: EventID) {
           getUserDetails(token),
         ]);
 
-        console.log("Event response:", eventResponse);
-        console.log("User response:", userResponse);
-        console.log("User ID:", userResponse.data);
-
         setEventDetail(eventResponse.data.data);
         setUserDetails(userResponse.data);
         setLoading(false);
       } catch (error) {
-        console.error("Failed to fetch data:", error);
         setError(
           error instanceof Error ? error.message : "Failed to fetch data"
         );

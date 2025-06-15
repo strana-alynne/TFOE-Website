@@ -498,7 +498,7 @@ export default function Profile() {
                       <span>
                         <IdCard />
                       </span>
-                      member.id
+                      {member.id}
                     </p>
                   </div>
                 ) : (

@@ -35,9 +35,29 @@ interface Certificate {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+  imageUrl?: string; // Keep for backward compatibility
+  image_base64?: string; // Add for new API format
   fileName: string;
   uploadDate: string;
+  file_id?: string;
+  content_type?: string;
+  filename?: string;
+}
+
+// API Response interface based on your data
+interface ApiCertificate {
+  content_type: string;
+  description: string;
+  file_id: string;
+  filename: string;
+  image_base64: string;
+  title: string;
+}
+
+interface ApiResponse {
+  detail?: ApiCertificate[];
+  certificates?: Certificate[]; // Fallback for other possible structures
+  data?: Certificate[]; // Another fallback
 }
 
 export default function CertificatesPage() {
@@ -52,6 +72,14 @@ export default function CertificatesPage() {
   const [description, setDescription] = useState("");
   const [uploading, setUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  // Helper function to get image source
+  const getImageSrc = (certificate: Certificate): string => {
+    if (certificate.image_base64) {
+      return certificate.image_base64;
+    }
+    return certificate.imageUrl || "";
+  };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -95,20 +123,16 @@ export default function CertificatesPage() {
     setError(null);
 
     try {
-      // Get token first and validate
       const token = localStorage.getItem("access_token");
       if (!token) {
         throw new Error("No access token found. Please log in again.");
       }
 
       const formData = new FormData();
-
-      // Make sure we're appending the file correctly
       formData.append("file", selectedFile, selectedFile.name);
       formData.append("title", title.trim());
       formData.append("description", description.trim());
 
-      // Debug: Log what we're sending
       console.log("Uploading file:", {
         name: selectedFile.name,
         type: selectedFile.type,
@@ -123,24 +147,17 @@ export default function CertificatesPage() {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
-            // Do NOT set Content-Type when using FormData - let browser set it
           },
           body: formData,
         }
       );
 
-      // Log response details for debugging
       console.log("Response status:", response.status);
-      console.log(
-        "Response headers:",
-        Object.fromEntries(response.headers.entries())
-      );
 
       if (!response.ok) {
         const errorText = await response.text();
         console.log("Error response:", errorText);
 
-        // Try to parse as JSON for better error message
         try {
           const errorJson = JSON.parse(errorText);
           throw new Error(
@@ -157,17 +174,8 @@ export default function CertificatesPage() {
       console.log("Upload success:", result);
       setError(null);
 
-      // Add the new certificate to the list
-      const newCertificate: Certificate = {
-        id: result.id || Date.now().toString(),
-        title,
-        description,
-        imageUrl: result.imageUrl || previewUrl || "",
-        fileName: selectedFile.name,
-        uploadDate: new Date().toISOString(),
-      };
-
-      setCertificates((prev) => [newCertificate, ...prev]);
+      // Refresh the certificates list
+      await loadCertificates();
 
       // Reset form
       setTitle("");
@@ -188,12 +196,35 @@ export default function CertificatesPage() {
 
   const handleDownload = async (certificate: Certificate) => {
     try {
-      const response = await fetch(certificate.imageUrl);
-      const blob = await response.blob();
+      let blob: Blob;
+
+      if (certificate.image_base64) {
+        // Convert base64 to blob
+        const base64Data = certificate.image_base64.split(",")[1]; // Remove data:image/png;base64, prefix
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        blob = new Blob([byteArray], {
+          type: certificate.content_type || "image/png",
+        });
+      } else if (certificate.imageUrl) {
+        // Fallback to URL fetch
+        const response = await fetch(certificate.imageUrl);
+        blob = await response.blob();
+      } else {
+        throw new Error("No image data available");
+      }
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = certificate.fileName || `${certificate.title}.jpg`;
+      link.download =
+        certificate.filename ||
+        certificate.fileName ||
+        `${certificate.title}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -201,6 +232,71 @@ export default function CertificatesPage() {
     } catch (error) {
       console.error("Download error:", error);
       setError("Failed to download certificate");
+    }
+  };
+
+  // Extract loadCertificates as a separate function so it can be reused
+  const loadCertificates = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setError("No access token found. Please log in again.");
+        return;
+      }
+
+      const response = await fetch(
+        "https://tfoe-backend.onrender.com/member/certificate",
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("API Response:", data);
+
+        // Transform API data to match Certificate interface
+        let certificatesArray: Certificate[] = [];
+
+        if (data.detail && Array.isArray(data.detail)) {
+          certificatesArray = data.detail.map(
+            (apiCert: ApiCertificate, index: number) => ({
+              id: apiCert.file_id || `cert-${index}`,
+              title: apiCert.title,
+              description: apiCert.description,
+              image_base64: apiCert.image_base64,
+              fileName: apiCert.filename,
+              filename: apiCert.filename, // Keep both for compatibility
+              uploadDate: new Date().toISOString(), // API doesn't seem to provide this
+              file_id: apiCert.file_id,
+              content_type: apiCert.content_type,
+            })
+          );
+        } else {
+          // Fallback for other response structures
+          if (Array.isArray(data)) {
+            certificatesArray = data as Certificate[];
+          } else if (data.certificates && Array.isArray(data.certificates)) {
+            certificatesArray = data.certificates as Certificate[];
+          } else if (data.data && Array.isArray(data.data)) {
+            certificatesArray = data.data as Certificate[];
+          }
+        }
+
+        setCertificates(certificatesArray);
+      } else {
+        console.error("Failed to fetch certificates:", response.status);
+        setCertificates([]);
+      }
+    } catch (error) {
+      console.error("Failed to load certificates:", error);
+      setCertificates([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -215,55 +311,6 @@ export default function CertificatesPage() {
 
   // Load certificates on mount
   useEffect(() => {
-    const loadCertificates = async () => {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("access_token");
-        if (!token) {
-          setError("No access token found. Please log in again.");
-          return;
-        }
-
-        const response = await fetch(
-          "https://tfoe-backend.onrender.com/member/certificate", // Note: plural endpoint
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log("API Response:", data); // Debug log
-
-          // Handle different possible response structures
-          let certificatesArray = [];
-          if (Array.isArray(data)) {
-            certificatesArray = data;
-          } else if (data.certificates && Array.isArray(data.certificates)) {
-            certificatesArray = data.certificates;
-          } else if (data.data && Array.isArray(data.data)) {
-            certificatesArray = data.data;
-          } else {
-            console.warn("Unexpected response structure:", data);
-            certificatesArray = [];
-          }
-
-          setCertificates(certificatesArray);
-        } else {
-          console.error("Failed to fetch certificates:", response.status);
-          setCertificates([]); // Set empty array on error
-        }
-      } catch (error) {
-        console.error("Failed to load certificates:", error);
-        setCertificates([]); // Set empty array on error
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadCertificates();
   }, []);
 
@@ -275,10 +322,7 @@ export default function CertificatesPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink
-                href="/portal/certificates"
-                className="text-muted-foreground"
-              >
+              <BreadcrumbLink className="text-muted-foreground">
                 Certificates
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -439,43 +483,47 @@ export default function CertificatesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 w-full">
-            {Array.isArray(certificates) &&
-              certificates.map((certificate) => (
-                <Card key={certificate.id} className="overflow-hidden">
-                  <div className="aspect-video relative">
-                    <img
-                      src={certificate.imageUrl}
-                      alt={certificate.title}
-                      className="w-full h-full object-cover"
-                    />
+            {certificates.map((certificate) => (
+              <Card key={certificate.id} className="overflow-hidden">
+                <div className="aspect-video relative">
+                  <img
+                    src={getImageSrc(certificate)}
+                    alt={certificate.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("Image failed to load:", certificate);
+                      // You could set a fallback image here
+                      // e.currentTarget.src = "/fallback-image.png";
+                    }}
+                  />
+                </div>
+                <CardHeader className="p-4">
+                  <CardTitle className="text-base line-clamp-1">
+                    {certificate.title}
+                  </CardTitle>
+                  {certificate.description && (
+                    <CardDescription className="line-clamp-2">
+                      {certificate.description}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent className="p-4 pt-0">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(certificate.uploadDate).toLocaleDateString()}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(certificate)}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Download
+                    </Button>
                   </div>
-                  <CardHeader className="p-4">
-                    <CardTitle className="text-base line-clamp-1">
-                      {certificate.title}
-                    </CardTitle>
-                    {certificate.description && (
-                      <CardDescription className="line-clamp-2">
-                        {certificate.description}
-                      </CardDescription>
-                    )}
-                  </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(certificate.uploadDate).toLocaleDateString()}
-                      </span>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownload(certificate)}
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Download
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>

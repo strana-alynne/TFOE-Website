@@ -30,7 +30,6 @@ const data = {
     { title: "Organizational Chart", url: "/portal-member/genealogy" },
     { title: "Contributions", url: "/portal-member/contributions" },
     { title: "Attendance", url: "/portal-member/attendance" },
-    { title: "Penalties", url: "/portal-member/penalties" },
     { title: "Awards & Certificates", url: "/portal-member/awards" },
   ],
 };

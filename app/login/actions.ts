@@ -28,7 +28,6 @@ export async function login(
   prevState: LoginState | undefined,
   formData: FormData,
 ): Promise<LoginState> {
-  console.log("Login action triggered", formData);
   const result = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
@@ -52,7 +51,6 @@ export async function login(
     });
 
     if (response.ok) {
-      console.log("Login successful", response);
       const data = await response.json();
       return {
         success: true,
@@ -60,7 +58,6 @@ export async function login(
         token: data.access_token,
       };
     } else {
-      console.error("Login failed with status:", response.status);
       return {
         success: false,
         errors: { form: "Invalid username or password" },

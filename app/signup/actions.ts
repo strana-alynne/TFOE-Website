@@ -19,11 +19,10 @@ const signupSchema = z
       .min(8, { message: "Password must be at least 8 characters" }),
     confirmPassword: z.string(),
     contact: z.string().min(1, { message: "Contact number is required" }),
-    profession: z.string().optional(), // <-- ADD THIS
-    countryCode: z.string().optional(), // <-- AND THIS
-    dateJoined: z.string().optional().default(Date().toString()),
+    profession: z.string().min(1, { message: "Profession is required" }), // Made required
+    countryCode: z.string().optional(),
+    dateJoined: z.string().optional().default(new Date().toISOString()),
     dateOfBirth: z.string().min(1, { message: "Date of birth is required" }),
-    // Fix: Handle string boolean conversion
     otpVerified: z.union([
       z.boolean(),
       z.string().transform((val) => val === "true")
@@ -33,10 +32,10 @@ const signupSchema = z
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
+
 // Function to send OTP to user's email
 export async function sendOTP(email: string) {
   try {
-    // Call your OTP API endpoint
     const response = await fetch("https://tfoe-backend.onrender.com/otp/send", {
       method: "POST",
       headers: {
@@ -72,7 +71,7 @@ export async function verifyOTP(email: string, otp: string) {
       body: JSON.stringify({ email, otp }),
     });
 
-    const text = await response.text(); // read response as text first
+    const text = await response.text();
 
     let data;
     try {
@@ -98,10 +97,23 @@ export async function verifyOTP(email: string, otp: string) {
 
 // Function to validate form and send OTP
 export async function validateAndSendOTP(prevState: any, formData: FormData) {
-  // Validate form data
-  const result = signupSchema.safeParse(Object.fromEntries(formData));
+  // Create a copy of formData entries for validation
+  const formDataEntries = Object.fromEntries(formData);
+  
+  // Add default values for optional fields if they're empty
+  if (!formDataEntries.middleName) {
+    formDataEntries.middleName = "";
+  }
+  if (!formDataEntries.nameExtensions) {
+    formDataEntries.nameExtensions = "";
+  }
+  
+  console.log("Form data for validation:", formDataEntries);
+  
+  const result = signupSchema.safeParse(formDataEntries);
 
   if (!result.success) {
+    console.log("Validation errors:", result.error.flatten().fieldErrors);
     return {
       success: false,
       errors: result.error.flatten().fieldErrors,
@@ -122,21 +134,34 @@ export async function validateAndSendOTP(prevState: any, formData: FormData) {
     };
   }
 
-  // Return the validated data
   return {
     success: true,
     data: result.data,
   };
 }
 
-
 // Function to register the user
 export async function register(prevState: any, formData: FormData) {
   console.log("➡️ Starting registration");
+  
+  // Create a copy of formData entries for validation
+  const formDataEntries = Object.fromEntries(formData);
+  
+  // Add default values for optional fields if they're empty
+  if (!formDataEntries.middleName) {
+    formDataEntries.middleName = "";
+  }
+  if (!formDataEntries.nameExtensions) {
+    formDataEntries.nameExtensions = "";
+  }
+  
+  console.log("Form data entries:", formDataEntries);
+  
   // Validate form data
-  const result = signupSchema.safeParse(Object.fromEntries(formData));
+  const result = signupSchema.safeParse(formDataEntries);
 
   if (!result.success) {
+    console.log("Validation failed:", result.error.flatten().fieldErrors);
     return {
       success: false,
       errors: result.error.flatten().fieldErrors,
@@ -146,6 +171,7 @@ export async function register(prevState: any, formData: FormData) {
   // Check if OTP was verified
   const otpVerified = formData.get("otpVerified") === "true";
   if (!otpVerified) {
+    console.log("OTP not verified");
     return {
       success: false,
       errors: {
@@ -157,19 +183,6 @@ export async function register(prevState: any, formData: FormData) {
   }
   
   try {
-    // Helper function to calculate age from date of birth
-    function calculateAge(dateOfBirth: string): number {
-      if (!dateOfBirth) return 0;
-      const today = new Date();
-      const birthDate = new Date(dateOfBirth);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      return age;
-    }
-
     // Prepare user data to match the expected API structure
     const userData = {
       user: {
@@ -184,59 +197,96 @@ export async function register(prevState: any, formData: FormData) {
         nameExtension: result.data.nameExtensions || "",
         address: result.data.address,
         email: result.data.email,
-        contact: result.data.contact,
+        cellphone: result.data.contact, // Changed from 'contact' to 'cellphone'
         status: "ACTIVE",
         birthDate: result.data.dateOfBirth,
         absences: 0,
         contribution: 0,
         position: "",
         feedback: "",
-        profession: result.data.profession || "", // Get profession from form data
+        profession: result.data.profession || "",
         dateJoined: new Date().toISOString(),
       },
     };
 
-    console.log("User Data:", userData);
+    console.log("User Data to send:", JSON.stringify(userData, null, 2));
 
     const url = "https://tfoe-backend.onrender.com/user/register";
     const response = await fetch(url, {
       method: "POST",
-      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
     });
+    
     console.log("Response Status:", response.status);
+    console.log("Response Headers:", Object.fromEntries(response.headers.entries()));
+
+    // Get response text first to handle both JSON and non-JSON responses
+    const responseText = await response.text();
+    console.log("Raw response:", responseText);
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Registration failed");
+      let errorMessage = "Registration failed";
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorMessage;
+        console.log("Error Data:", errorData);
+      } catch (e) {
+        console.log("Could not parse error response as JSON");
+        errorMessage = responseText || errorMessage;
+      }
+      
+      return {
+        success: false,
+        errors: {
+          _form: [errorMessage],
+        },
+      };
     }
 
-    const registrationData = await response.json();
-    console.log("Registration successful:", registrationData);
+    let registrationData;
+    try {
+      registrationData = JSON.parse(responseText);
+      console.log("Registration successful:", registrationData);
+    } catch (e) {
+      console.log("Registration response not JSON, but status was OK");
+      registrationData = { message: "Registration successful" };
+    }
     
     // Automatically log the user in after successful registration
-    const loginFormData = new FormData();
-    loginFormData.append("username", result.data.username);
-    loginFormData.append("password", result.data.password);
-    const loginResult = await login(undefined, loginFormData);
-    
-    if (!loginResult.success) {
-      // Try to extract a message from errors, fallback to default
-      const errorMsg =
-        (loginResult.errors &&
-          (loginResult.errors.form?.[0] ||
-            Object.values(loginResult.errors)[0]?.[0])) ||
-        "Auto-login failed after registration";
-      throw new Error(errorMsg);
+    try {
+      const loginFormData = new FormData();
+      loginFormData.append("username", result.data.username);
+      loginFormData.append("password", result.data.password);
+      
+      const loginResult = await login(undefined, loginFormData);
+      
+      if (!loginResult.success) {
+        console.log("Auto-login failed, but registration was successful");
+        // Registration was successful, just redirect to login
+        return {
+          success: true,
+          redirectTo: "/login",
+          message: "Registration successful! Please log in.",
+        };
+      }
+      
+      return {
+        success: true,
+        redirectTo: "/login", // or wherever you want to redirect after login
+        token: loginResult.token,
+      };
+    } catch (loginError) {
+      console.error("Auto-login error:", loginError);
+      // Registration was successful, just redirect to login
+      return {
+        success: true,
+        redirectTo: "/login",
+        message: "Registration successful! Please log in.",
+      };
     }
-    return {
-      success: true,
-      redirectTo: "/login",
-      token: loginResult.token, // Pass along the token from login
-    };
 
   } catch (error) {
     console.error("Registration error:", error);

@@ -23,9 +23,15 @@ interface OtpModalProps {
   isOpen: boolean;
   onClose: () => void;
   onVerify?: (otpValue: string) => void;
+  onResend?: () => void; // Add this
 }
 
-const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
+const OtpModal: React.FC<OtpModalProps> = ({
+  isOpen,
+  onClose,
+  onVerify,
+  onResend,
+}) => {
   // Fix 1: Initialize with 6 empty strings instead of 5
   const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
@@ -96,12 +102,17 @@ const OtpModal: React.FC<OtpModalProps> = ({ isOpen, onClose, onVerify }) => {
     }, 1500);
   };
 
-  // Handle resend OTP
   const handleResend = (): void => {
     // Reset OTP fields
     setOtp(["", "", "", "", ""]);
     // Reset timer
     setTimer(60);
+
+    // Call the parent's resend function
+    if (onResend) {
+      onResend();
+    }
+
     console.log("Resending OTP...");
   };
 

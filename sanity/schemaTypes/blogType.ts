@@ -18,6 +18,7 @@ export const blogType = defineType({
       type: 'string',
       validation: (rule) => rule.required().error('Title is required'),
     }),
+   
     defineField({
       name: 'Category',
       type: 'string',
@@ -48,6 +49,18 @@ export const blogType = defineType({
       validation: (rule) => rule.required().error('Details is required'),
 
     }),
+
+    defineField({
+      name: 'CustomLink',
+       description: 'The structure of the link should be like this: /events/your-event-name',
+      type: 'string',
+    }),
+    defineField({
+      name: 'CustomButtonText',
+      description: 'The text for the custom button, e.g., "Read More"',
+      type: 'string',
+    }),
+
   ],
   preview: {
     select: {title: 'Title', image: 'Image', date: 'Date', hero: 'HeroSection'},

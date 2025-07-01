@@ -4,7 +4,7 @@ import HomeClient from "./homeClient";
 import Footer from "@/components/Footer";
 
 const EVENTS_QUERY = defineQuery(`*[_type == "blog"]{
-  _id, Title, Category, Image, Link, Details, Date, HeroSection
+  _id, Title, Category, Image, Link, Details, Date, HeroSection, CustomLink, CustomButtonText
 }`);
 const MEMBERSHIP_QUERY = defineQuery(`*[_type == "membership"]{
   PersonalSheetDownload, NationalIDForm, NationIDOnlineForm
@@ -41,6 +41,10 @@ export default async function Home() {
   });
   const activities = blog
     .filter((item: { HeroSection: boolean }) => item.HeroSection === true)
+    .sort(
+      (a: { Date: string }, b: { Date: string }) =>
+        new Date(b.Date).getTime() - new Date(a.Date).getTime()
+    ) // Sort by date (latest first)
     .map(
       (item: {
         _id: string;
@@ -49,14 +53,17 @@ export default async function Home() {
         Details: any;
         Image: any;
         Link: any;
+        CustomLink: any;
+        CustomButtonText: any;
       }) => ({
         _id: item._id,
         category: item.Category,
         title: item.Title,
         description: item.Details,
         image: item.Image,
-        buttonText: "View More",
-        link: item.Link,
+        buttonText: item.CustomButtonText || "View More", // Use custom text or fallback
+        link: item.CustomLink || `/blog/${item._id}`, // Use custom link or fallback
+        hasCustomContent: !!(item.CustomLink && item.CustomButtonText), // Flag to check if custom content exists
       })
     );
 

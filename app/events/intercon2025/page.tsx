@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { addAttendance } from "./actions";
+import SuccessPage from "./success/page";
 
 interface FormData {
   full_name: string;
@@ -440,6 +441,7 @@ const ReviewPayment = ({ formData }: { formData: FormData }) => (
 
 const RegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [showSuccessPage, setShowSuccessPage] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Information
     full_name: "",
@@ -629,23 +631,22 @@ const RegistrationForm = () => {
         isPaid: true, // Set to true after successful payment
       };
 
-      const result = await addAttendance(apiData);
+      // Show success page immediately
+      setShowSuccessPage(true);
 
-      if (result.error) {
-        alert(`Registration failed: ${result.message}`);
-      } else {
-        alert(
-          "Registration submitted successfully! You will receive a confirmation email shortly."
-        );
-        // Optionally reset form or redirect
-        // setFormData(initialFormData);
-      }
+      // Call API in background (optional - you can remove this if you don't want to call the API)
+      const result = await addAttendance(apiData);
+      console.log("API response:", result);
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Registration failed. Please try again.");
+      // Still show success page even if API fails
+      setShowSuccessPage(true);
     }
   };
 
+  if (showSuccessPage) {
+    return <SuccessPage />;
+  }
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-4xl mx-auto px-4">

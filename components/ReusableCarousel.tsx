@@ -36,15 +36,9 @@ export default function ReusableTextCarousel({
   };
 
   const currentSlideData = slides[currentSlide];
-  console.log("Button text:", currentSlideData?.buttonText);
 
   return (
     <div className="relative w-full h-screen flex items-center justify-center overflow-hidden">
-      <div className="text-white bg-black bg-opacity-50 p-2 rounded mb-4">
-        <p>Debug Info:</p>
-        <p>Button Text: "{currentSlideData.buttonText}"</p>
-        <p>Link: "{currentSlideData.link}"</p>
-      </div>
       {/* Stationary Text Area */}
       <div className="absolute z-20 left-0 right-0 px-4 sm:px-8 md:left-0 md:w-1/2 mx-20 text-white">
         <AnimatePresence mode="wait">
@@ -71,10 +65,10 @@ export default function ReusableTextCarousel({
               className="bg-yellow-500 hover:bg-yellow-600 text-white items-center gap-2"
             >
               <Link href={currentSlideData.link}>
+                {currentSlideData.buttonText}
                 <span>
                   <ArrowForward className="w-5 h-5" />
                 </span>
-                {currentSlideData.buttonText}
               </Link>
             </Button>
           </motion.div>

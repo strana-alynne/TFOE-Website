@@ -9,6 +9,15 @@ export default {
   ],
   theme: {
     extend: {
+       animation: {
+        'pulse-slow': 'pulse-slow 10s ease-in-out infinite',
+      },
+      keyframes: {
+        'pulse-slow': {
+          '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+          '50%': { transform: 'translate(20px, 20px) scale(1.05)' },
+        },
+      },
       backgroundImage: {
         blackOverlay:
           "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%)",

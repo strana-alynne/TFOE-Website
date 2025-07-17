@@ -15,8 +15,8 @@ import {
   CreditCard,
 } from "lucide-react";
 import React from "react";
-import { addAttendance } from "./actions";
-import SuccessPage from "./success/page";
+import { addAttendance } from "../actions";
+import SuccessPage from "../success/page";
 
 interface FormData {
   full_name: string;

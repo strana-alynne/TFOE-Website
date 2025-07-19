@@ -52,9 +52,14 @@ interface FormData {
 interface StepComponentProps {
   formData: FormData;
   updateFormData: (field: string, value: string | boolean) => void;
+  errors: Record<string, string>; // Add this line
 }
 
-const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
+const BasicInformation = ({
+  formData,
+  updateFormData,
+  errors,
+}: StepComponentProps) => (
   <div className="space-y-4">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -64,7 +69,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.full_name}
           onChange={(e) => updateFormData("full_name", e.target.value)}
           placeholder="Enter your full name"
+          className={errors.full_name ? "border-red-500" : ""}
         />
+        {errors.full_name && (
+          <p className="text-red-500 text-xs mt-1">{errors.full_name}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="region">Region *</Label>
@@ -73,7 +82,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.region}
           onChange={(e) => updateFormData("region", e.target.value)}
           placeholder="Enter your region"
+          className={errors.region ? "border-red-500" : ""}
         />
+        {errors.region && (
+          <p className="text-red-500 text-xs mt-1">{errors.region}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="club_name">Club Name</Label>
@@ -109,7 +122,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.job_title}
           onChange={(e) => updateFormData("job_title", e.target.value)}
           placeholder="Enter your job title"
+          className={errors.job_title ? "border-red-500" : ""}
         />
+        {errors.job_title && (
+          <p className="text-red-500 text-xs mt-1">{errors.job_title}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="company_name">Company Name *</Label>
@@ -118,7 +135,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.company_name}
           onChange={(e) => updateFormData("company_name", e.target.value)}
           placeholder="Enter company name"
+          className={errors.company_name ? "border-red-500" : ""}
         />
+        {errors.company_name && (
+          <p className="text-red-500 text-xs mt-1">{errors.company_name}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="country">Country *</Label>
@@ -127,7 +148,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.country}
           onChange={(e) => updateFormData("country", e.target.value)}
           placeholder="Enter country"
+          className={errors.country ? "border-red-500" : ""}
         />
+        {errors.country && (
+          <p className="text-red-500 text-xs mt-1">{errors.country}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="city">City *</Label>
@@ -136,7 +161,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.city}
           onChange={(e) => updateFormData("city", e.target.value)}
           placeholder="Enter city"
+          className={errors.city ? "border-red-500" : ""}
         />
+        {errors.city && (
+          <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="email">Email *</Label>
@@ -146,7 +175,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.email}
           onChange={(e) => updateFormData("email", e.target.value)}
           placeholder="Enter your email"
+          className={errors.email ? "border-red-500" : ""}
         />
+        {errors.email && (
+          <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="phone">Phone *</Label>
@@ -155,7 +188,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
           value={formData.phone}
           onChange={(e) => updateFormData("phone", e.target.value)}
           placeholder="Enter phone number"
+          className={errors.phone ? "border-red-500" : ""}
         />
+        {errors.phone && (
+          <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="linkedin">LinkedIn Profile</Label>
@@ -179,7 +216,11 @@ const BasicInformation = ({ formData, updateFormData }: StepComponentProps) => (
   </div>
 );
 
-const CompanyProfile = ({ formData, updateFormData }: StepComponentProps) => (
+const CompanyProfile = ({
+  formData,
+  updateFormData,
+  errors,
+}: StepComponentProps) => (
   <div className="space-y-4">
     <div>
       <Label htmlFor="company_size">Company Size *</Label>
@@ -188,7 +229,11 @@ const CompanyProfile = ({ formData, updateFormData }: StepComponentProps) => (
         value={formData.company_size}
         onChange={(e) => updateFormData("company_size", e.target.value)}
         placeholder="e.g., 50 employees, $5M annual revenue"
+        className={errors.company_size ? "border-red-500" : ""}
       />
+      {errors.company_size && (
+        <p className="text-red-500 text-xs mt-1">{errors.company_size}</p>
+      )}
     </div>
     <div>
       <Label htmlFor="products_offered">Products/Services Offered *</Label>
@@ -198,7 +243,11 @@ const CompanyProfile = ({ formData, updateFormData }: StepComponentProps) => (
         onChange={(e) => updateFormData("products_offered", e.target.value)}
         placeholder="Describe your products or services"
         rows={3}
+        className={errors.products_offered ? "border-red-500" : ""}
       />
+      {errors.products_offered && (
+        <p className="text-red-500 text-xs mt-1">{errors.products_offered}</p>
+      )}
     </div>
     <div>
       <Label htmlFor="website">Website</Label>
@@ -232,9 +281,11 @@ const CompanyProfile = ({ formData, updateFormData }: StepComponentProps) => (
   </div>
 );
 
+// 8. Updated BusinessInterests component with error handling
 const BusinessInterests = ({
   formData,
   updateFormData,
+  errors,
 }: StepComponentProps) => (
   <div className="space-y-4">
     <div>
@@ -245,7 +296,11 @@ const BusinessInterests = ({
         onChange={(e) => updateFormData("purpose", e.target.value)}
         placeholder="e.g., find buyers, suppliers, partners, investors"
         rows={3}
+        className={errors.purpose ? "border-red-500" : ""}
       />
+      {errors.purpose && (
+        <p className="text-red-500 text-xs mt-1">{errors.purpose}</p>
+      )}
     </div>
     <div>
       <Label htmlFor="target_market">Target Markets or Regions *</Label>
@@ -255,7 +310,11 @@ const BusinessInterests = ({
         onChange={(e) => updateFormData("target_market", e.target.value)}
         placeholder="Which markets or regions are you interested in?"
         rows={2}
+        className={errors.target_market ? "border-red-500" : ""}
       />
+      {errors.target_market && (
+        <p className="text-red-500 text-xs mt-1">{errors.target_market}</p>
+      )}
     </div>
     <div>
       <Label htmlFor="type_of_partner">Type of Partners Sought *</Label>
@@ -265,7 +324,11 @@ const BusinessInterests = ({
         onChange={(e) => updateFormData("type_of_partner", e.target.value)}
         placeholder="What type of business partners are you looking for?"
         rows={2}
+        className={errors.type_of_partner ? "border-red-500" : ""}
       />
+      {errors.type_of_partner && (
+        <p className="text-red-500 text-xs mt-1">{errors.type_of_partner}</p>
+      )}
     </div>
     <div>
       <Label htmlFor="investment_interest">Investment Interests</Label>
@@ -280,7 +343,11 @@ const BusinessInterests = ({
   </div>
 );
 
-const DocumentsConsent = ({ formData, updateFormData }: StepComponentProps) => (
+const DocumentsConsent = ({
+  formData,
+  updateFormData,
+  errors,
+}: StepComponentProps) => (
   <div className="space-y-6">
     <div>
       <h3 className="text-lg font-semibold mb-4">Supporting Documents</h3>
@@ -323,11 +390,15 @@ const DocumentsConsent = ({ formData, updateFormData }: StepComponentProps) => (
           id="pdpaConsent"
           checked={formData.pdpaConsent}
           onCheckedChange={(checked) => updateFormData("pdpaConsent", checked)}
+          className={errors.pdpaConsent ? "border-red-500" : ""}
         />
         <Label htmlFor="pdpaConsent" className="text-sm">
           YES, I agree to the PDPA consent statement *
         </Label>
       </div>
+      {errors.pdpaConsent && (
+        <p className="text-red-500 text-xs mt-1">{errors.pdpaConsent}</p>
+      )}
     </div>
 
     <div>
@@ -442,6 +513,7 @@ const ReviewPayment = ({ formData }: { formData: FormData }) => (
 const RegistrationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccessPage, setShowSuccessPage] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     // Basic Information
     full_name: "",
@@ -508,11 +580,26 @@ const RegistrationForm = () => {
 
   const updateFormData = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing/selecting
+    clearError(field);
   };
 
   const nextStep = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+    if (validateStep(currentStep)) {
+      if (currentStep < steps.length) {
+        setCurrentStep(currentStep + 1);
+        setErrors({}); // Clear errors when moving to next step
+      }
+    }
+  };
+
+  const clearError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   };
 
@@ -532,7 +619,7 @@ const RegistrationForm = () => {
                 step.id < currentStep
                   ? "bg-green-500 border-green-500 text-white"
                   : step.id === currentStep
-                    ? "bg-blue-500 border-blue-500 text-white"
+                    ? "bg-amber-500 border-amber-500 text-white"
                     : "bg-gray-100 border-gray-300 text-gray-500"
               }`}
             >
@@ -558,7 +645,6 @@ const RegistrationForm = () => {
         </h2>
         <p className="text-gray-600">{steps[currentStep - 1].description}</p>
       </div>
-      <Progress value={(currentStep / steps.length) * 100} className="mt-4" />
     </div>
   );
 
@@ -569,17 +655,23 @@ const RegistrationForm = () => {
           <BasicInformation
             formData={formData}
             updateFormData={updateFormData}
+            errors={errors}
           />
         );
       case 2:
         return (
-          <CompanyProfile formData={formData} updateFormData={updateFormData} />
+          <CompanyProfile
+            formData={formData}
+            updateFormData={updateFormData}
+            errors={errors}
+          />
         );
       case 3:
         return (
           <BusinessInterests
             formData={formData}
             updateFormData={updateFormData}
+            errors={errors}
           />
         );
       case 4:
@@ -587,6 +679,7 @@ const RegistrationForm = () => {
           <DocumentsConsent
             formData={formData}
             updateFormData={updateFormData}
+            errors={errors}
           />
         );
       case 5:
@@ -596,9 +689,60 @@ const RegistrationForm = () => {
           <BasicInformation
             formData={formData}
             updateFormData={updateFormData}
+            errors={errors}
           />
         );
     }
+  };
+
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    switch (step) {
+      case 1: // Basic Information
+        if (!formData.full_name.trim())
+          newErrors.full_name = "Full name is required";
+        if (!formData.region.trim()) newErrors.region = "Region is required";
+        if (!formData.job_title.trim())
+          newErrors.job_title = "Job title is required";
+        if (!formData.company_name.trim())
+          newErrors.company_name = "Company name is required";
+        if (!formData.country.trim()) newErrors.country = "Country is required";
+        if (!formData.city.trim()) newErrors.city = "City is required";
+        if (!formData.email.trim()) {
+          newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+          newErrors.email = "Please enter a valid email address";
+        }
+        if (!formData.phone.trim())
+          newErrors.phone = "Phone number is required";
+        break;
+
+      case 2: // Company Profile
+        if (!formData.company_size.trim())
+          newErrors.company_size = "Company size is required";
+        if (!formData.products_offered.trim())
+          newErrors.products_offered =
+            "Products/services description is required";
+        break;
+
+      case 3: // Business Interests
+        if (!formData.purpose.trim())
+          newErrors.purpose = "Purpose of participation is required";
+        if (!formData.target_market.trim())
+          newErrors.target_market = "Target market is required";
+        if (!formData.type_of_partner.trim())
+          newErrors.type_of_partner = "Type of partners sought is required";
+        break;
+
+      case 4: // Documents & Consent
+        if (!formData.pdpaConsent)
+          newErrors.pdpaConsent = "PDPA consent is required to proceed";
+        break;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
@@ -648,13 +792,13 @@ const RegistrationForm = () => {
     return <SuccessPage />;
   }
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-amber-900 text-white overflow-hidden p-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-amber-300 mb-2">
             TFOE International Convention 2025
           </h1>
-          <p className="text-gray-600">
+          <p className="text-white-600">
             Complete your registration in {steps.length} simple steps
           </p>
         </div>

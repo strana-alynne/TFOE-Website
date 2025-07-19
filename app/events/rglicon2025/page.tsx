@@ -15,8 +15,17 @@ import {
   Handshake,
   Network,
   Award,
+  PartyPopper,
+  MessagesSquare,
+  HandCoins,
+  NotebookTabs,
+  Earth,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/autoplay";
+import { Autoplay } from "swiper/modules";
 
 const RGLIconLanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,7 +35,7 @@ const RGLIconLanding = () => {
 
   const sponsorshipPackages = [
     {
-      name: "GOLD SPONSOR",
+      name: "PLATINUM SPONSOR",
       price: "$20,000",
       features: [
         {
@@ -53,8 +62,8 @@ const RGLIconLanding = () => {
       highlighted: true,
     },
     {
-      name: "SILVER SPONSOR",
-      price: "$5,000",
+      name: "GOLD SPONSOR",
+      price: "$10,000",
       features: [
         {
           title: "Event Proper Mileage",
@@ -80,6 +89,33 @@ const RGLIconLanding = () => {
       highlighted: false,
     },
 
+    {
+      name: "SILVER SPONSOR",
+      price: "$5,000",
+      features: [
+        {
+          title: "Event Proper Mileage",
+          subfeatures: [
+            "Pullout banners by the Red Carpet Entrance 3pcs, 2x5 | Branded Red Carpet Interview | Logo Placement on LED Wall | Brand Live Acknowledgement by the Host all through out the event proper | Video Ad Playback before Event Proper (1x 30 seconder) | Logo Placement on Media Photowall | Branded VIP Table | Logo Placement on Red Carpet Photowall | 1x1m Booth Space | Brand or Product Presentation (10-15 Mins.)",
+            "Brand Inclusion in Digital Billboard",
+          ],
+        },
+        {
+          title: "Digital Mileage",
+          subfeatures: [
+            "Logo Inclusion on Post - edited video of the RGL Icon | Logo Inclusion on RGL Website | Logo Inclusion on Raffle Winners Announcement | Dedicated Online Article as official sponsor/partner to be published in RGL soc med platforms (1x Original Article) | Logo Inclusion on Lower Third during Live Streaming | Web Banner Placement in RGL Website (Leaderboard (Prime) 1,600x400px)",
+            "Dedicated announcement post as sponsor/partner on  RGL Website and Social Media Channels",
+          ],
+        },
+        {
+          title: "Print Mileage",
+          subfeatures: [
+            "1 page Full Page Ad  | Advertorial (1x, c/o of Client)",
+          ],
+        },
+      ],
+      highlighted: false,
+    },
     {
       name: "BRONZE SPONSOR",
       price: "$1,000",
@@ -111,8 +147,9 @@ const RGLIconLanding = () => {
   const navItems = [
     { id: "home", label: "Home" },
     { id: "venue", label: "Venue" },
-    { id: "why-join", label: "Why Join" },
-    { id: "proper", label: "Event Proper" },
+    { id: "expect", label: "About" }, // Combines what to expect
+    { id: "proper", label: "Event" }, // Combines event proper and digital/print
+    { id: "partners", label: "Partners" },
     { id: "sponsorship", label: "Sponsorship" },
     { id: "contact", label: "Contact" },
   ];
@@ -121,6 +158,41 @@ const RGLIconLanding = () => {
     "/rglicon2025/location01.png",
     "/rglicon2025/location02.png",
     "/rglicon2025/location03.png",
+  ];
+
+  const mediaPartners = [
+    "/rglicon2025/partners/1.png",
+    "/rglicon2025/partners/2.png",
+    "/rglicon2025/partners/3.png",
+    "/rglicon2025/partners/4.png",
+    "/rglicon2025/partners/5.png",
+    "/rglicon2025/partners/6.png",
+    "/rglicon2025/partners/7.png",
+    "/rglicon2025/partners/8.png",
+    "/rglicon2025/partners/9.png",
+    "/rglicon2025/partners/10.png",
+    "/rglicon2025/partners/11.png",
+    "/rglicon2025/partners/12.png",
+    "/rglicon2025/partners/13.png",
+    "/rglicon2025/partners/14.png",
+    "/rglicon2025/partners/15.png",
+    "/rglicon2025/partners/16.png",
+    "/rglicon2025/partners/17.png",
+    "/rglicon2025/partners/18.png",
+    "/rglicon2025/partners/19.png",
+    "/rglicon2025/partners/20.png",
+    "/rglicon2025/partners/21.png",
+    "/rglicon2025/partners/22.png",
+    "/rglicon2025/partners/23.png",
+    "/rglicon2025/partners/24.png",
+    "/rglicon2025/partners/25.png",
+    "/rglicon2025/partners/26.png",
+    "/rglicon2025/partners/27.png",
+    "/rglicon2025/partners/28.png",
+    "/rglicon2025/partners/29.png",
+    "/rglicon2025/partners/30.png",
+    "/rglicon2025/partners/31.png",
+    "/rglicon2025/partners/32.png",
   ];
 
   const scrollToSection = (sectionId: string) => {
@@ -323,10 +395,11 @@ const RGLIconLanding = () => {
       <div id="venue" className="py-20 bg-black/50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+              {" "}
               {/* Image Slider - LEFT */}
-              <div className="w-full h-full">
-                <div className="relative h-full w-full overflow-hidden rounded-xl shadow-lg border border-amber-400/20">
+              <div className="w-full order-2 lg:order-1">
+                <div className="relative h-64 sm:h-80 md:h-96 lg:h-full w-full overflow-hidden rounded-xl shadow-lg border border-amber-400/20">
                   <div
                     className="flex h-full transition-transform duration-700 ease-in-out"
                     style={{ transform: `translateX(-${current * 100}%)` }}
@@ -358,9 +431,8 @@ const RGLIconLanding = () => {
                   ))}
                 </div>
               </div>
-
               {/* Content - RIGHT */}
-              <div>
+              <div className="order-1 lg:order-2">
                 <div className="mb-4">
                   <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
                     Venue
@@ -417,11 +489,8 @@ const RGLIconLanding = () => {
           </div>
         </div>
       </div>
-      {/* Why Join Section */}
-      <div
-        id="why-join"
-        className="relative bg-gradient-to-r from-black via-zinc-800 to-black text-white"
-      >
+      {/* What to expect Section */}
+      <div id="expect" className="relative bg-black/50">
         {/* Hero Section */}
         <div
           className="relative z-0 px-4 pt-20 pb-24 md:pt-32 md:pb-48 text-center"
@@ -438,7 +507,7 @@ const RGLIconLanding = () => {
               What to Expect
             </span>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mt-6 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mt-6 leading-tight">
               Revitalizing TFOE-PE:
               <span className="text-amber-500">
                 {" "}
@@ -472,8 +541,8 @@ const RGLIconLanding = () => {
         </div>
 
         {/* Cards Section */}
-        <div className="relative z-10 -mt-20 sm:-mt-24 px-4 pb-16">
-          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="relative z-10 -mt-12 sm:-mt-16 md:-mt-20 lg:-mt-24 px-4 pb-16">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {[
               {
                 title: "RGL Convention",
@@ -518,47 +587,122 @@ const RGLIconLanding = () => {
           </div>
         </div>
       </div>
+      {/* Why Join Section */}
+      <div id="join" className="py-20 bg-black/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
+              Why Join
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-4 text-amber-300">
+              Be part of History
+            </h2>
+          </div>
+
+          {/* Grid of cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                icon: (
+                  <PartyPopper className="mx-auto w-16 h-16 text-amber-500" />
+                ),
+                title: "First-Ever Event",
+                description:
+                  "Be part of a historic inaugural convention, setting the tone for future gatherings.",
+              },
+              {
+                icon: (
+                  <MessagesSquare className="mx-auto w-16 h-16 text-amber-500" />
+                ),
+                title: "Networking Opportunities",
+                description:
+                  "Connect with regional governors, members, and officers from the fraternity around the world.",
+              },
+              {
+                icon: (
+                  <HandCoins className="mx-auto w-16 h-16 text-amber-500" />
+                ),
+                title: "Collaboration and Partnerships",
+                description:
+                  "Discuss joint initiatives to address common regional issues like economic development, sustainability, and infrastructure.",
+              },
+              {
+                icon: (
+                  <NotebookTabs className="mx-auto w-16 h-16 text-amber-500" />
+                ),
+                title: "Knowledge Exchange",
+                description:
+                  "Gain insights into global and regional governance challenges and solutions.",
+              },
+              {
+                icon: <Users className="mx-auto w-16 h-16 text-amber-500" />,
+                title: "Professional Development",
+                description:
+                  "Enhance your leadership and governance skills through workshops and panel discussions.",
+              },
+              {
+                icon: <Earth className="mx-auto w-16 h-16 text-amber-500" />,
+                title: "Cultural Experience",
+                description:
+                  "Enjoy the vibrant atmosphere of Ho Chi Minh City, a blend of tradition and modernity.",
+              },
+            ].map((item, index) => (
+              <div
+                key={index}
+                className="bg-black/40 border border-amber-400/20 rounded-xl p-6 text-center shadow-md hover:shadow-amber-500/10 transition duration-300"
+              >
+                <div className="mb-4">{item.icon}</div>
+                <h3 className="text-xl font-bold text-amber-300 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-white/80">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Event Proper Section */}
       <div id="proper" className="py-20 bg-black/50">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-12 items-start">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
               {/* Content - RIGHT */}
-              <div>
+              <div className="order-2 lg:order-1">
                 <div className="mb-4">
                   <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
                     Event
                   </span>
                 </div>
                 <div>
-                  <h2 className="text-4xl md:text-5xl font-bold mb-2 text-amber-300">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-amber-300">
                     Event Proper
                   </h2>
                 </div>
 
-                <div className="mb-6 mt-10 space-y-4">
+                <div className="mb-6 mt-6 lg:mt-10 space-y-4">
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-2xl">
+                    <p className="text-lg sm:text-xl lg:text-2xl">
                       Logo placement on red carpet and photo opt wall
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-2xl">
+                    <p className="text-lg sm:text-xl lg:text-2xl">
                       Brand exposure by the red carpet area & booth space
                       allocation
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-2xl">
+                    <p className="text-lg sm:text-xl lg:text-2xl">
                       AVP playback and logo placement on the led wall
                     </p>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-2xl ">
+                    <p className="text-lg sm:text-xl lg:text-2xl">
                       Brand inclusion during livestream
                     </p>
                   </div>
@@ -566,9 +710,9 @@ const RGLIconLanding = () => {
               </div>
               {/* LEFT SIDE: Single Image Only */}
 
-              <div className="w-full h-full rounded-xl overflow-hidden shadow-lg border border-amber-400/20">
+              <div className="order-1 lg:order-2 w-full h-64 sm:h-80 md:h-96 lg:h-full rounded-xl overflow-hidden shadow-lg border border-amber-400/20">
                 <img
-                  src="/rglicon2025/stage.png" // just show the first image (or change index as needed)
+                  src="/rglicon2025/stage.png"
                   alt="Venue"
                   className="w-full h-full object-cover"
                 />
@@ -577,7 +721,117 @@ const RGLIconLanding = () => {
           </div>
         </div>
       </div>
+      {/* Digital/Print Section */}
+      <div id="digital-print" className="py-20 bg-black/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+              {/* Content - RIGHT */}
 
+              <div className="flex flex-col sm:flex-row gap-4 w-full h-auto">
+                <div className="flex-1 h-48 sm:h-64 md:h-80 lg:h-full rounded-xl overflow-hidden shadow-lg border border-amber-400/20">
+                  <img
+                    src="/rglicon2025/print01.png"
+                    alt="Stage"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex-1 h-48 sm:h-64 md:h-80 lg:h-full rounded-xl overflow-hidden shadow-lg border border-amber-400/20">
+                  <img
+                    src="/rglicon2025/print02.png"
+                    alt="Print"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* LEFT SIDE: Single Image Only */}
+              <div>
+                <div className="mb-4">
+                  <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
+                    Advertisement
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 text-amber-300">
+                    Digital And Print
+                  </h2>
+                </div>
+
+                <div className="mb-6 mt-6 lg:mt-10 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl lg:text-2xl">Cover page</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl lg:text-2xl">
+                      Advertorial
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl lg:text-2xl">
+                      Full and half page advertisement
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl lg:text-2xl">
+                      Logo inclusion on digital and print
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Partners Section */}
+      <div id="partners" className="py-20 bg-black/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
+              Partners
+            </span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-4 text-amber-300">
+              Media Partners
+            </h2>
+          </div>
+
+          <div className="flex justify-center items-center h-32">
+            <Swiper
+              modules={[Autoplay]}
+              spaceBetween={30}
+              slidesPerView={3}
+              loop={true}
+              autoplay={{
+                delay: 2000,
+                disableOnInteraction: false,
+              }}
+              breakpoints={{
+                320: { slidesPerView: 2 },
+                640: { slidesPerView: 3 },
+                1024: { slidesPerView: 4 },
+              }}
+            >
+              {mediaPartners.map((logo, idx) => (
+                <SwiperSlide key={idx}>
+                  <div className="flex justify-center items-center h-32">
+                    <img
+                      src={logo}
+                      alt={`Partner ${idx + 1}`}
+                      width={120}
+                      height={80}
+                      className="object-contain max-h-full w-auto transition duration-300 grayscale hover:grayscale-0"
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      </div>
       {/* Sponsorship Packages */}
       <div id="sponsorship" className="py-20 bg-black/50 pt-20">
         <div className="container mx-auto px-4">
@@ -593,24 +847,17 @@ const RGLIconLanding = () => {
               </h2>
             </div>
 
-            <div className="flex flex-wrap gap-8 w-full justify-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-8 w-full justify-items-center">
               {sponsorshipPackages.map((pkg, index) => (
                 <div
                   key={index}
-                  className={`flex flex-col justify-between p-6 rounded-lg border-2 ${
-                    pkg.highlighted
-                      ? "border-amber-400 bg-gradient-to-b from-amber-900/40 to-yellow-900/40"
-                      : "border-amber-400/30 bg-gradient-to-b from-gray-900/40 to-black/40"
-                  } w-full sm:w-64 md:w-72 lg:w-80`}
+                  className={`flex flex-col justify-between p-4 sm:p-6 rounded-lg border-2 w-full max-w-sm
+                    ${
+                      pkg.highlighted
+                        ? "border-amber-400 bg-gradient-to-b from-amber-900/40 to-yellow-900/40"
+                        : "border-amber-400/30 bg-gradient-to-b from-gray-900/40 to-black/40"
+                    }`}
                 >
-                  {pkg.highlighted && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                      <span className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold">
-                        MOST POPULAR
-                      </span>
-                    </div>
-                  )}
-
                   <div className="text-center mb-6">
                     <h3 className="text-lg font-bold text-amber-300 mb-2">
                       {pkg.name}
@@ -654,10 +901,22 @@ const RGLIconLanding = () => {
         </div>
       </div>
       {/* CTA Section */}
-      <div className="py-20 bg-gradient-to-r from-amber-900/50 to-yellow-900/50">
-        <div className="container mx-auto px-4 text-center">
+      <div className="relative py-20">
+        {/* Background image */}
+        <div className="absolute inset-0">
+          <img
+            src="/rglicon2025/cta.png" // Replace with your image path
+            alt="CTA Background"
+            className="w-full h-full object-cover"
+          />
+          {/* Black overlay */}
+          <div className="absolute inset-0 bg-black/75" />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-amber-300">
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-amber-300">
               Ready to Make History?
             </h2>
             <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
@@ -682,11 +941,12 @@ const RGLIconLanding = () => {
           </div>
         </div>
       </div>
+
       {/* Contact Section */}
       <div id="contact" className="py-20 bg-black">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-12 text-amber-300">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-12 text-amber-300">
               Get In Touch
             </h2>
 

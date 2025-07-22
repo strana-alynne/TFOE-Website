@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { getDetails } from "../actions";
+import { checkAttendance } from "../actions";
 
 type Participant = {
   id: number;
@@ -55,6 +56,7 @@ const AdminAttendanceDashboard = () => {
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [nameFilter, setNameFilter] = useState("");
   const [eagleIdFilter, setEagleIdFilter] = useState("");
+  const [isCheckingAttendance, setIsCheckingAttendance] = useState(false);
 
   type ScanResult = {
     success: boolean;
@@ -137,63 +139,79 @@ const AdminAttendanceDashboard = () => {
   const closeQRScanner = () => {
     setShowQRScanner(false);
     setIsScanning(false);
+    setIsCheckingAttendance(false);
     setScanResult(null);
     setScanError(null);
   };
 
-  const handleQRScan = (detectedCodes: any[]) => {
+  const handleQRScan = async (detectedCodes: any[]) => {
     try {
       if (!detectedCodes || detectedCodes.length === 0) {
         return;
       }
+
       // Get the first detected QR code value
-      const result = detectedCodes[0]?.rawValue || detectedCodes[0]?.value;
-      if (!result) {
-        setScanError("No QR code value detected.");
+      const firstCode = detectedCodes[0];
+      console.log("First detected code object:", firstCode);
+
+      // Try different properties that might contain the QR code value
+      const result =
+        firstCode?.rawValue ||
+        firstCode?.value ||
+        firstCode?.text ||
+        firstCode?.data ||
+        firstCode;
+
+      const participantData = JSON.parse(result);
+      console.log("Parsed participant data:", participantData);
+
+      if (participantData) {
+        participants.find((p) => p.eagle_id === participantData);
+      }
+      if (!participantData) {
+        const identifier = participantData;
+        setScanResult({
+          success: false,
+          message: `Participant with ${identifier} not found.`,
+        });
         setIsScanning(false);
         return;
       }
 
-      let participantData;
-
-      // Try to parse as JSON first (if QR contains full participant data)
-      try {
-        participantData = JSON.parse(result);
-      } catch {
-        // If not JSON, treat as Eagle ID
-        participantData = { eagle_id: result };
-      }
-
-      // Find participant by Eagle ID
-      const participant = participants.find(
-        (p) => p.eagle_id === participantData.eagle_id || p.eagle_id === result
-      );
-
-      if (participant) {
-        // Mark as attended
-        setParticipants((prev) =>
-          prev.map((p) =>
-            p.id === participant.id ? { ...p, attended: true } : p
-          )
-        );
-
-        setScanResult({
-          success: true,
-          participant: participant,
-          message: `Successfully marked ${participant.full_name} as attended!`,
-        });
-      } else {
+      // Check if already attended
+      if (participantData.attended) {
         setScanResult({
           success: false,
-          message: `Participant with Eagle ID "${participantData.eagle_id || result}" not found.`,
+          message: `${participantData.full_name} has already been marked as attended.`,
         });
+        setIsScanning(false);
+        return;
       }
 
       setIsScanning(false);
+      setIsCheckingAttendance(true);
+
+      // Call the checkAttendance API with participant ID
+      const attendanceResult = await checkAttendance(participantData);
+
+      if (attendanceResult.error) {
+        setScanResult({
+          success: false,
+          message: `Failed to mark attendance: ${attendanceResult.message}`,
+        });
+      } else {
+        setScanResult({
+          success: true,
+          participant: { ...attendanceResult.data, attended: true },
+          message: `Successfully marked ${attendanceResult.data?.full_name} as attended!`,
+        });
+      }
     } catch (error) {
       console.error("QR Scan error:", error);
       setScanError("Failed to process QR code. Please try again.");
       setIsScanning(false);
+    } finally {
+      setIsCheckingAttendance(false);
     }
   };
 
@@ -776,8 +794,15 @@ const AdminAttendanceDashboard = () => {
                   </div>
                 )}
 
+                {isCheckingAttendance && (
+                  <div className="mb-4 p-4 text-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                    <p className="text-gray-600">Checking attendance...</p>
+                  </div>
+                )}
+
                 {/* Start Scanning Button */}
-                {!isScanning && !scanResult && (
+                {!isScanning && !scanResult && !isCheckingAttendance && (
                   <div className="text-center">
                     <div className="mx-auto w-32 h-32 bg-gray-100 rounded-lg flex items-center justify-center mb-4">
                       <QrCode className="h-16 w-16 text-gray-400" />

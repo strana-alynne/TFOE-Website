@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { closeCheckout } from "../actions";
 
-const ResultPageContent = () => {
+const SuccessPage = () => {
   const searchParams = useSearchParams();
   const status = searchParams.get("status") || "success"; // 'success' or 'error'
   const message = searchParams.get("message");
@@ -44,7 +44,7 @@ const ResultPageContent = () => {
         setIsProcessing(true);
 
         try {
-          const result = await closeCheckout(eagle_id, checkout_id);
+          const result = await closeCheckout(checkout_id, eagle_id);
 
           if (result.error) {
             setCloseCheckoutError(result.message);
@@ -410,7 +410,7 @@ const ResultPage = () => {
         </div>
       }
     >
-      <ResultPageContent />
+      <SuccessPage />
     </Suspense>
   );
 };

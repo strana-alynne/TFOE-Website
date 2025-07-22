@@ -38,12 +38,12 @@ export async function addAttendance(attendeeData: any) {
 }
 
 
-export async function ParticipantCheckout() {
+export async function ParticipantCheckout(eagleId: string) {
   const price = "price_1RnESx2MVcHoWIBeBEwqkr8H";
   
   try {
     const response = await fetch(
-      `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/payment/checkout-session/${price}`,
+      `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/payment/checkout-session?price=${price}&eagle_id=${eagleId}`,
       {
         method: "POST",
         headers: {
@@ -83,11 +83,11 @@ export async function ParticipantCheckout() {
   }
 }
 
-export async function SponsorCheckout(price: string) {
+export async function SponsorCheckout(price: string, eagleId: string) {
   
   try {
     const response = await fetch(
-      `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/payment/checkout-session/${price}`,
+      `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws//api/v1/payment/checkout-session?price=${price}&eagle_id=${eagleId}`,
       {
         method: "POST",
         headers: {
@@ -159,16 +159,19 @@ export async function getDetails() {
 }
 
 
-export async function closeCheckout(eagleId: string, checkoutId: string) {
+export async function closeCheckout(checkoutId: string, eagleId: string) {
   try {
    const response = await fetch(
   `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/payment/checkout-session`,
   {
-    method: "POST",
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ eagleId, checkoutId }),
+     body: JSON.stringify({
+          checkout_id: checkoutId,
+          eagle_id: eagleId,
+        })
   },
 );
 
@@ -196,3 +199,4 @@ export async function closeCheckout(eagleId: string, checkoutId: string) {
     };
   }
 }
+

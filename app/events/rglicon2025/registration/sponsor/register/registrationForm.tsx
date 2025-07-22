@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,9 +15,12 @@ import {
   CreditCard,
 } from "lucide-react";
 import React from "react";
-import { addAttendance, ParticipantCheckout } from "../actions";
-import SuccessPage from "../success/page";
-import { useRouter } from "next/navigation";
+import {
+  addAttendance,
+  ParticipantCheckout,
+  SponsorCheckout,
+} from "../../../actions";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface FormData {
   full_name: string;
@@ -441,57 +444,90 @@ const DocumentsConsent = ({
   </div>
 );
 
-const ReviewPayment = ({ formData }: { formData: FormData }) => (
-  <div className="space-y-6">
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Registration Summary</h3>
-      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Full Name:</span>
-          <span className="text-sm font-medium">
-            {formData.full_name || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Company:</span>
-          <span className="text-sm font-medium">
-            {formData.company_name || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Email:</span>
-          <span className="text-sm font-medium">
-            {formData.email || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Location:</span>
-          <span className="text-sm font-medium">
-            {formData.city && formData.country
-              ? `${formData.city}, ${formData.country}`
-              : "Not provided"}
-          </span>
-        </div>
-      </div>
-    </div>
+const ReviewPayment = ({
+  formData,
+  package_id,
+}: {
+  formData: FormData;
+  package_id: string;
+}) => {
+  let price = 0;
 
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Payment Information</h3>
-      <div className="border rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-medium">Registration Fee</span>
-          <span className="text-2xl font-bold text-green-600">USD 80.00</span>
+  switch (package_id) {
+    case "PLATINUM SPONSOR":
+      price = 20000;
+      break;
+    case "GOLD SPONSOR":
+      price = 10000;
+      break;
+    case "SILVER SPONSOR":
+      price = 5000;
+      break;
+    case "BRONZE SPONSOR":
+      price = 1000;
+      break;
+    default:
+      price = 0;
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Registration Summary</h3>
+        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Full Name:</span>
+            <span className="text-sm font-medium">
+              {formData.full_name || "Not provided"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Company:</span>
+            <span className="text-sm font-medium">
+              {formData.company_name || "Not provided"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Email:</span>
+            <span className="text-sm font-medium">
+              {formData.email || "Not provided"}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-gray-600">Location:</span>
+            <span className="text-sm font-medium">
+              {formData.city && formData.country
+                ? `${formData.city}, ${formData.country}`
+                : "Not provided"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Payment Information</h3>
+        <div className="border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-lg font-medium">Registration Fee</span>
+            <span className="text-2xl font-bold text-green-600">
+              USD {price}
+            </span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RegistrationForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const package_id = searchParams.get("package");
+  const price = searchParams.get("price");
   const [currentStep, setCurrentStep] = useState(1);
-  const [showSuccessPage, setShowSuccessPage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  console.log("Package ID:", package_id);
+  console.log("Price:", price);
   const [formData, setFormData] = useState({
     // Basic Information
     full_name: "",
@@ -661,7 +697,9 @@ const RegistrationForm = () => {
           />
         );
       case 5:
-        return <ReviewPayment formData={formData} />;
+        return (
+          <ReviewPayment formData={formData} package_id={package_id ?? ""} />
+        );
       default:
         return (
           <BasicInformation
@@ -755,7 +793,7 @@ const RegistrationForm = () => {
       };
 
       await addAttendance(apiData);
-      const result = await ParticipantCheckout(apiData.eagle_id);
+      const result = await SponsorCheckout(price ?? "", apiData.eagle_id ?? "");
       console.log("API response:", result);
 
       // Check if checkout session creation failed
@@ -765,10 +803,12 @@ const RegistrationForm = () => {
         router.push(`/success?status=error&message=${errorMessage}`);
         return;
       }
-      window.location.href = result.data.checkout_url;
+
       if (result.data?.checkout_url) {
+        // Store both registration data and checkout_id for later use
         sessionStorage.setItem("registrationData", JSON.stringify(apiData));
         sessionStorage.setItem("checkout_id", result.data.checkout_id);
+        window.location.href = result.data.checkout_url;
       } else {
         const errorMessage = encodeURIComponent(
           "Payment checkout URL not available"

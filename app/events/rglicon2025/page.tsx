@@ -26,6 +26,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
+import Link from "next/link";
 
 const RGLIconLanding = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -278,17 +279,23 @@ const RGLIconLanding = () => {
               ))}
 
               <div className="flex items-center space-x-4 ml-6">
-                <Button
-                  onClick={() => scrollToSection("sponsorship")}
-                  className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105"
-                >
-                  Become a Sponsor
+                <Button className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105">
+                  <Link
+                    href="/events/rglicon2025/registration/sponsor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Become a Sponsor
+                  </Link>
                 </Button>
-                <Button
-                  onClick={() => scrollToSection("venue")}
-                  className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300"
-                >
-                  Register Now!
+                <Button className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300">
+                  <Link
+                    href="/events/rglicon2025/registration"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Register Now!
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -327,10 +334,22 @@ const RGLIconLanding = () => {
 
               <div className="px-4 pb-4 flex flex-col space-y-3">
                 <Button className="w-full px-4 py-2 text-sm font-medium text-black bg-amber-400 rounded-lg hover:bg-amber-500 transition-colors">
-                  Become a Sponsor
+                  <Link
+                    href="/events/rglicon2025/registration/sponsor"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Become a Sponsor
+                  </Link>
                 </Button>
                 <Button className="w-full px-4 py-2 text-sm font-medium text-amber-400 border border-amber-400 rounded-lg hover:bg-amber-400 hover:text-black transition-colors">
-                  Register Now!
+                  <Link
+                    href="/events/rglicon2025/registration"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Register Now!
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -375,17 +394,23 @@ const RGLIconLanding = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => scrollToSection("sponsorship")}
-                className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105"
-              >
-                Become a Sponsor
+              <Button className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105">
+                <Link
+                  href="/events/rglicon2025/registration/sponsor"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Become a Sponsor
+                </Link>
               </Button>
-              <Button
-                onClick={() => scrollToSection("venue")}
-                className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300"
-              >
-                Learn More
+              <Button className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300">
+                <Link
+                  href="/events/rglicon2025/registration"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Register Now!
+                </Link>
               </Button>
             </div>
           </div>
@@ -516,17 +541,23 @@ const RGLIconLanding = () => {
             </h1>
 
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => scrollToSection("sponsorship")}
-                className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105"
-              >
-                Become a Sponsor
+              <Button className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105">
+                <Link
+                  href="/events/rglicon2025/registration/sponsor"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Become a Sponsor
+                </Link>
               </Button>
-              <Button
-                onClick={() => scrollToSection("venue")}
-                className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300"
-              >
-                Learn More
+              <Button className="px-8 py-4 border-2 border-amber-400 text-amber-400 font-bold rounded-lg hover:bg-amber-400 hover:text-black transition-all duration-300">
+                <Link
+                  href="/events/rglicon2025/registration"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Register Now!
+                </Link>
               </Button>
             </div>
 
@@ -929,7 +960,13 @@ const RGLIconLanding = () => {
                 onClick={() => scrollToSection("sponsorship")}
                 className="px-8 py-4 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-lg hover:from-amber-600 hover:to-yellow-500 transition-all duration-300 transform hover:scale-105"
               >
-                Become a Sponsor Now
+                <Link
+                  href="/events/rglicon2025/registration/sponsor"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Become a Sponsor Now
+                </Link>
               </button>
               <button
                 onClick={() => scrollToSection("contact")}
@@ -974,7 +1011,9 @@ const RGLIconLanding = () => {
                 <h3 className="text-xl font-bold mb-2 text-amber-300">
                   Website
                 </h3>
-                <p className="text-gray-300">www.srtec.tfoe-ph.org</p>
+                <p className="text-gray-300">
+                  www.srtec.tfoe-ph.org/events/rglicon2025
+                </p>
               </div>
             </div>
           </div>

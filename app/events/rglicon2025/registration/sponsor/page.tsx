@@ -1,10 +1,29 @@
+"use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 const SponsorshipPackages = () => {
+  const router = useRouter();
+
+  // Add this handler function
+  const handlePackageSelect = (packageName: any, price: string) => {
+    // Remove $ and comma from price for easier handling
+    const cleanPrice = price.replace(/[$,]/g, "");
+
+    // Navigate to registration page with package details as query params
+    const query = new URLSearchParams({
+      package: packageName,
+      price: cleanPrice,
+    }).toString();
+
+    router.push(` /events/rglicon2025/registration/sponsor/register?${query}`);
+  };
+
   const sponsorshipPackages = [
     {
       name: "PLATINUM SPONSOR",
       price: "$20,000",
+      price_code: "price_1RnEGT2MVcHoWIBewGPfTjXU",
       features: [
         {
           title: "Event Proper Mileage",
@@ -32,6 +51,7 @@ const SponsorshipPackages = () => {
     {
       name: "GOLD SPONSOR",
       price: "$10,000",
+      price_code: " price_1RnEHA2MVcHoWIBek2C5HeAQ",
       features: [
         {
           title: "Event Proper Mileage",
@@ -60,6 +80,7 @@ const SponsorshipPackages = () => {
     {
       name: "SILVER SPONSOR",
       price: "$5,000",
+      price_code: "price_1RnEHn2MVcHoWIBeY0Tm69XZ",
       features: [
         {
           title: "Event Proper Mileage",
@@ -87,6 +108,7 @@ const SponsorshipPackages = () => {
     {
       name: "BRONZE SPONSOR",
       price: "$1,000",
+      price_code: "price_1RnEIP2MVcHoWIBebcYl8NpN",
       features: [
         {
           title: "Event Proper Mileage",
@@ -167,6 +189,9 @@ const SponsorshipPackages = () => {
                   </ul>
 
                   <button
+                    onClick={() =>
+                      handlePackageSelect(pkg.name, pkg.price_code)
+                    }
                     className={`w-full py-3 rounded-lg font-bold transition-all duration-300 ${
                       pkg.highlighted
                         ? "bg-gradient-to-r from-amber-500 to-yellow-400 text-black hover:from-amber-600 hover:to-yellow-500"

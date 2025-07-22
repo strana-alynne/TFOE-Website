@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Search,
   QrCode,
@@ -11,107 +11,51 @@ import {
   Camera,
   CheckCircle,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
 import { Scanner } from "@yudiel/react-qr-scanner";
+import { getDetails } from "../actions";
 
-// Sample data - replace with your actual data
-const sampleParticipants = [
-  {
-    id: 1,
-    full_name: "John Smith",
-    eagle_id: "EG001",
-    company_name: "Tech Solutions Inc",
-    email: "john@techsolutions.com",
-    phone: "+1234567890",
-    city: "New York",
-    country: "USA",
-    job_title: "CEO",
-    club_name: "NYC Business Club",
-    region: "North America",
-    isPaid: true,
-    attended: true,
-    document_link: "https://example.com/doc1",
-    purpose: "Networking and partnerships",
-    target_market: "B2B Software",
-    type_of_partner: "Technology Partner",
-    investment_interest: "Series A",
-    company_size: "50-100 employees",
-    products_offered: "CRM Software, Analytics Tools",
-    website: "https://techsolutions.com",
-    socials: "@techsolutions",
-    export_import_exp: "5 years",
-    national_president: "Sarah Johnson",
-    linkedin: "https://linkedin.com/in/johnsmith",
-    other_links: "https://github.com/johnsmith",
-  },
-  {
-    id: 2,
-    full_name: "Maria Garcia",
-    eagle_id: "523370",
-    company_name: "Global Imports Ltd",
-    email: "maria@globalimports.com",
-    phone: "+1987654321",
-    city: "Los Angeles",
-    country: "USA",
-    job_title: "Import Manager",
-    club_name: "LA Trade Association",
-    region: "West Coast",
-    isPaid: true,
-    attended: false,
-    document_link: "https://example.com/doc2",
-    purpose: "International trade expansion",
-    target_market: "Consumer goods",
-    type_of_partner: "Distribution Partner",
-    investment_interest: "",
-    company_size: "20-50 employees",
-    products_offered: "Import/Export services",
-    website: "https://globalimports.com",
-    socials: "@globalimports",
-    export_import_exp: "10 years",
-    national_president: "Michael Chen",
-    linkedin: "https://linkedin.com/in/mariagarcia",
-    other_links: "",
-  },
-  {
-    id: 3,
-    full_name: "David Kim",
-    eagle_id: "EG003",
-    company_name: "Innovation Hub",
-    email: "david@innovationhub.com",
-    phone: "+1555000111",
-    city: "San Francisco",
-    country: "USA",
-    job_title: "CTO",
-    club_name: "Silicon Valley Entrepreneurs",
-    region: "California",
-    isPaid: false,
-    attended: true,
-    document_link: "https://example.com/doc3",
-    purpose: "Technology partnerships",
-    target_market: "Startups and SMEs",
-    type_of_partner: "Technology Partner",
-    investment_interest: "Seed funding",
-    company_size: "10-20 employees",
-    products_offered: "AI solutions, Cloud services",
-    website: "https://innovationhub.com",
-    socials: "@innovationhub",
-    export_import_exp: "2 years",
-    national_president: "Lisa Wong",
-    linkedin: "https://linkedin.com/in/davidkim",
-    other_links: "https://github.com/innovationhub",
-  },
-];
-
-type Participant = (typeof sampleParticipants)[number];
+type Participant = {
+  id: number;
+  full_name: string;
+  eagle_id: string;
+  company_name: string;
+  email: string;
+  phone: string;
+  city: string;
+  country: string;
+  job_title: string;
+  club_name: string;
+  region: string;
+  isPaid: boolean;
+  attended: boolean;
+  document_link: string;
+  purpose: string;
+  target_market: string;
+  type_of_partner: string;
+  investment_interest: string;
+  company_size: string;
+  products_offered: string;
+  website: string;
+  socials: string;
+  export_import_exp: string;
+  national_president: string;
+  linkedin: string;
+  other_links: string;
+};
 
 const AdminAttendanceDashboard = () => {
-  const [participants, setParticipants] = useState(sampleParticipants);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedParticipant, setSelectedParticipant] =
     useState<Participant | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [nameFilter, setNameFilter] = useState("");
   const [eagleIdFilter, setEagleIdFilter] = useState("");
+
   type ScanResult = {
     success: boolean;
     participant?: Participant;
@@ -121,6 +65,35 @@ const AdminAttendanceDashboard = () => {
   const [scanResult, setScanResult] = useState<ScanResult>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
+
+  useEffect(() => {
+    const fetchParticipants = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // You need to get the token from your auth system
+        // This is just an example - replace with your actual token retrieval method
+        const result = await getDetails();
+
+        if (result.data) {
+          // Assuming the API returns an array of participants
+          // You may need to adjust this based on your actual API response structure
+          setParticipants(Array.isArray(result.data) ? result.data : []);
+        } else if (result.message) {
+          setError(result.message);
+        }
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch participants"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParticipants();
+  }, []);
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -234,6 +207,36 @@ const AdminAttendanceDashboard = () => {
     setNameFilter("");
     setEagleIdFilter("");
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading participants...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-8 w-8 text-red-600 mx-auto mb-4" />
+          <p className="text-red-600 mb-4">Error: {error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">

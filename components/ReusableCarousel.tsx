@@ -64,7 +64,11 @@ export default function ReusableTextCarousel({
               asChild
               className="bg-yellow-500 hover:bg-yellow-600 text-white items-center gap-2"
             >
-              <Link href={currentSlideData.link}>
+              <Link
+                href={currentSlideData.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {currentSlideData.buttonText}
                 <span>
                   <ArrowForward className="w-5 h-5" />

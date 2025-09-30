@@ -159,7 +159,7 @@ export async function getDetails() {
 }
 
 
-export async function closeCheckout(checkoutId: string, eagleId: string) {
+export async function closeCheckout(eagleId: string) {
   try {
    const response = await fetch(
   `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/payment/checkout-session`,
@@ -169,7 +169,6 @@ export async function closeCheckout(checkoutId: string, eagleId: string) {
       "Content-Type": "application/json",
     },
      body: JSON.stringify({
-          checkout_id: checkoutId,
           eagle_id: eagleId,
         })
   },

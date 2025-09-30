@@ -14,7 +14,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import React from "react";
-import { addAttendance, ParticipantCheckout } from "../actions";
+import { addAttendance, closeCheckout, ParticipantCheckout } from "../actions";
 import SuccessPage from "../success/page";
 import { useRouter } from "next/navigation";
 
@@ -751,36 +751,30 @@ const RegistrationForm = () => {
         isPaid: true,
       };
 
-      await addAttendance(apiData);
-      const result = await ParticipantCheckout(apiData.eagle_id);
-      console.log("API response:", result);
+      const result = await addAttendance(apiData);
 
-      if (result.error) {
-        console.error("Checkout session creation failed:", result.message);
-        const errorMessage = encodeURIComponent(result.message);
-        router.push(`/success?status=error&message=${errorMessage}`);
-        return;
-      }
-      console.log("Redirecting to checkout URL:", result.data.checkout_id);
-
-      if (result.data?.checkout_url) {
-        sessionStorage.setItem("registrationData", JSON.stringify(apiData));
-        localStorage.setItem("checkout_id", result.data.checkout_id);
-        window.location.href = result.data.checkout_url;
-      } else {
+      if (result?.error) {
         const errorMessage = encodeURIComponent(
-          "Payment checkout URL not available"
+          result.message || "Registration failed"
         );
         router.push(
-          `/events/rglicon2025/registration/success?status=error&message=${errorMessage}`
+          `/events/rglicon2025/success?status=error&message=${errorMessage}`
         );
+        return;
       }
+
+      // Success - redirect with eagle_id
+      router.push(
+        `/events/rglicon2025/success?status=success&eagle_id=${encodeURIComponent(formData.eagle_id)}`
+      );
     } catch (error) {
       console.error("Error submitting form:", error);
       const errorMessage = encodeURIComponent(
         "An unexpected error occurred. Please try again."
       );
-      router.push(`/success?status=error&message=${errorMessage}`);
+      router.push(
+        `/events/rglicon2025/success?status=error&message=${errorMessage}`
+      );
     }
   };
 

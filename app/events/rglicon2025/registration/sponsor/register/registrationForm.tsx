@@ -772,29 +772,21 @@ const RegistrationForm = () => {
         isPaid: true,
       };
 
-      await addAttendance(apiData);
-      const result = await SponsorCheckout(price ?? "", apiData.eagle_id ?? "");
-      console.log("API response:", result);
-
-      // Check if checkout session creation failed
-      if (result.error) {
-        console.error("Checkout session creation failed:", result.message);
-        const errorMessage = encodeURIComponent(result.message);
-        router.push(`/success?status=error&message=${errorMessage}`);
+      const result = await addAttendance(apiData);
+      if (result?.error) {
+        const errorMessage = encodeURIComponent(
+          result.message || "Registration failed"
+        );
+        router.push(
+          `/events/rglicon2025/success?status=error&message=${errorMessage}`
+        );
         return;
       }
 
-      if (result.data?.checkout_url) {
-        // Store both registration data and checkout_id for later use
-        sessionStorage.setItem("registrationData", JSON.stringify(apiData));
-        sessionStorage.setItem("checkout_id", result.data.checkout_id);
-        window.location.href = result.data.checkout_url;
-      } else {
-        const errorMessage = encodeURIComponent(
-          "Payment checkout URL not available"
-        );
-        router.push(`/success?status=error&message=${errorMessage}`);
-      }
+      // Success - redirect with eagle_id
+      router.push(
+        `/events/rglicon2025/success?status=success&eagle_id=${encodeURIComponent(formData.eagle_id)}`
+      );
     } catch (error) {
       console.error("Error submitting form:", error);
       const errorMessage = encodeURIComponent(

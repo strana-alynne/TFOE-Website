@@ -5,7 +5,6 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AdminEvent } from "@/components/admin-event";
-import { EditEvent } from "@/components/edit-event-modal";
 import { getDetails } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Add } from "@mui/icons-material";

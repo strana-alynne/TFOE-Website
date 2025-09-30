@@ -1,6 +1,6 @@
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +18,11 @@ import { closeCheckout } from "../actions";
 
 const SuccessPage = () => {
   const searchParams = useSearchParams();
-  const status = searchParams.get("status") || "success"; // 'success' or 'error'
+  const router = useRouter();
+  const status = searchParams.get("status") || "success";
   const message = searchParams.get("message");
-  const checkout_id = localStorage.getItem("checkout_id");
   const eagle_id = searchParams.get("eagle_id");
 
-  console.log("Status:", checkout_id);
   const [isProcessing, setIsProcessing] = useState(false);
   const [closeCheckoutError, setCloseCheckoutError] = useState<string | null>(
     null
@@ -32,20 +31,14 @@ const SuccessPage = () => {
 
   const isSuccess = status === "success";
 
-  // Call closeCheckout when component mounts and we have success with required IDs
+  // Call closeCheckout when component mounts and we have success
   useEffect(() => {
     const recordAttendance = async () => {
-      if (
-        isSuccess &&
-        eagle_id &&
-        checkout_id &&
-        !attendanceRecorded &&
-        !isProcessing
-      ) {
+      if (isSuccess && eagle_id && !attendanceRecorded && !isProcessing) {
         setIsProcessing(true);
 
         try {
-          const result = await closeCheckout(checkout_id!, eagle_id!);
+          const result = await closeCheckout(eagle_id);
 
           if (result.error) {
             setCloseCheckoutError(result.message);
@@ -64,9 +57,8 @@ const SuccessPage = () => {
     };
 
     recordAttendance();
-  }, [isSuccess, eagle_id, checkout_id, attendanceRecorded, isProcessing]);
+  }, [isSuccess, eagle_id, attendanceRecorded, isProcessing]);
 
-  // Dynamic styling based on status
   const bgGradient = isSuccess
     ? "from-green-50 to-emerald-100"
     : "from-red-50 to-red-100";
@@ -100,19 +92,17 @@ const SuccessPage = () => {
                   "There was an issue processing your registration. Please try again."}
             </p>
 
-            {/* Processing indicator */}
             {isProcessing && (
               <div className="flex items-center justify-center mt-4">
                 <Loader2 className="w-4 h-4 animate-spin mr-2" />
                 <span className="text-sm text-gray-600">
-                  Processing registration...
+                  Finalizing registration...
                 </span>
               </div>
             )}
           </CardHeader>
 
           <CardContent className="space-y-8">
-            {/* Show error if closeCheckout failed */}
             {closeCheckoutError && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
@@ -123,8 +113,8 @@ const SuccessPage = () => {
                     </p>
                     <p className="text-sm text-yellow-700">
                       Your registration was successful, but we couldn't
-                      automatically record your attendance. Please contact
-                      support if needed. Error: {closeCheckoutError}
+                      automatically finalize your attendance record. Please
+                      contact support if needed. Error: {closeCheckoutError}
                     </p>
                   </div>
                 </div>
@@ -133,7 +123,6 @@ const SuccessPage = () => {
 
             {isSuccess ? (
               <>
-                {/* Success Content */}
                 <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-green-800 mb-4">
                     What happens next?
@@ -147,8 +136,7 @@ const SuccessPage = () => {
                         </p>
                         <p className="text-sm text-green-700">
                           You'll receive a confirmation email with your
-                          registration details and receipt within the next few
-                          minutes.
+                          registration details within the next few minutes.
                         </p>
                       </div>
                     </div>
@@ -192,7 +180,6 @@ const SuccessPage = () => {
                   </div>
                 </div>
 
-                {/* Event Details */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-blue-800 mb-4">
                     Event Details
@@ -208,18 +195,10 @@ const SuccessPage = () => {
                     </div>
                     <div>
                       <p className="text-sm font-medium text-blue-800">
-                        Registration Fee
-                      </p>
-                      <p className="text-sm text-blue-700">$299.00</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-blue-800">
                         Status
                       </p>
                       <div className="flex items-center space-x-2">
-                        <p className="text-sm text-blue-700">
-                          Confirmed & Paid
-                        </p>
+                        <p className="text-sm text-blue-700">Confirmed</p>
                         {attendanceRecorded && (
                           <CheckCircle className="w-4 h-4 text-green-600" />
                         )}
@@ -233,14 +212,6 @@ const SuccessPage = () => {
                         {new Date().toLocaleDateString()}
                       </p>
                     </div>
-                    {checkout_id && (
-                      <div>
-                        <p className="text-sm font-medium text-blue-800">
-                          Transaction ID
-                        </p>
-                        <p className="text-sm text-blue-700">{checkout_id}</p>
-                      </div>
-                    )}
                     {eagle_id && (
                       <div>
                         <p className="text-sm font-medium text-blue-800">
@@ -252,8 +223,7 @@ const SuccessPage = () => {
                   </div>
                 </div>
 
-                {/* Attendance Status */}
-                {eagle_id && checkout_id && (
+                {eagle_id && (
                   <div
                     className={`${attendanceRecorded ? "bg-green-50 border-green-200" : "bg-blue-50 border-blue-200"} border rounded-lg p-4`}
                   >
@@ -266,19 +236,13 @@ const SuccessPage = () => {
                         <AlertTriangle className="w-5 h-5 text-yellow-600" />
                       )}
                       <p
-                        className={`text-sm font-medium ${
-                          attendanceRecorded
-                            ? "text-green-800"
-                            : isProcessing
-                              ? "text-blue-800"
-                              : "text-yellow-800"
-                        }`}
+                        className={`text-sm font-medium ${attendanceRecorded ? "text-green-800" : isProcessing ? "text-blue-800" : "text-yellow-800"}`}
                       >
                         {attendanceRecorded
-                          ? "Attendance Successfully Recorded"
+                          ? "Registration Finalized Successfully"
                           : isProcessing
-                            ? "Recording Attendance..."
-                            : "Processing Attendance Record"}
+                            ? "Finalizing Registration..."
+                            : "Processing Registration"}
                       </p>
                     </div>
                   </div>
@@ -286,7 +250,6 @@ const SuccessPage = () => {
               </>
             ) : (
               <>
-                {/* Error Content */}
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-red-800 mb-4">
                     What went wrong?
@@ -300,14 +263,13 @@ const SuccessPage = () => {
                         </p>
                         <p className="text-sm text-red-700">
                           {message ||
-                            "There was a problem processing your registration payment."}
+                            "There was a problem processing your registration."}
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Troubleshooting Steps */}
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                   <h3 className="text-lg font-semibold text-yellow-800 mb-4">
                     What can you do?
@@ -342,7 +304,6 @@ const SuccessPage = () => {
               </>
             )}
 
-            {/* Contact Information */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 Need Help?
@@ -364,12 +325,11 @@ const SuccessPage = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
               {isSuccess ? (
                 <Button
                   className="flex items-center bg-blue-600 hover:bg-blue-700"
-                  onClick={() => (window.location.href = "/")}
+                  onClick={() => router.push("/events/rglicon2025")}
                   disabled={isProcessing}
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
@@ -379,7 +339,7 @@ const SuccessPage = () => {
                 <>
                   <Button
                     className="flex items-center bg-red-600 hover:bg-red-700"
-                    onClick={() => window.history.back()}
+                    onClick={() => router.back()}
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Try Again
@@ -387,7 +347,7 @@ const SuccessPage = () => {
                   <Button
                     variant="outline"
                     className="flex items-center"
-                    onClick={() => (window.location.href = "/")}
+                    onClick={() => router.push("/events/rglicon2025")}
                   >
                     Return to Home
                   </Button>

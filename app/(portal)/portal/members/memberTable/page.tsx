@@ -55,16 +55,6 @@ export default function MembersTable() {
 
       const apiResponse = await response.json();
 
-      // DEBUG: Log the complete API response
-      console.log("=== API RESPONSE DEBUG ===");
-      console.log("Full API Response:", apiResponse);
-      console.log("Response type:", typeof apiResponse);
-      console.log("Has 'data' property?", "data" in apiResponse);
-      console.log("apiResponse.data:", apiResponse.data);
-      console.log(
-        "apiResponse.data is array?",
-        Array.isArray(apiResponse.data)
-      );
       if (apiResponse.data) {
         console.log("apiResponse.data length:", apiResponse.data.length);
         console.log(
@@ -72,8 +62,6 @@ export default function MembersTable() {
           apiResponse.data.filter((item: any) => item !== null).length
         );
       }
-      console.log("===========================");
-
       setRawApiResponse(apiResponse);
 
       // Extract and process the actual data

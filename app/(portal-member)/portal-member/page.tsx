@@ -46,8 +46,6 @@ export default function Page() {
           getDetails(token),
           getStats(token),
         ]);
-        console.log("Member Response:", memberResponse);
-        console.log("Stats Response:", statsResponse);
         setMember(memberResponse.data);
         setStats(statsResponse.data);
       } catch (error) {

@@ -20,9 +20,10 @@ const SuccessPage = () => {
   const searchParams = useSearchParams();
   const status = searchParams.get("status") || "success"; // 'success' or 'error'
   const message = searchParams.get("message");
-  const checkout_id = searchParams.get("checkout_id");
+  const checkout_id = localStorage.getItem("checkout_id");
   const eagle_id = searchParams.get("eagle_id");
 
+  console.log("Status:", checkout_id);
   const [isProcessing, setIsProcessing] = useState(false);
   const [closeCheckoutError, setCloseCheckoutError] = useState<string | null>(
     null
@@ -44,7 +45,7 @@ const SuccessPage = () => {
         setIsProcessing(true);
 
         try {
-          const result = await closeCheckout(checkout_id, eagle_id);
+          const result = await closeCheckout(checkout_id!, eagle_id!);
 
           if (result.error) {
             setCloseCheckoutError(result.message);
@@ -354,7 +355,7 @@ const SuccessPage = () => {
                 </p>
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-gray-800">
-                    Email: ralph_pacayra@yahoo.com.sg
+                    Email: rglicon@gmail.com
                   </p>
                   <p className="text-sm text-gray-700">
                     We'll get back to you within 24 hours.

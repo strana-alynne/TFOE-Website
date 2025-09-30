@@ -16,7 +16,7 @@ const SponsorshipPackages = () => {
       price: cleanPrice,
     }).toString();
 
-    router.push(` /events/rglicon2025/registration/sponsor/register?${query}`);
+    router.push(`/events/rglicon2025/registration/sponsor/register?${query}`);
   };
 
   const sponsorshipPackages = [

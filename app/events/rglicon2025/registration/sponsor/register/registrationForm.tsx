@@ -26,7 +26,8 @@ interface FormData {
   full_name: string;
   region: string;
   club_name: string;
-  national_president: string;
+  date_of_arrival: string;
+  departure: string;
   eagle_id: string;
   job_title: string;
   company_name: string;
@@ -47,10 +48,12 @@ interface FormData {
   type_of_partner: string;
   investment_interest: string;
   document_link: string;
+  dietary_restrictions: string;
   isPaid: boolean;
   pdpaConsent: boolean;
   marketingConsent: boolean;
   promotionalConsent: boolean;
+  ticket_type: string;
 }
 
 interface StepComponentProps {
@@ -102,13 +105,37 @@ const BasicInformation = ({
         />
       </div>
       <div>
-        <Label htmlFor="national_president">National President</Label>
-        <Input
-          id="national_president"
-          value={formData.national_president}
-          onChange={(e) => updateFormData("national_president", e.target.value)}
-          placeholder="Enter national president name"
-        />
+        <Label htmlFor="flight_dates">
+          Flight Dates (Arrival - Departure) *
+        </Label>
+        <div className="flex items-center gap-2">
+          <Input
+            id="date_of_arrival"
+            type="date"
+            value={formData.date_of_arrival}
+            onChange={(e) => updateFormData("date_of_arrival", e.target.value)}
+            className={
+              errors.date_of_arrival || errors.departure ? "border-red-500" : ""
+            }
+            placeholder="Arrival"
+          />
+          <span className="text-gray-500">-</span>
+          <Input
+            id="departure"
+            type="date"
+            value={formData.departure}
+            onChange={(e) => updateFormData("departure", e.target.value)}
+            className={
+              errors.date_of_arrival || errors.departure ? "border-red-500" : ""
+            }
+            placeholder="Departure"
+          />
+        </div>
+        {(errors.date_of_arrival || errors.departure) && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.date_of_arrival || errors.departure}
+          </p>
+        )}
       </div>
       <div>
         <Label htmlFor="eagle_id">Eagle ID Number</Label>
@@ -215,6 +242,24 @@ const BasicInformation = ({
           onChange={(e) => updateFormData("other_links", e.target.value)}
           placeholder="WeChat/WhatsApp/TikTok handles"
         />
+      </div>
+      <div className="md:col-span-2">
+        <Label htmlFor="dietary_restrictions">Dietary Restrictions *</Label>
+        <Textarea
+          id="dietary_restrictions"
+          value={formData.dietary_restrictions}
+          onChange={(e) =>
+            updateFormData("dietary_restrictions", e.target.value)
+          }
+          placeholder="Please specify any dietary restrictions, allergies, or special meal requirements"
+          className={errors.dietary_restrictions ? "border-red-500" : ""}
+          rows={3}
+        />
+        {errors.dietary_restrictions && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.dietary_restrictions}
+          </p>
+        )}
       </div>
     </div>
   </div>
@@ -444,81 +489,6 @@ const DocumentsConsent = ({
   </div>
 );
 
-const ReviewPayment = ({
-  formData,
-  package_id,
-}: {
-  formData: FormData;
-  package_id: string;
-}) => {
-  let price = 0;
-
-  switch (package_id) {
-    case "PLATINUM SPONSOR":
-      price = 20000;
-      break;
-    case "GOLD SPONSOR":
-      price = 10000;
-      break;
-    case "SILVER SPONSOR":
-      price = 5000;
-      break;
-    case "BRONZE SPONSOR":
-      price = 1000;
-      break;
-    default:
-      price = 0;
-  }
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Registration Summary</h3>
-        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Full Name:</span>
-            <span className="text-sm font-medium">
-              {formData.full_name || "Not provided"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Company:</span>
-            <span className="text-sm font-medium">
-              {formData.company_name || "Not provided"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Email:</span>
-            <span className="text-sm font-medium">
-              {formData.email || "Not provided"}
-            </span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Location:</span>
-            <span className="text-sm font-medium">
-              {formData.city && formData.country
-                ? `${formData.city}, ${formData.country}`
-                : "Not provided"}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Payment Information</h3>
-        <div className="border rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-lg font-medium">Registration Fee</span>
-            <span className="text-2xl font-bold text-green-600">
-              USD {price}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const RegistrationForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -543,6 +513,9 @@ const RegistrationForm = () => {
     phone: "",
     linkedin: "",
     other_links: "",
+    date_of_arrival: "",
+    departure: "",
+    dietary_restrictions: "",
 
     // Company Profile
     industrySector: "", // This will map to industry sector (not in API)
@@ -566,6 +539,9 @@ const RegistrationForm = () => {
     pdpaConsent: false,
     marketingConsent: false,
     promotionalConsent: false,
+
+    // Required by FormData interface
+    ticket_type: "",
   });
 
   const steps = [
@@ -585,11 +561,6 @@ const RegistrationForm = () => {
       title: "Documents & Consent",
       description: "Supporting documents and agreements",
     },
-    {
-      id: 5,
-      title: "Review & Payment",
-      description: "Final review and checkout",
-    },
   ];
 
   const updateFormData = (field: string, value: string | boolean) => {
@@ -599,7 +570,7 @@ const RegistrationForm = () => {
   };
 
   const nextStep = () => {
-    if (validateStep(currentStep)) {
+    if (validateStep(currentStep, formData, setErrors)) {
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
         setErrors({}); // Clear errors when moving to next step
@@ -696,10 +667,6 @@ const RegistrationForm = () => {
             errors={errors}
           />
         );
-      case 5:
-        return (
-          <ReviewPayment formData={formData} package_id={package_id ?? ""} />
-        );
       default:
         return (
           <BasicInformation
@@ -711,7 +678,11 @@ const RegistrationForm = () => {
     }
   };
 
-  const validateStep = (step: number): boolean => {
+  const validateStep = (
+    step: number,
+    formData: FormData,
+    setErrors: (errors: Record<string, string>) => void
+  ): boolean => {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
@@ -719,6 +690,10 @@ const RegistrationForm = () => {
         if (!formData.full_name.trim())
           newErrors.full_name = "Full name is required";
         if (!formData.region.trim()) newErrors.region = "Region is required";
+        if (!formData.date_of_arrival.trim())
+          newErrors.date_of_arrival = "Flight date of arrival is required";
+        if (!formData.departure.trim())
+          newErrors.departure = "Flight date of departure is required";
         if (!formData.job_title.trim())
           newErrors.job_title = "Job title is required";
         if (!formData.company_name.trim())
@@ -732,6 +707,9 @@ const RegistrationForm = () => {
         }
         if (!formData.phone.trim())
           newErrors.phone = "Phone number is required";
+        if (!formData.dietary_restrictions.trim())
+          newErrors.dietary_restrictions =
+            "Dietary restrictions information is required";
         break;
 
       case 2: // Company Profile
@@ -762,10 +740,11 @@ const RegistrationForm = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Submitting form data:");
     try {
       // Prepare data for API
       const apiData = {
+        date_of_arrival: formData.date_of_arrival,
+        departure: formData.departure,
         document_link: formData.document_link,
         purpose: formData.purpose,
         target_market: formData.target_market,
@@ -782,7 +761,8 @@ const RegistrationForm = () => {
         company_name: formData.company_name,
         email: formData.email,
         region: formData.region,
-        national_president: formData.national_president,
+        dietary_restrictions: formData.dietary_restrictions,
+        ticket_type: package_id ?? "",
         job_title: formData.job_title,
         country: formData.country,
         city: formData.city,
@@ -867,6 +847,7 @@ const RegistrationForm = () => {
                 <Button
                   onClick={handleSubmit}
                   className="flex items-center bg-green-600 hover:bg-green-700"
+                  disabled={!formData.pdpaConsent}
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Proceed to Payment

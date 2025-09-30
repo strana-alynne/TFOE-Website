@@ -923,7 +923,13 @@ const RGLIconLanding = () => {
                         : "border-2 border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-black"
                     }`}
                   >
-                    Choose Package
+                    <Link
+                      href={`/events/rglicon2025/registration/sponsor`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Choose Package
+                    </Link>
                   </button>
                 </div>
               ))}
@@ -931,6 +937,66 @@ const RGLIconLanding = () => {
           </div>
         </div>
       </div>
+      {/* Merchandise Section */}
+      <div id="merchandise" className="py-20 bg-black/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Content - LEFT */}
+              <div className="order-2 lg:order-1">
+                <div className="mb-4">
+                  <span className="inline-block px-6 py-2 bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-bold rounded-full text-sm uppercase tracking-wide">
+                    Exclusive
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 text-amber-300">
+                    RGL Icon Merchandise
+                  </h2>
+                </div>
+
+                <div className="mb-8 space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl">
+                      Commemorate this historic first-ever RGL International
+                      Convention
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl">
+                      Limited edition designs exclusive to RGL Icon 2025
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl">
+                      Premium quality items to remember this momentous occasion
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-2 h-2 bg-amber-400 rounded-full mt-2 flex-shrink-0"></div>
+                    <p className="text-lg sm:text-xl">
+                      Perfect keepsakes for members and delegates
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Image - RIGHT */}
+              <div className="order-1 lg:order-2 w-full h-64 sm:h-80 md:h-96 lg:h-full rounded-xl overflow-hidden shadow-lg border border-amber-400/20">
+                <img
+                  src="/rglicon2025/merch.png"
+                  alt="RGL Icon 2025 Merchandise"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Section */}
       <div className="relative py-20">
         {/* Background image */}

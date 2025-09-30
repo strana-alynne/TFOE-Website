@@ -204,7 +204,7 @@ export default function AttendancePage() {
         const token = localStorage.getItem("access_token");
 
         const attendanceResponse = await fetch(
-          "https://tfoe-backend.onrender.com/member/attendance", // Update this URL to your actual attendance endpoint
+          "https://tfoe-backend.onrender.com/member/attendance",
           {
             headers: {
               Authorization: `Bearer ${token}`,

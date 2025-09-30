@@ -41,7 +41,6 @@ type Participant = {
   website: string;
   socials: string;
   export_import_exp: string;
-  national_president: string;
   linkedin: string;
   other_links: string;
 };
@@ -630,14 +629,6 @@ const AdminAttendanceDashboard = () => {
                         </label>
                         <p className="text-gray-900">
                           {selectedParticipant.region}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-gray-500">
-                          National President
-                        </label>
-                        <p className="text-gray-900">
-                          {selectedParticipant.national_president}
                         </p>
                       </div>
                       <div>

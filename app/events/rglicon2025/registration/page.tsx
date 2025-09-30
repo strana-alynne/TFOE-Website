@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
 import {
   CheckCircle,
   ArrowLeft,
@@ -23,7 +22,8 @@ interface FormData {
   full_name: string;
   region: string;
   club_name: string;
-  national_president: string;
+  date_of_arrival: string;
+  departure: string;
   eagle_id: string;
   job_title: string;
   company_name: string;
@@ -44,16 +44,18 @@ interface FormData {
   type_of_partner: string;
   investment_interest: string;
   document_link: string;
+  dietary_restrictions: string;
   isPaid: boolean;
   pdpaConsent: boolean;
   marketingConsent: boolean;
   promotionalConsent: boolean;
+  ticket_type: string;
 }
 
 interface StepComponentProps {
   formData: FormData;
   updateFormData: (field: string, value: string | boolean) => void;
-  errors: Record<string, string>; // Add this line
+  errors: Record<string, string>;
 }
 
 const BasicInformation = ({
@@ -99,13 +101,37 @@ const BasicInformation = ({
         />
       </div>
       <div>
-        <Label htmlFor="national_president">National President</Label>
-        <Input
-          id="national_president"
-          value={formData.national_president}
-          onChange={(e) => updateFormData("national_president", e.target.value)}
-          placeholder="Enter national president name"
-        />
+        <Label htmlFor="flight_dates">
+          Flight Dates (Arrival - Departure) *
+        </Label>
+        <div className="flex items-center gap-2">
+          <Input
+            id="date_of_arrival"
+            type="date"
+            value={formData.date_of_arrival}
+            onChange={(e) => updateFormData("date_of_arrival", e.target.value)}
+            className={
+              errors.date_of_arrival || errors.departure ? "border-red-500" : ""
+            }
+            placeholder="Arrival"
+          />
+          <span className="text-gray-500">-</span>
+          <Input
+            id="departure"
+            type="date"
+            value={formData.departure}
+            onChange={(e) => updateFormData("departure", e.target.value)}
+            className={
+              errors.date_of_arrival || errors.departure ? "border-red-500" : ""
+            }
+            placeholder="Departure"
+          />
+        </div>
+        {(errors.date_of_arrival || errors.departure) && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.date_of_arrival || errors.departure}
+          </p>
+        )}
       </div>
       <div>
         <Label htmlFor="eagle_id">Eagle ID Number</Label>
@@ -213,6 +239,24 @@ const BasicInformation = ({
           placeholder="WeChat/WhatsApp/TikTok handles"
         />
       </div>
+      <div className="md:col-span-2">
+        <Label htmlFor="dietary_restrictions">Dietary Restrictions *</Label>
+        <Textarea
+          id="dietary_restrictions"
+          value={formData.dietary_restrictions}
+          onChange={(e) =>
+            updateFormData("dietary_restrictions", e.target.value)
+          }
+          placeholder="Please specify any dietary restrictions, allergies, or special meal requirements"
+          className={errors.dietary_restrictions ? "border-red-500" : ""}
+          rows={3}
+        />
+        {errors.dietary_restrictions && (
+          <p className="text-red-500 text-xs mt-1">
+            {errors.dietary_restrictions}
+          </p>
+        )}
+      </div>
     </div>
   </div>
 );
@@ -282,7 +326,6 @@ const CompanyProfile = ({
   </div>
 );
 
-// 8. Updated BusinessInterests component with error handling
 const BusinessInterests = ({
   formData,
   updateFormData,
@@ -441,59 +484,12 @@ const DocumentsConsent = ({
   </div>
 );
 
-const ReviewPayment = ({ formData }: { formData: FormData }) => (
-  <div className="space-y-6">
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Registration Summary</h3>
-      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Full Name:</span>
-          <span className="text-sm font-medium">
-            {formData.full_name || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Company:</span>
-          <span className="text-sm font-medium">
-            {formData.company_name || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Email:</span>
-          <span className="text-sm font-medium">
-            {formData.email || "Not provided"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Location:</span>
-          <span className="text-sm font-medium">
-            {formData.city && formData.country
-              ? `${formData.city}, ${formData.country}`
-              : "Not provided"}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <h3 className="text-lg font-semibold mb-4">Payment Information</h3>
-      <div className="border rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-lg font-medium">Registration Fee</span>
-          <span className="text-2xl font-bold text-green-600">USD 80.00</span>
-        </div>
-      </div>
-    </div>
-  </div>
-);
-
 const RegistrationForm = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccessPage, setShowSuccessPage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
-    // Basic Information
     full_name: "",
     region: "",
     club_name: "",
@@ -507,29 +503,25 @@ const RegistrationForm = () => {
     phone: "",
     linkedin: "",
     other_links: "",
-
-    // Company Profile
-    industrySector: "", // This will map to industry sector (not in API)
+    date_of_arrival: "",
+    departure: "",
+    dietary_restrictions: "",
+    industrySector: "",
     company_size: "",
     products_offered: "",
     website: "",
     socials: "",
     export_import_exp: "",
-
-    // Business Interests
     purpose: "",
     target_market: "",
     type_of_partner: "",
     investment_interest: "",
-
-    // Additional fields
     document_link: "",
     isPaid: false,
-
-    // Consent (keep these for form validation)
     pdpaConsent: false,
     marketingConsent: false,
     promotionalConsent: false,
+    ticket_type: "",
   });
 
   const steps = [
@@ -549,24 +541,18 @@ const RegistrationForm = () => {
       title: "Documents & Consent",
       description: "Supporting documents and agreements",
     },
-    {
-      id: 5,
-      title: "Review & Payment",
-      description: "Final review and checkout",
-    },
   ];
 
   const updateFormData = (field: string, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing/selecting
     clearError(field);
   };
 
   const nextStep = () => {
-    if (validateStep(currentStep)) {
+    if (validateStep(currentStep, formData, setErrors)) {
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
-        setErrors({}); // Clear errors when moving to next step
+        setErrors({});
       }
     }
   };
@@ -660,8 +646,6 @@ const RegistrationForm = () => {
             errors={errors}
           />
         );
-      case 5:
-        return <ReviewPayment formData={formData} />;
       default:
         return (
           <BasicInformation
@@ -673,14 +657,22 @@ const RegistrationForm = () => {
     }
   };
 
-  const validateStep = (step: number): boolean => {
+  const validateStep = (
+    step: number,
+    formData: FormData,
+    setErrors: (errors: Record<string, string>) => void
+  ): boolean => {
     const newErrors: Record<string, string> = {};
 
     switch (step) {
-      case 1: // Basic Information
+      case 1:
         if (!formData.full_name.trim())
           newErrors.full_name = "Full name is required";
         if (!formData.region.trim()) newErrors.region = "Region is required";
+        if (!formData.date_of_arrival.trim())
+          newErrors.date_of_arrival = "Flight date of arrival is required";
+        if (!formData.departure.trim())
+          newErrors.departure = "Flight date of departure is required";
         if (!formData.job_title.trim())
           newErrors.job_title = "Job title is required";
         if (!formData.company_name.trim())
@@ -694,9 +686,12 @@ const RegistrationForm = () => {
         }
         if (!formData.phone.trim())
           newErrors.phone = "Phone number is required";
+        if (!formData.dietary_restrictions.trim())
+          newErrors.dietary_restrictions =
+            "Dietary restrictions information is required";
         break;
 
-      case 2: // Company Profile
+      case 2:
         if (!formData.company_size.trim())
           newErrors.company_size = "Company size is required";
         if (!formData.products_offered.trim())
@@ -704,7 +699,7 @@ const RegistrationForm = () => {
             "Products/services description is required";
         break;
 
-      case 3: // Business Interests
+      case 3:
         if (!formData.purpose.trim())
           newErrors.purpose = "Purpose of participation is required";
         if (!formData.target_market.trim())
@@ -713,7 +708,7 @@ const RegistrationForm = () => {
           newErrors.type_of_partner = "Type of partners sought is required";
         break;
 
-      case 4: // Documents & Consent
+      case 4:
         if (!formData.pdpaConsent)
           newErrors.pdpaConsent = "PDPA consent is required to proceed";
         break;
@@ -726,8 +721,9 @@ const RegistrationForm = () => {
   const handleSubmit = async () => {
     console.log("Submitting form data:");
     try {
-      // Prepare data for API
       const apiData = {
+        date_of_arrival: formData.date_of_arrival,
+        departure: formData.departure,
         document_link: formData.document_link,
         purpose: formData.purpose,
         target_market: formData.target_market,
@@ -744,7 +740,8 @@ const RegistrationForm = () => {
         company_name: formData.company_name,
         email: formData.email,
         region: formData.region,
-        national_president: formData.national_president,
+        dietary_restrictions: formData.dietary_restrictions,
+        ticket_type: "Standard",
         job_title: formData.job_title,
         country: formData.country,
         city: formData.city,
@@ -758,22 +755,25 @@ const RegistrationForm = () => {
       const result = await ParticipantCheckout(apiData.eagle_id);
       console.log("API response:", result);
 
-      // Check if checkout session creation failed
       if (result.error) {
         console.error("Checkout session creation failed:", result.message);
         const errorMessage = encodeURIComponent(result.message);
         router.push(`/success?status=error&message=${errorMessage}`);
         return;
       }
-      window.location.href = result.data.checkout_url;
+      console.log("Redirecting to checkout URL:", result.data.checkout_id);
+
       if (result.data?.checkout_url) {
         sessionStorage.setItem("registrationData", JSON.stringify(apiData));
-        sessionStorage.setItem("checkout_id", result.data.checkout_id);
+        localStorage.setItem("checkout_id", result.data.checkout_id);
+        window.location.href = result.data.checkout_url;
       } else {
         const errorMessage = encodeURIComponent(
           "Payment checkout URL not available"
         );
-        router.push(`/success?status=error&message=${errorMessage}`);
+        router.push(
+          `/events/rglicon2025/registration/success?status=error&message=${errorMessage}`
+        );
       }
     } catch (error) {
       console.error("Error submitting form:", error);

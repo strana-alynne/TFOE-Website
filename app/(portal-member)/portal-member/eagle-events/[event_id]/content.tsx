@@ -85,7 +85,6 @@ export default function EventDetails({ id }: EventID) {
     if (!eventdetail || !userDetails) return false;
 
     return eventdetail.eventAttendees.some((attendee) => {
-      // Check if attendee is an object (not empty string) and has matching memberId
       return (
         typeof attendee === "object" &&
         attendee !== null &&

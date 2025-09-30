@@ -205,7 +205,7 @@ export async function checkAttendance(id: any) {
    const response = await fetch(
   `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/attendance/${id}`,
   {
-    method: "GET",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },

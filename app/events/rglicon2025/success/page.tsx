@@ -316,7 +316,7 @@ const SuccessPage = () => {
                 </p>
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-gray-800">
-                    Email: rglicon@gmail.com
+                    Email: rglicon2025@gmail.com
                   </p>
                   <p className="text-sm text-gray-700">
                     We'll get back to you within 24 hours.

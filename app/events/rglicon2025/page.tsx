@@ -1067,7 +1067,7 @@ const RGLIconLanding = () => {
                   <Mail className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-amber-300">Email</h3>
-                <p className="text-gray-300">rglicon@gmail.com</p>
+                <p className="text-gray-300">rglicon2025@gmail.com</p>
               </div>
 
               <div className="flex flex-col items-center">

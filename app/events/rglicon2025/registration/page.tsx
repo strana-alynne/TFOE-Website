@@ -6,16 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  CheckCircle,
-  ArrowLeft,
-  ArrowRight,
-  Upload,
-  CreditCard,
-} from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, Upload, Send } from "lucide-react";
 import React from "react";
-import { addAttendance, closeCheckout, ParticipantCheckout } from "../actions";
-import SuccessPage from "../success/page";
+import { addAttendance } from "../actions";
 import { useRouter } from "next/navigation";
 
 interface FormData {
@@ -822,8 +815,8 @@ const RegistrationForm = () => {
                   onClick={handleSubmit}
                   className="flex items-center bg-green-600 hover:bg-green-700"
                 >
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Proceed to Payment
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit
                 </Button>
               )}
             </div>

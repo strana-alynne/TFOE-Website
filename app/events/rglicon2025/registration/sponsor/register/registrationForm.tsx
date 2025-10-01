@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Upload,
   CreditCard,
+  Send,
 } from "lucide-react";
 import React from "react";
 import {
@@ -792,7 +793,9 @@ const RegistrationForm = () => {
       const errorMessage = encodeURIComponent(
         "An unexpected error occurred. Please try again."
       );
-      router.push(`/success?status=error&message=${errorMessage}`);
+      router.push(
+        `/events/rglicon2025/success?status=error&message=${errorMessage}`
+      );
     }
   };
 
@@ -841,8 +844,8 @@ const RegistrationForm = () => {
                   className="flex items-center bg-green-600 hover:bg-green-700"
                   disabled={!formData.pdpaConsent}
                 >
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Proceed to Payment
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit
                 </Button>
               )}
             </div>

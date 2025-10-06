@@ -409,8 +409,8 @@ const DocumentsConsent = ({
       <div className="bg-gray-50 p-4 rounded-lg mb-4">
         <p className="text-sm text-gray-700 mb-3">
           By submitting this registration form, you acknowledge and agree to the
-          collection, use, and disclosure of your personal data by DMI Studios
-          for:
+          collection, use, and disclosure of your personal data by RGL Icon
+          Organizers for:
         </p>
         <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 mb-3">
           <li>Processing your registration</li>
@@ -465,13 +465,13 @@ const DocumentsConsent = ({
             }
           />
           <Label htmlFor="promotionalConsent" className="text-sm">
-            I would like to receive marketing communications from DMI Studios
+            I would like to receive marketing communications from RGL Icon
+            Organizers
           </Label>
         </div>
       </div>
       <p className="text-xs text-gray-500 mt-2">
-        You may withdraw consent anytime by contacting DMI c/o
-        ralph_pacayra@yahoo.com.sg
+        You may withdraw consent anytime by contacting: rglicon2025@gmail.com
       </p>
     </div>
   </div>
@@ -776,7 +776,7 @@ const RegistrationForm = () => {
       <div className="max-w-4xl mx-auto px-4">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-amber-300 mb-2">
-            TFOE International Convention 2025
+            RGL ICON Convention 2025
           </h1>
           <p className="text-white-600">
             Complete your registration in {steps.length} simple steps

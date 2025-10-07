@@ -235,3 +235,76 @@ export async function checkAttendance(id: any) {
     };
   }
 }
+
+export async function uploadDocument(file: File, eagleId: string) {
+  try {
+    const formData = new FormData();
+    formData.append('eagle_id', eagleId);
+    formData.append('file', file);
+
+    console.log("Uploading document for eagle_id:", eagleId);
+    console.log("File name:", file.name);
+    console.log("File size:", file.size);
+
+    const response = await fetch(
+      `https://34qxhbungzt75udjai6nkbvxyy0rpesi.lambda-url.ap-southeast-1.on.aws/api/v1/attendance/document`,
+      {
+        method: "POST",
+        body: formData,
+        // Add mode to handle CORS
+        mode: 'cors',
+      }
+    );
+
+    console.log("Upload response status:", response.status);
+    
+    // Try to parse JSON response
+    let data;
+    try {
+      data = await response.json();
+      console.log("Upload response data:", data);
+    } catch (jsonError) {
+      console.error("Failed to parse JSON response:", jsonError);
+      const textResponse = await response.text();
+      console.log("Raw response:", textResponse);
+      
+      return {
+        error: true,
+        message: "Invalid response from server",
+      };
+    }
+
+    // Check for 201 status (Created successfully)
+    if (response.status === 201) {
+      return { 
+        error: false,
+        data: {
+          document_id: data.document_id || data.id || data
+        }
+      };
+    }
+
+    // Handle error responses
+    return {
+      error: true,
+      message: data.detail || data.message || `Upload failed with status ${response.status}`,
+      data: data
+    };
+
+  } catch (error) {
+    console.error("Error uploading document:", error);
+    
+    // More detailed error message
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      return {
+        error: true,
+        message: error.message,
+      };
+    }
+    
+    return {
+      error: true,
+      message: error instanceof Error ? error.message : "Failed to upload document!",
+    };
+  }
+}

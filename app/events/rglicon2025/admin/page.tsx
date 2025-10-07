@@ -31,6 +31,7 @@ type Participant = {
   region: string;
   isPaid: boolean;
   attended: boolean;
+  ticket_type: string;
   document_link: string;
   purpose: string;
   target_market: string;
@@ -370,6 +371,9 @@ const AdminAttendanceDashboard = () => {
                     Company
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Ticket Type
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -401,6 +405,11 @@ const AdminAttendanceDashboard = () => {
                       <div className="text-sm text-gray-500">
                         {participant.job_title}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm text-gray-900">
+                        {participant.ticket_type}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
@@ -503,6 +512,14 @@ const AdminAttendanceDashboard = () => {
                         </label>
                         <p className="text-gray-900">
                           {selectedParticipant.phone}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">
+                          Ticket Type
+                        </label>
+                        <p className="text-gray-900">
+                          {selectedParticipant.ticket_type}
                         </p>
                       </div>
                       <div>
@@ -660,6 +677,39 @@ const AdminAttendanceDashboard = () => {
                             ? "Attended"
                             : "Not Attended"}
                         </span>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">
+                          Document
+                        </label>
+                        {selectedParticipant.document_link ? (
+                          <a
+                            href={selectedParticipant.document_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            className="text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                          >
+                            Download Document
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                              />
+                            </svg>
+                          </a>
+                        ) : (
+                          <p className="text-gray-400 text-sm">
+                            No document available
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>

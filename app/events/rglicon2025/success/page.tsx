@@ -87,7 +87,7 @@ const SuccessPage = () => {
             </h1>
             <p className={`text-lg ${subtitleColor}`}>
               {isSuccess
-                ? "Thank you for registering for TFOE International Convention 2025"
+                ? "Thank you for registering for RGL ICON Convention 2025"
                 : message ||
                   "There was an issue processing your registration. Please try again."}
             </p>
@@ -190,7 +190,7 @@ const SuccessPage = () => {
                         Event Name
                       </p>
                       <p className="text-sm text-blue-700">
-                        TFOE International Convention 2025
+                        RGL ICON Convention 2025
                       </p>
                     </div>
                     <div>

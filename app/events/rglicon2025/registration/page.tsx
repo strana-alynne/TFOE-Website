@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckCircle, ArrowLeft, ArrowRight, Upload, Send } from "lucide-react";
 import React from "react";
-import { addAttendance } from "../actions";
+import { addAttendance, uploadDocument } from "../actions";
 import { useRouter } from "next/navigation";
+import { form } from "sanity/structure";
 
 interface FormData {
   full_name: string;
@@ -384,7 +385,12 @@ const DocumentsConsent = ({
   formData,
   updateFormData,
   errors,
-}: StepComponentProps) => (
+  onFileSelect,
+  uploadedFile,
+}: StepComponentProps & {
+  onFileSelect: (file: File | null) => void;
+  uploadedFile: File | null;
+}) => (
   <div className="space-y-6">
     <div>
       <h3 className="text-lg font-semibold mb-4">Supporting Documents</h3>
@@ -392,14 +398,52 @@ const DocumentsConsent = ({
         Please attach the following if available:
       </p>
       <div className="space-y-3">
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-          <p className="mt-2 text-sm text-gray-600">
-            Click to upload or drag and drop
-          </p>
-          <p className="text-xs text-gray-500">
-            Company Brochure, Product Catalog, Business Registration, Pitch Deck
-          </p>
+        <div
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-all ${
+            uploadedFile
+              ? "border-green-500 bg-green-50"
+              : "border-gray-300 bg-white hover:border-gray-400"
+          }`}
+        >
+          <input
+            type="file"
+            id="document-upload"
+            className="hidden"
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            onChange={(e) => {
+              const file = e.target.files?.[0] || null;
+              onFileSelect(file);
+            }}
+          />
+          <label htmlFor="document-upload" className="cursor-pointer">
+            {uploadedFile ? (
+              <>
+                <div className="flex items-center justify-center mb-2">
+                  <CheckCircle className="h-12 w-12 text-green-600" />
+                </div>
+                <p className="text-sm font-semibold text-green-700 mb-1">
+                  File attached successfully!
+                </p>
+                <p className="text-sm text-green-600 font-medium break-all px-4">
+                  {uploadedFile.name}
+                </p>
+                <p className="text-xs text-gray-600 mt-2">
+                  Click to replace file
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                <p className="mt-2 text-sm text-gray-600">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-xs text-gray-500">
+                  Company Brochure, Product Catalog, Business Registration,
+                  Pitch Deck
+                </p>
+              </>
+            )}
+          </label>
         </div>
       </div>
     </div>
@@ -480,7 +524,6 @@ const DocumentsConsent = ({
 const RegistrationForm = () => {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [showSuccessPage, setShowSuccessPage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     full_name: "",
@@ -516,6 +559,8 @@ const RegistrationForm = () => {
     promotionalConsent: false,
     ticket_type: "",
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const steps = [
     {
@@ -541,7 +586,7 @@ const RegistrationForm = () => {
     clearError(field);
   };
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (validateStep(currentStep, formData, setErrors)) {
       if (currentStep < steps.length) {
         setCurrentStep(currentStep + 1);
@@ -637,6 +682,8 @@ const RegistrationForm = () => {
             formData={formData}
             updateFormData={updateFormData}
             errors={errors}
+            onFileSelect={setUploadedFile}
+            uploadedFile={uploadedFile}
           />
         );
       default:
@@ -713,7 +760,35 @@ const RegistrationForm = () => {
 
   const handleSubmit = async () => {
     console.log("Submitting form data:");
+
     try {
+      let documentId = formData.document_link;
+      console.log("Initial document_link value:", formData.document_link);
+
+      // Upload document if file is selected and not yet uploaded
+      if (uploadedFile && !documentId) {
+        // Check if eagle_id exists
+        if (!formData.eagle_id.trim()) {
+          setErrors({ eagle_id: "Eagle ID is required to upload documents" });
+          return;
+        }
+
+        setIsUploading(true);
+        const uploadResult = await uploadDocument(
+          uploadedFile,
+          formData.eagle_id
+        );
+        setIsUploading(false);
+        console.log("Upload result:", uploadResult);
+
+        // Get the document_id from upload result
+        if (uploadResult && uploadResult.data?.document_id) {
+          documentId = uploadResult.data.document_id;
+        }
+      }
+
+      console.log("document_link value:", formData.document_link);
+
       const apiData = {
         date_of_arrival: formData.date_of_arrival,
         departure: formData.departure,
@@ -743,6 +818,7 @@ const RegistrationForm = () => {
         other_links: formData.other_links,
         isPaid: true,
       };
+      console.log("API Data:", apiData);
 
       const result = await addAttendance(apiData);
 
@@ -805,9 +881,11 @@ const RegistrationForm = () => {
                 <Button
                   onClick={nextStep}
                   className="flex items-center"
-                  disabled={currentStep === 4 && !formData.pdpaConsent}
+                  disabled={
+                    (currentStep === 4 && !formData.pdpaConsent) || isUploading
+                  }
                 >
-                  Next
+                  {isUploading ? "Uploading..." : "Next"}
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               ) : (

@@ -561,6 +561,8 @@ const RegistrationForm = () => {
   });
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const steps = [
     {
@@ -762,14 +764,17 @@ const RegistrationForm = () => {
     console.log("Submitting form data:");
 
     try {
+      setHasSubmitted(true);
+      setIsSubmitting(true); // Add this line at the start
       let documentId = formData.document_link;
-      console.log("Initial document_link value:", formData.document_link);
 
       // Upload document if file is selected and not yet uploaded
       if (uploadedFile && !documentId) {
         // Check if eagle_id exists
         if (!formData.eagle_id.trim()) {
           setErrors({ eagle_id: "Eagle ID is required to upload documents" });
+          setIsSubmitting(false); // Add this line
+          setHasSubmitted(false);
           return;
         }
 
@@ -779,14 +784,12 @@ const RegistrationForm = () => {
           formData.eagle_id
         );
         setIsUploading(false);
-        console.log("Upload result:", uploadResult);
 
         // Get the document_id from upload result
         if (uploadResult && uploadResult.data?.document_id) {
           documentId = uploadResult.data.document_id;
         }
       }
-
       console.log("document_link value:", formData.document_link);
 
       const apiData = {
@@ -838,6 +841,7 @@ const RegistrationForm = () => {
       );
     } catch (error) {
       console.error("Error submitting form:", error);
+      setHasSubmitted(false);
       const errorMessage = encodeURIComponent(
         "An unexpected error occurred. Please try again."
       );
@@ -892,9 +896,19 @@ const RegistrationForm = () => {
                 <Button
                   onClick={handleSubmit}
                   className="flex items-center bg-green-600 hover:bg-green-700"
+                  disabled={
+                    !formData.pdpaConsent ||
+                    isUploading ||
+                    isSubmitting ||
+                    hasSubmitted
+                  }
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Submit
+                  {isUploading
+                    ? "Uploading..."
+                    : isSubmitting
+                      ? "Submitting..."
+                      : "Submit"}
                 </Button>
               )}
             </div>

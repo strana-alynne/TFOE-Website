@@ -28,13 +28,20 @@ const SuccessPage = () => {
     null
   );
   const [attendanceRecorded, setAttendanceRecorded] = useState(false);
+  const hasCalledCloseCheckout = React.useRef(false);
 
   const isSuccess = status === "success";
 
   // Call closeCheckout when component mounts and we have success
   useEffect(() => {
     const recordAttendance = async () => {
-      if (isSuccess && eagle_id && !attendanceRecorded && !isProcessing) {
+      // Prevent multiple calls
+      if (hasCalledCloseCheckout.current) {
+        return;
+      }
+
+      if (isSuccess && eagle_id) {
+        hasCalledCloseCheckout.current = true; // Mark as called immediately
         setIsProcessing(true);
 
         try {
@@ -57,7 +64,7 @@ const SuccessPage = () => {
     };
 
     recordAttendance();
-  }, [isSuccess, eagle_id, attendanceRecorded, isProcessing]);
+  }, [isSuccess, eagle_id]);
 
   const bgGradient = isSuccess
     ? "from-green-50 to-emerald-100"

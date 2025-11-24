@@ -128,13 +128,17 @@ const BasicInformation = ({
         )}
       </div>
       <div>
-        <Label htmlFor="eagle_id">Eagle ID Number</Label>
+        <Label htmlFor="eagle_id">Eagle ID Number *</Label>
         <Input
           id="eagle_id"
           value={formData.eagle_id}
           onChange={(e) => updateFormData("eagle_id", e.target.value)}
           placeholder="Enter Eagle ID"
+          className={errors.eagle_id ? "border-red-500" : ""}
         />
+        {errors.eagle_id && (
+          <p className="text-red-500 text-xs mt-1">{errors.eagle_id}</p>
+        )}
       </div>
       <div>
         <Label htmlFor="job_title">Job Title *</Label>
@@ -404,6 +408,23 @@ const DocumentsConsent = ({
               ? "border-green-500 bg-green-50"
               : "border-gray-300 bg-white hover:border-gray-400"
           }`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onDrop={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const file = e.dataTransfer.files?.[0] || null;
+            if (
+              file &&
+              [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"].some((ext) =>
+                file.name.toLowerCase().endsWith(ext)
+              )
+            ) {
+              onFileSelect(file);
+            }
+          }}
         >
           <input
             type="file"
@@ -711,6 +732,8 @@ const RegistrationForm = () => {
         if (!formData.full_name.trim())
           newErrors.full_name = "Full name is required";
         if (!formData.region.trim()) newErrors.region = "Region is required";
+        if (!formData.eagle_id.trim())
+          newErrors.eagle_id = "Eagle ID is required";
         if (!formData.date_of_arrival.trim())
           newErrors.date_of_arrival = "Flight date of arrival is required";
         if (!formData.departure.trim())

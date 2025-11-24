@@ -57,6 +57,8 @@ const AdminAttendanceDashboard = () => {
   const [nameFilter, setNameFilter] = useState("");
   const [eagleIdFilter, setEagleIdFilter] = useState("");
   const [isCheckingAttendance, setIsCheckingAttendance] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   type ScanResult = {
     success: boolean;
@@ -108,7 +110,7 @@ const AdminAttendanceDashboard = () => {
 
   // Filter participants
   const filteredParticipants = useMemo(() => {
-    return participants.filter((participant) => {
+    const filtered = participants.filter((participant) => {
       const matchesName = participant.full_name
         .toLowerCase()
         .includes(nameFilter.toLowerCase());
@@ -117,7 +119,28 @@ const AdminAttendanceDashboard = () => {
         .includes(eagleIdFilter.toLowerCase());
       return matchesName && matchesEagleId;
     });
+
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+
+    return filtered.slice(startIndex, endIndex);
+  }, [participants, nameFilter, eagleIdFilter, currentPage]);
+
+  // Total filtered count for pagination
+  const totalFiltered = useMemo(() => {
+    return participants.filter((participant) => {
+      const matchesName = participant.full_name
+        .toLowerCase()
+        .includes(nameFilter.toLowerCase());
+      const matchesEagleId = participant.eagle_id
+        .toLowerCase()
+        .includes(eagleIdFilter.toLowerCase());
+      return matchesName && matchesEagleId;
+    }).length;
   }, [participants, nameFilter, eagleIdFilter]);
+
+  const totalPages = Math.ceil(totalFiltered / itemsPerPage);
 
   const openModal = (participant: Participant) => {
     setSelectedParticipant(participant);
@@ -162,27 +185,26 @@ const AdminAttendanceDashboard = () => {
         firstCode?.data ||
         firstCode;
 
-      const participantData = JSON.parse(result);
-      console.log("Parsed participant data:", participantData);
+      const eagleId = typeof result === "string" ? result : JSON.parse(result);
+      console.log("Eagle ID:", eagleId);
 
-      if (participantData) {
-        participants.find((p) => p.eagle_id === participantData);
-      }
-      if (!participantData) {
-        const identifier = participantData;
+      // Find participant by eagle_id
+      const foundParticipant = participants.find((p) => p.eagle_id === eagleId);
+
+      if (!foundParticipant) {
         setScanResult({
           success: false,
-          message: `Participant with ${identifier} not found.`,
+          message: `Participant with Eagle ID "${eagleId}" not found.`,
         });
         setIsScanning(false);
         return;
       }
 
       // Check if already attended
-      if (participantData.attended) {
+      if (foundParticipant.attended) {
         setScanResult({
           success: false,
-          message: `${participantData.full_name} has already been marked as attended.`,
+          message: `${foundParticipant.full_name} has already been marked as attended.`,
         });
         setIsScanning(false);
         return;
@@ -191,8 +213,8 @@ const AdminAttendanceDashboard = () => {
       setIsScanning(false);
       setIsCheckingAttendance(true);
 
-      // Call the checkAttendance API with participant ID
-      const attendanceResult = await checkAttendance(participantData);
+      // Call the checkAttendance API with eagle ID
+      const attendanceResult = await checkAttendance(eagleId);
 
       if (attendanceResult.error) {
         setScanResult({
@@ -200,10 +222,17 @@ const AdminAttendanceDashboard = () => {
           message: `Failed to mark attendance: ${attendanceResult.message}`,
         });
       } else {
+        // UPDATE LOCAL STATE - This is the critical fix
+        setParticipants((prevParticipants) =>
+          prevParticipants.map((p) =>
+            p.eagle_id === eagleId ? { ...p, attended: true } : p
+          )
+        );
+
         setScanResult({
           success: true,
-          participant: { ...attendanceResult.data, attended: true },
-          message: `Successfully marked ${attendanceResult.data?.full_name} as attended!`,
+          participant: { ...foundParticipant, attended: true },
+          message: `Successfully marked ${foundParticipant.full_name} as attended!`,
         });
       }
     } catch (error) {
@@ -214,7 +243,6 @@ const AdminAttendanceDashboard = () => {
       setIsCheckingAttendance(false);
     }
   };
-
   const handleScanError = (error: any) => {
     console.error("QR Scanner error:", error);
     setScanError("Failed to access camera. Please check permissions.");
@@ -224,6 +252,7 @@ const AdminAttendanceDashboard = () => {
   const clearFilters = () => {
     setNameFilter("");
     setEagleIdFilter("");
+    setCurrentPage(1);
   };
 
   // Loading state
@@ -455,8 +484,71 @@ const AdminAttendanceDashboard = () => {
               </p>
             </div>
           )}
+          {/* Pagination Controls */}
+          {totalFiltered > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Showing{" "}
+                <span className="font-medium">
+                  {(currentPage - 1) * itemsPerPage + 1}
+                </span>{" "}
+                to{" "}
+                <span className="font-medium">
+                  {Math.min(currentPage * itemsPerPage, totalFiltered)}
+                </span>{" "}
+                of <span className="font-medium">{totalFiltered}</span> results
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      // Show first page, last page, current page, and pages around current
+                      return (
+                        page === 1 ||
+                        page === totalPages ||
+                        Math.abs(page - currentPage) <= 1
+                      );
+                    })
+                    .map((page, idx, arr) => (
+                      <React.Fragment key={page}>
+                        {idx > 0 && arr[idx - 1] !== page - 1 && (
+                          <span className="px-2 text-gray-500">...</span>
+                        )}
+                        <button
+                          onClick={() => setCurrentPage(page)}
+                          className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      </React.Fragment>
+                    ))}
+                </div>
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-
         {/* Participant Details Modal */}
         {showModal && selectedParticipant && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">

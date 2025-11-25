@@ -76,14 +76,19 @@ const AdminAttendanceDashboard = () => {
         setLoading(true);
         setError(null);
 
-        // You need to get the token from your auth system
-        // This is just an example - replace with your actual token retrieval method
         const result = await getDetails();
 
         if (result.data) {
-          // Assuming the API returns an array of participants
-          // You may need to adjust this based on your actual API response structure
-          setParticipants(Array.isArray(result.data) ? result.data : []);
+          // Map the API response to match the component's expected format
+          const mappedData = Array.isArray(result.data)
+            ? result.data.map((participant: any) => ({
+                ...participant,
+                attended: participant.checked_in, // Map checked_in to attended
+                isPaid: participant.has_paid, // Map has_paid to isPaid
+              }))
+            : [];
+
+          setParticipants(mappedData);
         } else if (result.message) {
           setError(result.message);
         }
@@ -185,7 +190,18 @@ const AdminAttendanceDashboard = () => {
         firstCode?.data ||
         firstCode;
 
-      const eagleId = typeof result === "string" ? result : JSON.parse(result);
+      // Convert single quotes to double quotes for valid JSON, then parse
+      let eagleId: string;
+
+      if (typeof result === "string") {
+        // Replace single quotes with double quotes to make it valid JSON
+        const jsonString = result.replace(/'/g, '"');
+        const parsedData = JSON.parse(jsonString);
+        eagleId = parsedData.eagle_id;
+      } else {
+        eagleId = result.eagle_id;
+      }
+
       console.log("Eagle ID:", eagleId);
 
       // Find participant by eagle_id
